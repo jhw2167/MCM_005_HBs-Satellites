@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "hbs_satellites:block/satellite_block"
+    }
+  }
+}
