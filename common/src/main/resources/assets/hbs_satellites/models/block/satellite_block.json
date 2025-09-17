@@ -1,6 +1,12 @@
 {
-  "parent": "block/cube_all",
+  "parent": "block/cube",
   "textures": {
-    "all": "hbs_satellites:block/satellite_block"
+    "particle": "hbs_satellites:block/satellite_block",
+    "down": "hbs_satellites:block/satellite_block_bottom",
+    "up": "hbs_satellites:block/satellite_block",
+    "north": "hbs_satellites:block/satellite_block",
+    "east": "hbs_satellites:block/satellite_block",
+    "south": "hbs_satellites:block/satellite_block",
+    "west": "hbs_satellites:block/satellite_block"
   }
 }
