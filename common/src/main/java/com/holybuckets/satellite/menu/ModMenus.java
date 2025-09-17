@@ -1,7 +1,6 @@
 package com.holybuckets.satellite.menu;
 
 import com.holybuckets.satellite.Constants;
-import com.holybuckets.satellite.block.be.TemplateBlockEntity;
 import net.blay09.mods.balm.api.DeferredObject;
 import net.blay09.mods.balm.api.menu.BalmMenus;
 import net.minecraft.core.BlockPos;
@@ -17,6 +16,7 @@ public class ModMenus {
 
     public static void initialize(BalmMenus menus)
     {
+        /*
         countingChestMenu = menus.registerMenu(id("counting_chest_menu"),
             (syncId, inventory, buf) -> {
                 BlockPos pos = buf.readBlockPos();
@@ -29,6 +29,7 @@ public class ModMenus {
                 }
                 return null;
             });
+         */
     }
 
     private static ResourceLocation id(String name) {

@@ -1,4 +1,7 @@
 Requirements
 ---
 
-
+In the template that EmptyBlock was added (id: empty_block, name: Empty Block), please add a block "Satellite Block" corresponding to the SatelliteBlockEntity.
+it should create a new SatelliteBlockEntity when placed as block entities usually are. Add it to the ModBlocks where appropriate and ModItems.
+Add the blockstate, item, and block jsonfiles as necessary. Also upate en_us to add the block name and description.
+This block has no special behavior, in the Block constructor, duplicate the properties of iron_block. I will add the appropriate texture with the PNG satellite_block.png

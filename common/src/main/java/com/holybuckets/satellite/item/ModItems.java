@@ -12,11 +12,10 @@ import net.minecraft.world.item.ItemStack;
 
 public class ModItems {
     public static DeferredObject<CreativeModeTab> creativeModeTab;
-    public static Item emptyBlockItem;
+
 
     public static void initialize(BalmItems items) {
-        //items.registerItem(() -> emptyBlockItem = new EmptyBlockItem(items.itemProperties()), id("empty_block"));
-        creativeModeTab = items.registerCreativeModeTab(id(Constants.MOD_ID), () -> new ItemStack(ModBlocks.templateBlock));
+        creativeModeTab = items.registerCreativeModeTab(id(Constants.MOD_ID), () -> new ItemStack(ModBlocks.satelliteBlock));
     }
 
     private static ResourceLocation id(String name) {
