@@ -36,3 +36,9 @@ mandatory=true
 versionRange="[${foundation_version},)"
 ordering="NONE"
 side="BOTH"
+[[dependencies.${mod_id}]]
+modId="chisels-and-bits"
+mandatory=true
+versionRange="[3.0.0,)"
+ordering="AFTER"
+side="BOTH"

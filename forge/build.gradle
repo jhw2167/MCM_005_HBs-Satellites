@@ -89,6 +89,8 @@ dependencies {
         changing = true
         transitive = false
     }
+    
+    implementation fg.deobf("curse.maven:chisels-and-bits-231095:4600936")
 
 }
 
