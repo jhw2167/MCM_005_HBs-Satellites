@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hbs_satellites:block/satellite_controller_block"
+    },
+    "facing=south": {
+      "model": "hbs_satellites:block/satellite_controller_block",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hbs_satellites:block/satellite_controller_block",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "hbs_satellites:block/satellite_controller_block",
+      "y": 90
+    }
+  }
+}
