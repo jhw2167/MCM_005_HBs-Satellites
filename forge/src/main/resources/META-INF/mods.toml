@@ -37,8 +37,8 @@ versionRange="[${foundation_version},)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.${mod_id}]]
-modId="chisels-and-bits"
+modId="chiselsandbits"
 mandatory=true
-versionRange="[3.0.0,)"
+versionRange="[${chiselbits_version},)"
 ordering="AFTER"
 side="BOTH"
