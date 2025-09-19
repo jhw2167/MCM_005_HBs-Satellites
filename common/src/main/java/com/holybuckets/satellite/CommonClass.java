@@ -6,6 +6,7 @@ import com.holybuckets.satellite.block.be.ModBlockEntities;
 import com.holybuckets.satellite.client.ModRenderers;
 import com.holybuckets.satellite.item.ModItems;
 import com.holybuckets.satellite.menu.ModMenus;
+import com.holybuckets.satellite.networking.ModNetworking;
 import com.holybuckets.satellite.platform.Services;
 import net.blay09.mods.balm.api.Balm;
 import net.blay09.mods.balm.api.client.BalmClient;
@@ -33,13 +34,14 @@ public class CommonClass {
 
         //RegisterConfigs
         //Balm.getConfig().registerConfig(ChallengeTempleConfig.class);
-        TemplateMain.INSTANCE = new TemplateMain();
+        SatelliteMain.INSTANCE = new SatelliteMain();
         BalmEventRegister.registerEvents();
         BalmEventRegister.registerCommands();
         ModBlocks.initialize(Balm.getBlocks());
         ModBlockEntities.initialize(Balm.getBlockEntities());
         ModItems.initialize(Balm.getItems());
         ModMenus.initialize(Balm.getMenus());
+        ModNetworking.initialize();
         
         isInitialized = true;
     }

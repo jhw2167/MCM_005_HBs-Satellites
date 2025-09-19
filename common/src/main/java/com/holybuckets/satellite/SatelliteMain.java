@@ -2,21 +2,25 @@ package com.holybuckets.satellite;
 
 
 import com.holybuckets.foundation.event.EventRegistrar;
+import com.holybuckets.satellite.api.ChiselBitsAPI;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import com.holybuckets.satellite.config.TemplateConfig;
+import com.holybuckets.satellite.core.SatelliteManager;
 import net.blay09.mods.balm.api.Balm;
-import net.blay09.mods.balm.api.event.EventPriority;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 
 /**
  * Main instance of the mod, initialize this class statically via commonClass
  * This class will init all major Manager instances and events for the mod
  */
-public class TemplateMain {
+public class SatelliteMain {
     private static boolean DEV_MODE = false;;
     private static TemplateConfig CONFIG;
-    public static TemplateMain INSTANCE;
+    public static SatelliteMain INSTANCE;
 
-    public TemplateMain()
+    public static ChiselBitsAPI chiselBitsApi;
+
+    public SatelliteMain()
     {
         super();
         INSTANCE = this;
@@ -34,10 +38,14 @@ public class TemplateMain {
             .withForge("com.holybuckets.challengetemple.externalapi.ForgePortalApi")
             .build();
             */
+        this.chiselBitsApi = (ChiselBitsAPI) Balm.platformProxy()
+            .withForge("com.holybuckets.satellite.externalapi.ChiselBitsAPIForge")
+            .build();
 
         //Events
         EventRegistrar registrar = EventRegistrar.getInstance();
         //ChallengeBlockBehavior.init(registrar);
+        SatelliteManager.init(registrar);
 
 
         //register local events
@@ -45,8 +53,11 @@ public class TemplateMain {
 
     }
 
+
+    //** Events
+
     private void onServerStarting(ServerStartingEvent e) {
-        CONFIG = Balm.getConfig().getActiveConfig(TemplateConfig.class);
+        //CONFIG = Balm.getConfig().getActiveConfig(TemplateConfig.class);
         //this.DEV_MODE = CONFIG.devMode;
         this.DEV_MODE = false;
     }

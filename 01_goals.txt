@@ -1,7 +1,112 @@
 Requirements
 ---
 
+1. Add some block entities
+----
 In the template that EmptyBlock was added (id: empty_block, name: Empty Block), please add a block "Satellite Block" corresponding to the SatelliteBlockEntity.
 it should create a new SatelliteBlockEntity when placed as block entities usually are. Add it to the ModBlocks where appropriate and ModItems.
 Add the blockstate, item, and block jsonfiles as necessary. Also upate en_us to add the block name and description.
-This block has no special behavior, in the Block constructor, duplicate the properties of iron_block. I will add the appropriate texture with the PNG satellite_block.png
+This block has no special behavior, in the Block constructor, duplicate the properties of iron_block. I will add the appropriate texture with the PNG satellite_block.png.
+
+2. Lets add our manager
+---
+
+Okkk
+
+
+3. Lets send these bits to the client
+---
+
+	1. Network packet type
+	2. register handler and sender and receiver
+	3. Create message object
+	4. 
+	- Render the bits on client only side
+
+4. Get the bits to auto update without clicking on them!
+---
+
+
+5. Remove Bits, turn off holgram
+---
+	- Disable and reset blockstate to Air
+	- If block below is removed, set to air
+	
+6. Map blocks to better palette
+---
+	- Map darker blocks to darker areas
+	- Remove small blocks like snow, carpet etc from satellite
+
+7. Allow satellite to be adjusted in cardinal directions
+---
+
+	- Move satellite view N/S/E/W
+
+8. Allow satellite imaging to view up and down
+---
+	- Simply add to the height
+	- Make sure blocks check above them for free space
+
+9. Player hands highlight certain blocks orange for interactive display
+---
+
+	- get ray trace of players hand, paint spot orange
+
+10. Install chunk loading for far away satellites
+---
+
+	- Chunk the satellite exists in must always be loaded
+	- Load area around chunk by choice
+	- Add a button on controller to force chunkLoading
+
+11. Satellite must be able to set its id
+---
+
+	- Satellite sets id by right clicking
+	- Controller sets ID by right clicking as well
+
+
+12. Add crafting recipes for all items
+---
+
+
+13. Get models produced for all items
+---
+	- Satellite model
+	- Satellite controller model
+	- Satellite display holo model
+
+14. Get nicer blocks and lighting affects for hologram itself
+---
+
+15. Set glowing effects on display for entities
+----
+
+	- Get all entities in chunk
+	- Send information to holo display
+	- Forward to client and display info as well
+
+16. 
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

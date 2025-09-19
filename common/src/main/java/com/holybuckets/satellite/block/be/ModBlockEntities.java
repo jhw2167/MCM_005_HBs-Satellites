@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 public class ModBlockEntities {
     public static DeferredObject<BlockEntityType<SatelliteBlockEntity>> satelliteBlockEntity;
     public static DeferredObject<BlockEntityType<SatelliteControllerBlockEntity>> satelliteControllerBlockEntity;
+    public static DeferredObject<BlockEntityType<SatelliteDisplayBlockEntity>> satelliteDisplayBlockEntity;
 
     public static void initialize(BalmBlockEntities blockEntities)
     {
@@ -22,6 +23,10 @@ public class ModBlockEntities {
         satelliteControllerBlockEntity =  blockEntities.registerBlockEntity(
             id("satellite_controller_block_entity") , SatelliteControllerBlockEntity::new,
             () -> new Block[]{ModBlocks.satelliteControllerBlock} );
+
+        satelliteDisplayBlockEntity =  blockEntities.registerBlockEntity(
+            id("satellite_display_block_entity") , SatelliteDisplayBlockEntity::new,
+            () -> new Block[]{ModBlocks.satelliteDisplayBlock} );
 
     }
 

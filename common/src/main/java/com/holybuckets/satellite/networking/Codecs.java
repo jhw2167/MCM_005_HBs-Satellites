@@ -1,27 +1,34 @@
 package com.holybuckets.satellite.networking;
 
-import com.holybuckets.foundation.HBUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
-
-import java.util.List;
-import java.util.Map;
 
 public class Codecs {
 
-    //ManagedChunk
-    public static final FriendlyByteBuf encodeBlockStateUpdates(BlockStateUpdatesMessage object, FriendlyByteBuf buf) {
-        buf.writeUtf(HBUtil.LevelUtil.toLevelId(object.world));
-        buf.writeUtf(HBUtil.BlockUtil.serializeBlockStatePairs(object.blockStates));
+    public static final FriendlyByteBuf encodeControllerInput(SatelliteControllerMessage object, FriendlyByteBuf buf) {
+        buf.writeInt(object.controllerInput);
+        buf.writeInt(object.useDisplay);
+        buf.writeBlockPos(object.pos);
         return buf;
     }
 
-    public static final BlockStateUpdatesMessage decodeBlockStateUpdates(FriendlyByteBuf buf) {
-        LevelAccessor world = HBUtil.LevelUtil.toLevel( HBUtil.LevelUtil.LevelNameSpace.CLIENT, buf.readUtf());
-        Map<BlockState, List<BlockPos>> blocks = HBUtil.BlockUtil.deserializeBlockStatePairs(buf.readUtf());
-        return new BlockStateUpdatesMessage(world, blocks);
+    public static final SatelliteControllerMessage decodeControllerInput(FriendlyByteBuf buf) {
+        int controllerInput = buf.readInt();
+        int useDisplay = buf.readInt();
+        BlockPos pos = buf.readBlockPos();
+        return new SatelliteControllerMessage(controllerInput, useDisplay, pos);
+    }
+
+    public static final FriendlyByteBuf encodeControllerDisplay(SatelliteDisplayMessage object, FriendlyByteBuf buf) {
+        buf.writeBlockPos(object.pos);
+        buf.writeVarIntArray(object.displayData);
+        return buf;
+    }
+
+    public static final SatelliteDisplayMessage decodeControllerDisplay(FriendlyByteBuf buf) {
+        BlockPos pos = buf.readBlockPos();
+        int[] displayData = buf.readVarIntArray();
+        return new SatelliteDisplayMessage(pos, displayData);
     }
 
 
