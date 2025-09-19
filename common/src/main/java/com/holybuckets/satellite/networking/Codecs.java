@@ -22,13 +22,15 @@ public class Codecs {
     public static final FriendlyByteBuf encodeControllerDisplay(SatelliteDisplayMessage object, FriendlyByteBuf buf) {
         buf.writeBlockPos(object.pos);
         buf.writeVarIntArray(object.displayData);
+        buf.writeInt(object.height);
         return buf;
     }
 
     public static final SatelliteDisplayMessage decodeControllerDisplay(FriendlyByteBuf buf) {
         BlockPos pos = buf.readBlockPos();
         int[] displayData = buf.readVarIntArray();
-        return new SatelliteDisplayMessage(pos, displayData);
+        int height = buf.readInt();
+        return new SatelliteDisplayMessage(pos, displayData, height);
     }
 
 
