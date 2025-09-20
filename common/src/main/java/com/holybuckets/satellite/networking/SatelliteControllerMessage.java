@@ -27,4 +27,9 @@ public class SatelliteControllerMessage {
         SatelliteControllerMessage message = new SatelliteControllerMessage(controllerInput, useDisplay, pos);
         SatelliteControllerMessageHandler.createAndFire(message);
     }
+
+    public static void createAndFire(int useDisplay, BlockPos pos) {
+        SatelliteControllerMessage message = new SatelliteControllerMessage(useDisplay, pos);
+        SatelliteControllerMessageHandler.createAndFire(message);
+    }
 }

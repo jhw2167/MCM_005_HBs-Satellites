@@ -5,7 +5,6 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBloc
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteDisplayUpdate;
-import com.holybuckets.satellite.networking.ModNetworking;
 import com.holybuckets.satellite.networking.SatelliteDisplayMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -16,7 +15,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Deque;
-import java.util.List;
 
 import static net.minecraft.world.level.block.Blocks.AIR;
 
@@ -52,36 +50,44 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         if(source == null || source.noSource() ) return;
         this.source = source;
         this.displayInfo = source.initDisplayInfo(this);
-        BlockPos pos = this.getBlockPos();
+        BlockPos pos = getBlockPos();
+        BlockPos displayPos = getBlockPos();
         for(ChunkDisplayInfo info : displayInfo) {
             pos = pos.above();
             BlockEntity be = SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, pos);
-            be.setChanged();
-            SatelliteDisplayMessage.createAndFire(pos, info.holoBits);
+            //SatelliteDisplayMessage.createAndFire(displayPos, info.holoBits, Math.abs( pos.getY()- displayPos.getY() ) );
         }
     }
 
-    public void clearSource() {
-        this.source = null;
+    public void clearDisplay() {
         BlockPos pos = this.getBlockPos();
         for(ChunkDisplayInfo info : displayInfo) {
             pos = pos.above();
-            BlockEntity be = level.getBlockEntity(pos);
-            if(be != null) {
-                level.removeBlockEntity(pos);
-            }
-            level.setBlock(pos, AIR.defaultBlockState(), Block.UPDATE_ALL_IMMEDIATE );
+            SatelliteMain.chiselBitsApi.clear(this.level, pos);
         }
-        this.displayInfo = null;
+        //SatelliteControllerMessage.createAndFire(0,getBlockPos());
     }
 
+    private static final int T = 10;
+    private static int t = 0;
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
-        if (this.level.isClientSide) return;
-        if( source == null || source.noSource()) return;
-        if(source.noSource() || !source.contains(this.getBlockPos())) {
-            clearSource();
+
+        if (this.level.isClientSide) {
+            BlockEntity be = level.getBlockEntity(blockPos.above());
             return;
+        }
+        else if( source == null) {
+            return;
+        }
+
+        if(source.noSource() || !source.contains(this.getBlockPos())) {
+            clearDisplay();
+            this.source = null;
+            this.displayInfo.clear();
+        } else if(displayInfo != null && !displayInfo.isEmpty() && t++%T==0) {
+            ChunkDisplayInfo info = displayInfo.getFirst();
+            //SatelliteDisplayMessage.createAndFire(getBlockPos(), info.holoBits, 1 );
         }
 
     }
@@ -96,14 +102,14 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
          BlockPos targetPos = update.pos;
          if(targetPos == null) return;
          if(targetPos == getBlockPos()) {
-            if(!update.displayOn) clearSource();
+            if(!update.displayOn) clearDisplay();
             return;
          }
 
          if(update.displayData == null) {
             BlockEntity be = level.getBlockEntity(targetPos);
-            if(be != null) level.removeBlockEntity(targetPos);
-            level.setBlock(targetPos, AIR.defaultBlockState(), Block.UPDATE_ALL_IMMEDIATE );
+            //if(be != null) level.removeBlockEntity(targetPos);
+            //level.setBlock(targetPos, AIR.defaultBlockState(), Block.UPDATE_ALL_IMMEDIATE );
          } else {
             ChunkDisplayInfo info = new ChunkDisplayInfo(update.displayData);
             BlockEntity be = SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, targetPos);

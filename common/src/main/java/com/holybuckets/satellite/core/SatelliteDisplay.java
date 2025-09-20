@@ -39,10 +39,10 @@ public class SatelliteDisplay {
         this.target = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
 
         LevelChunkSection[] sections =  level.getChunk(target.x, target.z).getSections();
-        for (int i = sections.length - 1; i >= 0; i--) {
+        for (int i = sections.length - 1; i >= 1; i--) {
             LevelChunkSection section = sections[i];
             if (section == null || section.hasOnlyAir()) continue;
-            this.currentSection = i;
+            this.currentSection = i-1;
             break;
         }
         this.height = 1;

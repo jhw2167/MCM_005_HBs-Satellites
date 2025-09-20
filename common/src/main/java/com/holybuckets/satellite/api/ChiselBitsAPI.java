@@ -29,6 +29,8 @@ public interface ChiselBitsAPI {
 
     public BlockEntity build(Level level, int[] bits, BlockPos pos);
 
+    void clear(Level level, BlockPos pos);
+
     public void update(ChunkDisplayInfo info, int[] bits, List<TripleInt> updates, BlockPos pos);
 
     public void offset(ChunkDisplayInfo info, int[] bits, List<int[][][]> adj, TripleInt offset, BlockPos pos);

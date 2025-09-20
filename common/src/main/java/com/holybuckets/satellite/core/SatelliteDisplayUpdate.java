@@ -20,13 +20,14 @@ public class SatelliteDisplayUpdate {
     public SatelliteDisplayUpdate(SatelliteControllerMessage msg) {
         this.controllerMessage = msg;
         this.pos = msg.pos;
-        this.displayOn = msg.useDisplay != 0;
+        this.displayOn = (msg.useDisplay != 0);
     }
 
     public SatelliteDisplayUpdate(SatelliteDisplayMessage msg) {
         this.displayMessage = msg;
-        this.pos = msg.pos;
+        this.pos = msg.pos.above(msg.height);
         this.displayData = msg.displayData;
+        this.displayOn = true;
     }
 
 

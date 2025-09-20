@@ -45,6 +45,12 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.linkedSatellite = satellite;
     }
 
+    @Override
+    public void setRemoved() {
+        if(this.source != null) this.source.clear();
+        super.setRemoved();
+    }
+
 
     @Override
     public BlockEntityType<?> getType() {

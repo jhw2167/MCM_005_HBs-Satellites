@@ -34,6 +34,12 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBlock
     }
 
     @Override
+    public void setRemoved() {
+        SatelliteManager.remove(this.colorId);
+        super.setRemoved();
+    }
+
+    @Override
     public BlockEntityType<?> getType() {
         return ModBlockEntities.satelliteBlockEntity.get();
     }
