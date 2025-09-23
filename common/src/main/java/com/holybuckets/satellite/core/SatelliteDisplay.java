@@ -51,8 +51,13 @@ public class SatelliteDisplay {
 
     public boolean noSource() { return satellite == null; }
 
-    public void setHeight(int height) {
-        this.height = height;
+    /** delta height
+     * @return
+     */
+    public void setHeight(int delta) {
+         int temp = this.height + delta;
+         if(temp < 1 || temp > 4) return;
+        this.height += delta;
     }
 
     public void setCurrentSection(int section) {

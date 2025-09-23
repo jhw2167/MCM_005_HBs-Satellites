@@ -44,8 +44,8 @@ public class SatelliteMain {
 
         //Events
         EventRegistrar registrar = EventRegistrar.getInstance();
-        //ChallengeBlockBehavior.init(registrar);
         SatelliteManager.init(registrar);
+        ChiselBitsAPI.init(registrar);
 
 
         //register local events

@@ -26,12 +26,12 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
     public SatelliteDisplayBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.satelliteDisplayBlockEntity.get(), pos, state);
-        this.isDisplayOn = false;
+        this.isDisplayOn = true;
     }
 
     public SatelliteDisplayBlockEntity(BlockEntityType<? extends BlockEntity> beType, BlockPos pos, BlockState state) {
         super(beType, pos, state);
-        this.isDisplayOn = false;
+        this.isDisplayOn = true;
     }
 
     @Override
@@ -50,12 +50,14 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         if(source == null || source.noSource() ) return;
         this.source = source;
         this.displayInfo = source.initDisplayInfo(this);
+        //buildDisplay(); during tick loop
+    }
+
+    public void buildDisplay() {
         BlockPos pos = getBlockPos();
-        BlockPos displayPos = getBlockPos();
         for(ChunkDisplayInfo info : displayInfo) {
             pos = pos.above();
-            BlockEntity be = SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, pos);
-            //SatelliteDisplayMessage.createAndFire(displayPos, info.holoBits, Math.abs( pos.getY()- displayPos.getY() ) );
+            SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, pos);
         }
     }
 
@@ -68,6 +70,10 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         //SatelliteControllerMessage.createAndFire(0,getBlockPos());
     }
 
+    public void onDestroyed() {
+        this.clearDisplay();
+    }
+
     private static final int T = 10;
     private static int t = 0;
     @Override
@@ -77,17 +83,17 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
             BlockEntity be = level.getBlockEntity(blockPos.above());
             return;
         }
-        else if( source == null) {
-            return;
-        }
+        else if( source == null) { return; }
 
-        if(source.noSource() || !source.contains(this.getBlockPos())) {
+        if(source.noSource() || !source.contains(this.getBlockPos()))
+        {
             clearDisplay();
             this.source = null;
             this.displayInfo.clear();
         } else if(displayInfo != null && !displayInfo.isEmpty() && t++%T==0) {
-            ChunkDisplayInfo info = displayInfo.getFirst();
+            //ChunkDisplayInfo info = displayInfo.getFirst();
             //SatelliteDisplayMessage.createAndFire(getBlockPos(), info.holoBits, 1 );
+            buildDisplay();
         }
 
     }

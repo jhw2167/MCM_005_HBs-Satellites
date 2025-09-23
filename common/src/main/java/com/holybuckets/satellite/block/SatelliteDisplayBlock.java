@@ -5,6 +5,7 @@ import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Blocks;
@@ -25,6 +26,18 @@ public class SatelliteDisplayBlock extends Block implements EntityBlock {
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new SatelliteDisplayBlockEntity(pos, state);
     }
+
+    //Override block is destroyed
+    @Override
+    public void destroy(LevelAccessor level, BlockPos pos, BlockState state) {
+        BlockEntity be = level.getBlockEntity(pos);
+        if(be instanceof SatelliteDisplayBlockEntity) {
+            SatelliteDisplayBlockEntity displayBE = (SatelliteDisplayBlockEntity) be;
+            displayBE.onDestroyed();
+        }
+        super.destroy(level, pos, state);
+    }
+
 
     @Nullable
     @Override

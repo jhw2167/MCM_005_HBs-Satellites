@@ -6,9 +6,11 @@ import com.holybuckets.satellite.LoggerProject;
 import com.holybuckets.satellite.api.ChiselBitsAPI;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
+import mod.chiselsandbits.api.block.entity.IMultiStateBlockEntity;
 import mod.chiselsandbits.api.block.storage.IStateEntryStorage;
 import mod.chiselsandbits.api.blockinformation.IBlockInformation;
 import mod.chiselsandbits.api.exceptions.SpaceOccupiedException;
+import mod.chiselsandbits.api.util.IBatchMutation;
 import mod.chiselsandbits.api.variant.state.IStateVariantManager;
 import mod.chiselsandbits.block.entities.ChiseledBlockEntity;
 import mod.chiselsandbits.blockinformation.BlockInformation;
@@ -123,17 +125,17 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
         BlockState above = level.getBlockState(pos);
         if(!above.equals(AIR.defaultBlockState())) return null;
         ChiselAdaptingWorldMutator mutator = new ChiselAdaptingWorldMutator(level, pos);
-        try {
-            for(int y = 0; y < 16; y++) {
-                for(int x = 0; x < 16; x++) {
-                    for(int z = 0; z < 16; z++) {
-                        mutator.setInAreaTarget(
-                            HOLO_BLOCKS[ bits[ISatelliteDisplayBlock.getCachePos(x,y,z)] ],
-                            ISatelliteDisplayBlock.get3Dpos(x,y,z)
-                        );
+        try(IBatchMutation m = mutator.batch() ) {
+                for(int y = 0; y < 16; y++) {
+                    for(int x = 0; x < 16; x++) {
+                        for(int z = 0; z < 16; z++) {
+                            mutator.setInAreaTarget(
+                                HOLO_BLOCKS[ bits[ISatelliteDisplayBlock.getCachePos(x,y,z)] ],
+                                ISatelliteDisplayBlock.get3Dpos(x,y,z)
+                            );
+                        }
                     }
                 }
-            }
         } catch (SpaceOccupiedException e) {
             LoggerProject.logError ("100002","Could not place chiseled block at " + pos + ", space occupied.");
             return null;
@@ -155,6 +157,7 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
             level.removeBlockEntity(pos);
         } else {
 
+            /*
             try {
                 // Get the storage field via reflection
                 Field storageField = blockEntity.getClass().getDeclaredField("storage");
@@ -171,7 +174,9 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
             } catch (Exception e) {
                 LoggerProject.logError ("100001","Error manipulating storage: " + e.getMessage());
                 e.printStackTrace();
-            }
+            }*/
+
+            ChiselAdaptingWorldMutator mutator = new ChiselAdaptingWorldMutator(level, pos);
         }//END IF ELSE
 
         level.setBlock(pos, AIR.defaultBlockState(), Block.UPDATE_ALL_IMMEDIATE );

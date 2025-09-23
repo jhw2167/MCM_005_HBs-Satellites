@@ -12,9 +12,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
@@ -44,11 +45,38 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void setSatellite(SatelliteBlockEntity satellite) {
         this.linkedSatellite = satellite;
     }
+    
+    public void onDestroyed() {
+        this.turnOff();
+    }
 
-    @Override
-    public void setRemoved() {
-        if(this.source != null) this.source.clear();
-        super.setRemoved();
+    public void use(BlockHitResult res)
+    {
+        int cmd = -1;
+        cmd = ISatelliteControllerBlock.calculateHitCommand(res);
+
+        if(cmd == 0) this.toggleOnOff(!this.isDisplayOn);
+
+        if(!this.isDisplayOn || this.source == null) {
+            this.turnOff();
+            return;
+        }
+
+        if(cmd == 0) {
+            //handled above
+        } else if( cmd < 5) {   //adjust ordinally
+            //not implemented
+        } else if( cmd < 7) {   //adjust height
+            this.source.setHeight( cmd == 5 ? 1 :-1 );
+        }
+
+
+    }
+
+    public void turnOff() {
+        this.toggleOnOff(false);
+        this.clearDisplay();
+        this.source.clear();
     }
 
 
@@ -62,6 +90,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteBlockEntity)
     {
+        super.tick(level, blockPos, blockState, satelliteBlockEntity);
         if (this.level.isClientSide) return;
         if(this.linkedSatellite != SatelliteManager.get(this.colorId)) {
             this.linkedSatellite = SatelliteManager.get(this.colorId);
@@ -74,7 +103,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         if(ticks++ >= PATH_REFRESH_TICKS) {
             ticks = 0;
-            if(this.source != null) {
+            if(this.source != null && this.isDisplayOn ) {
                 propagateToNeighbors();
             }
         }
@@ -148,8 +177,6 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         super.load(tag);
         colorId = tag.getInt("colorId");
     }
-
-
 
 
 }
