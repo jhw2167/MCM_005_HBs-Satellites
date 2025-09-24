@@ -1,9 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
-import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
-import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteDisplayUpdate;
 import com.holybuckets.satellite.core.SatelliteManager;
@@ -15,7 +13,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
@@ -45,7 +42,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void setSatellite(SatelliteBlockEntity satellite) {
         this.linkedSatellite = satellite;
     }
-    
+
     public void onDestroyed() {
         this.turnOff();
     }
@@ -66,8 +63,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             //handled above
         } else if( cmd < 5) {   //adjust ordinally
             //not implemented
-        } else if( cmd < 7) {   //adjust height
-            this.source.setHeight( cmd == 5 ? 1 :-1 );
+        } else if( cmd < 7) {   //adjust depth 5 - increase depth, 6 - decrease depth
+            this.source.setDepth( cmd == 5 ? 1 :-1 );
         }
 
 
@@ -76,7 +73,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void turnOff() {
         this.toggleOnOff(false);
         this.clearDisplay();
-        this.source.clear();
+        if(this.source != null) this.source.clear();
     }
 
 

@@ -5,18 +5,15 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBloc
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteDisplayUpdate;
-import com.holybuckets.satellite.networking.SatelliteDisplayMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Arrays;
 import java.util.Deque;
-
-import static net.minecraft.world.level.block.Blocks.AIR;
 
 public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelliteDisplayBlock, BlockEntityTicker<SatelliteDisplayBlockEntity> {
 
@@ -49,7 +46,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         if(this.level.isClientSide) return;
         if(source == null || source.noSource() ) return;
         this.source = source;
-        this.displayInfo = source.initDisplayInfo(this);
+         this.displayInfo = source.initDisplayInfo(this);
         //buildDisplay(); during tick loop
     }
 
@@ -57,11 +54,17 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         BlockPos pos = getBlockPos();
         for(ChunkDisplayInfo info : displayInfo) {
             pos = pos.above();
-            SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, pos);
+            boolean proceedWithUpdates = false;
+            for(boolean b : info.hasUpdates ) {
+                if(b) proceedWithUpdates = true;
+            }
+            if(!proceedWithUpdates) continue;
+            SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, pos, info.hasUpdates);
         }
     }
 
     public void clearDisplay() {
+        if(displayInfo == null) return;
         BlockPos pos = this.getBlockPos();
         for(ChunkDisplayInfo info : displayInfo) {
             pos = pos.above();
@@ -74,26 +77,23 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         this.clearDisplay();
     }
 
-    private static final int T = 10;
-    private static int t = 0;
+    private static final int REFRESH_RATE = 60;
+    private static int ticks = 0;
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
 
         if (this.level.isClientSide) {
-            BlockEntity be = level.getBlockEntity(blockPos.above());
+            //BlockEntity be = level.getBlockEntity(blockPos.above());
             return;
         }
         else if( source == null) { return; }
 
-        if(source.noSource() || !source.contains(this.getBlockPos()))
-        {
+        if(source.noSource() || !source.contains(this.getBlockPos()) || source.getDepth() < displayInfo.size()) {
             clearDisplay();
-            this.source = null;
-            this.displayInfo.clear();
-        } else if(displayInfo != null && !displayInfo.isEmpty() && t++%T==0) {
-            //ChunkDisplayInfo info = displayInfo.getFirst();
-            //SatelliteDisplayMessage.createAndFire(getBlockPos(), info.holoBits, 1 );
-            buildDisplay();
+        } else if(displayInfo != null && !displayInfo.isEmpty()) {
+         if( (ticks++*this.hashCode()) % REFRESH_RATE==0) {
+             buildDisplay();
+         }
         }
 
     }

@@ -5,7 +5,6 @@ import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
-import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -14,19 +13,23 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 
 import java.util.*;
 
+import static com.holybuckets.foundation.HBUtil.TripleInt;
+
 /**
  * Each Satellite Controller Block contains a single satellite display
  * which contains all Satellite Display Blocks related to this controller
  */
 public class SatelliteDisplay {
 
+    private static Map<TripleInt, ChunkDisplayInfo> INFO_CACHE = new LinkedHashMap<>();
+
     Level level;
     SatelliteBlockEntity satellite;
     SatelliteControllerBlockEntity controller;
-    HBUtil.TripleInt offset;
+    TripleInt offset;
     ChunkPos target;
     int currentSection;
-    int height;
+    int depth;
     Map<BlockPos, ISatelliteDisplayBlock> displayBlocks;
 
     public SatelliteDisplay(Level level, SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller) {
@@ -42,10 +45,10 @@ public class SatelliteDisplay {
         for (int i = sections.length - 1; i >= 1; i--) {
             LevelChunkSection section = sections[i];
             if (section == null || section.hasOnlyAir()) continue;
-            this.currentSection = i-1;
+            this.currentSection = i;
             break;
         }
-        this.height = 1;
+        this.depth = 1;
 
     }
 
@@ -54,10 +57,14 @@ public class SatelliteDisplay {
     /** delta height
      * @return
      */
-    public void setHeight(int delta) {
-         int temp = this.height + delta;
+    public void setDepth(int delta) {
+         int temp = this.depth + delta;
          if(temp < 1 || temp > 4) return;
-        this.height += delta;
+        this.depth += delta;
+    }
+
+    public int getDepth() {
+        return this.depth;
     }
 
     public void setCurrentSection(int section) {
@@ -87,10 +94,11 @@ public class SatelliteDisplay {
     public Deque<ChunkDisplayInfo> initDisplayInfo(SatelliteDisplayBlockEntity displayblock) {
 
         Deque<ChunkDisplayInfo> infoList = new ArrayDeque<>();
-        for(int i = currentSection; i < currentSection + height; i++) {
+        for(int i = currentSection; i > currentSection - depth; i--) {
+            if(i < 0) break;
             ChunkDisplayInfo info = getDisplayInfo(displayblock, i);
             if(info == null) break;
-            infoList.add( info );
+            infoList.push( info );
         }
 
         return infoList;
@@ -101,8 +109,13 @@ public class SatelliteDisplay {
         int xDiff = blockPos.getX() - controller.getBlockPos().getX();
         int zDiff = blockPos.getZ() - controller.getBlockPos().getZ();
 
-        LevelChunk chunk = level.getChunk(target.x + xDiff , target.z + zDiff);
+        TripleInt chunkSelection = new TripleInt(target.x + xDiff, section, target.z + zDiff);
+        LevelChunk chunk = level.getChunk(chunkSelection.x, chunkSelection.z);
         if(chunk.getSections().length <= section) return null;
-        return new ChunkDisplayInfo(chunk, section);
+
+        ChunkDisplayInfo info = INFO_CACHE.putIfAbsent(chunkSelection, new ChunkDisplayInfo(chunk, section));
+        if(info != null) info.refreshBits();
+        return INFO_CACHE.get(chunkSelection);
+
     }
 }

@@ -47,7 +47,7 @@ public class SatelliteControllerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public void destroy(LevelAccessor level, BlockPos pos, BlockState state) {
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof SatelliteControllerBlockEntity controller) {
             controller.onDestroyed();
