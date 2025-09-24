@@ -30,6 +30,7 @@ public class SatelliteDisplay {
     ChunkPos target;
     int currentSection;
     int depth;
+    int lifetime;
     Map<BlockPos, ISatelliteDisplayBlock> displayBlocks;
 
     public SatelliteDisplay(Level level, SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller) {
@@ -49,7 +50,18 @@ public class SatelliteDisplay {
             break;
         }
         this.depth = 1;
+        this.lifetime = 0;
+    }
 
+    public void tick() {
+        if (!isActive()) {
+            lifetime++;
+        }
+    }
+
+    private boolean isActive() {
+        return displayBlocks.values().stream()
+                .anyMatch(block -> block.getDisplayInfo() != null && block.getDisplayInfo().isActive);
     }
 
     public boolean noSource() { return satellite == null; }
