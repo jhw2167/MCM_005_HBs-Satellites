@@ -23,6 +23,7 @@ public class ChunkDisplayInfo {
 
     public int currentYIndexForBatch;
     public boolean isActive;
+    public int lifetime;
 
     public ChunkDisplayInfo(int[] bits) {
         holoBits = bits;
@@ -56,10 +57,12 @@ public class ChunkDisplayInfo {
 
     public void resetUpdates() {
         for(int i=0; i<16; i++) hasUpdates[i] = true;
+        lifetime = 0;
     }
 
     public void refreshBits() {
         updateBits(holoBits, this, false);
+        lifetime = 0;
     }
 
     static Set<Integer> updateBits(int[] holoBits, ChunkDisplayInfo info, boolean init) {
