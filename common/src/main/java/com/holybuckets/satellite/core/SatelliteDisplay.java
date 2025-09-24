@@ -114,7 +114,13 @@ public class SatelliteDisplay {
         if(chunk.getSections().length <= section) return null;
 
         ChunkDisplayInfo info = INFO_CACHE.putIfAbsent(chunkSelection, new ChunkDisplayInfo(chunk, section));
-        if(info != null) info.refreshBits();
+        if(info != null) {
+            if(info.isActive)
+                info.resetUpdates();
+            else
+                info.refreshBits();
+            info.isActive = true;
+        }
         return INFO_CACHE.get(chunkSelection);
 
     }
