@@ -14,7 +14,7 @@ This block has no special behavior, in the Block constructor, duplicate the prop
 Okkk
 
 
-3. Lets send these bits to the client
+3. Lets send these bits to the client					XXX
 ---
 
 	1. Network packet type
@@ -23,7 +23,7 @@ Okkk
 	4. 
 	- Render the bits on client only side
 
-4. Get the bits to auto update without clicking on them!
+4. Get the bits to auto update without clicking on them!		XXX
 ---
 
 
@@ -42,10 +42,12 @@ Okkk
 
 	- Move satellite view N/S/E/W
 
-8. Allow satellite imaging to view up and down
+8. Allow satellite imaging to view up and down				XXX
 ---
 	- Simply add to the height
 	- Make sure blocks check above them for free space
+
+	** ADded max depth of 4, you can only view downward
 
 9. Player hands highlight certain blocks orange for interactive display
 ---
@@ -86,8 +88,30 @@ Okkk
 	- Send information to holo display
 	- Forward to client and display info as well
 
-16. 
+
+16. Refactor satellite depth so it cannot be cheesed by placing blocks high in the sky
 ---
+
+
+
+17. Get some Art going on Satellite looking blocks
+---
+
+
+18. Add custom hologram looking blocks that can be chiseled
+---
+
+	- Remove the wireframe on these specific blocks
+	- Pale blue, 30% transparent with soft terrain map lines or dots on top face only
+
+
+19. Queue an auto refresh when player interacts with the controller
+---
+
+20.
+---
+
+
 
 
 
