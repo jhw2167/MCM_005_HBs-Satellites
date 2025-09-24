@@ -22,10 +22,13 @@ public class ChunkDisplayInfo {
     public boolean[] hasUpdates;
 
     public int currentYIndexForBatch;
+    public boolean isActive;
 
     public ChunkDisplayInfo(int[] bits) {
         holoBits = bits;
         this.currentYIndexForBatch = -1;
+        this.isActive = false;
+
         this.hasUpdates = new boolean[16];
     }
 
@@ -34,6 +37,7 @@ public class ChunkDisplayInfo {
         this.chunk = chunk;
         this.blockOffset = blockOffset;
         this.currentYIndexForBatch = -1;
+        this.isActive = false;
 
         holoBits = new int[4096];
         hasUpdates = new boolean[16];
@@ -48,6 +52,10 @@ public class ChunkDisplayInfo {
         currentYIndexForBatch++;
         if(currentYIndexForBatch > 15) currentYIndexForBatch = 0;
         return currentYIndexForBatch;
+    }
+
+    public void resetUpdates() {
+        for(int i=0; i<16; i++) hasUpdates[i] = true;
     }
 
     public void refreshBits() {
