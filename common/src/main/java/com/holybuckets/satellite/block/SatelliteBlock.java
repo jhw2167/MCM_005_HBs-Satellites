@@ -2,6 +2,7 @@ package com.holybuckets.satellite.block;
 
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
@@ -22,6 +23,16 @@ public class SatelliteBlock extends Block implements EntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new SatelliteBlockEntity(pos, state);
+    }
+
+    @Override
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player p) {
+        super.playerWillDestroy(level, pos, state, p);
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof SatelliteBlockEntity) {
+            SatelliteBlockEntity satelliteBE = (SatelliteBlockEntity) be;
+            satelliteBE.onDestroyed();
+        }
     }
 
     @Nullable

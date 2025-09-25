@@ -27,7 +27,7 @@ Okkk
 ---
 
 
-5. Remove Bits, turn off holgram
+5. Remove Bits, turn off holgram					XXX
 ---
 	- Disable and reset blockstate to Air
 	- If block below is removed, set to air
@@ -53,6 +53,9 @@ Okkk
 ---
 
 	- get ray trace of players hand, paint spot orange
+	- This should be a lighting effect
+
+	- Must remove wireFrame!!
 
 10. Install chunk loading for far away satellites
 ---

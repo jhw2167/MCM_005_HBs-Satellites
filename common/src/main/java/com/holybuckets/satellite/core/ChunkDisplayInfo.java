@@ -65,6 +65,14 @@ public class ChunkDisplayInfo {
         lifetime = 0;
     }
 
+    public void tick() {
+        if (!isActive)
+            lifetime++;
+    }
+
+
+    //** STATICS
+
     static Set<Integer> updateBits(int[] holoBits, ChunkDisplayInfo info, boolean init) {
         LevelChunk chunk = info.chunk;
         LevelChunkSection section = chunk.getSections()[info.levelSectionIndex];

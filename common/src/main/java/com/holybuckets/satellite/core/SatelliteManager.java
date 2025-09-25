@@ -4,11 +4,16 @@ import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.TickType;
+import com.holybuckets.foundation.model.ManagedChunk;
+import com.holybuckets.foundation.model.ManagedChunkUtility;
+import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import io.netty.util.collection.IntObjectHashMap;
 import net.blay09.mods.balm.api.event.server.ServerStoppedEvent;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 
@@ -48,8 +53,8 @@ public class SatelliteManager {
 
     public static void put(int colorId, SatelliteBlockEntity be) {
         if(be == null) return;
-        if(SATELLITES.containsKey(colorId)) return;
-        SATELLITES.put(colorId, be);
+        SATELLITES.putIfAbsent(colorId, be);
+        be.setLevelChunk( getChunk(be.getLevel(), be.getBlockPos()) );
     }
 
     //** Events
@@ -58,7 +63,8 @@ public class SatelliteManager {
         // Unforce load all chunks before clearing cache
         CHUNK_CACHE.forEach((pos, info) -> {
             if (info.forceLoaded) {
-                HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(), pos);
+                HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(),
+                    HBUtil.ChunkUtil.getId(pos), Constants.MOD_ID);
             }
         });
         CHUNK_CACHE.clear();
@@ -69,15 +75,28 @@ public class SatelliteManager {
         while (iterator.hasNext()) {
             Map.Entry<ChunkPos, CachedChunkInfo> entry = iterator.next();
             CachedChunkInfo info = entry.getValue();
+            if(SatelliteDisplay.hasActiveDisplay(info.chunk)) {
+                info.lifetime = 0; // Reset lifetime if chunk is actively used
+                continue;
+            }
             info.lifetime++;
             
             if (info.lifetime > MAX_CHUNK_LIFETIME) {
                 if (info.forceLoaded) {
-                    HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(), entry.getKey());
+                    String chunkId = HBUtil.ChunkUtil.getId(entry.getKey());
+                    HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(), chunkId, Constants.MOD_ID);
                 }
                 iterator.remove();
             }
         }
+    }
+
+    public static LevelChunk getChunk(Level level, BlockPos pos) {
+        return getChunk((ServerLevel) level, HBUtil.ChunkUtil.getChunkPos(pos));
+    }
+
+    public static LevelChunk getChunk(ServerLevel level, int chunkX, int chunkZ) {
+        return getChunk(level, new ChunkPos(chunkX, chunkZ));
     }
 
     public static LevelChunk getChunk(ServerLevel level, ChunkPos pos) {
@@ -88,17 +107,19 @@ public class SatelliteManager {
         }
 
         // Try to get active chunk first
-        LevelChunk chunk = level.getChunk(pos.x, pos.z, false);
+        String chunkId = HBUtil.ChunkUtil.getId(pos);
+        ManagedChunk chunk = ManagedChunkUtility.getManagedChunk(level, chunkId);
         if (chunk != null) {
-            CHUNK_CACHE.put(pos, new CachedChunkInfo(chunk, false));
-            return chunk;
+            CHUNK_CACHE.put(pos, new CachedChunkInfo(chunk.getLevelChunk(), false));
+            return chunk.getLevelChunk();
         }
 
         // Try force loading
-        chunk = HBUtil.ChunkUtil.forceLoadChunk(level, pos);
+        HBUtil.ChunkUtil.forceLoadChunk(level, chunkId, Constants.MOD_ID);
         if (chunk != null) {
-            CHUNK_CACHE.put(pos, new CachedChunkInfo(chunk, true));
-            return chunk;
+            LevelChunk levelChunk = chunk.getLevelChunk();
+            CHUNK_CACHE.put(pos, new CachedChunkInfo(levelChunk, true));
+            return levelChunk;
         }
 
         return null;

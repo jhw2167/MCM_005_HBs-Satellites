@@ -1,11 +1,15 @@
 package com.holybuckets.satellite.core;
 
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.foundation.event.EventRegistrar;
+import com.holybuckets.foundation.event.custom.ServerTickEvent;
+import com.holybuckets.foundation.event.custom.TickType;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -30,7 +34,6 @@ public class SatelliteDisplay {
     ChunkPos target;
     int currentSection;
     int depth;
-    int lifetime;
     Map<BlockPos, ISatelliteDisplayBlock> displayBlocks;
 
     public SatelliteDisplay(Level level, SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller) {
@@ -50,19 +53,15 @@ public class SatelliteDisplay {
             break;
         }
         this.depth = 1;
-        this.lifetime = 0;
     }
 
-    public void tick() {
-        if (!isActive()) {
-            lifetime++;
+    public static boolean hasActiveDisplay(LevelChunk chunk) {
+        for(ChunkDisplayInfo info : INFO_CACHE.values()) {
+            if(info.chunk == chunk && info.isActive) return true;
         }
+        return false;
     }
 
-    private boolean isActive() {
-        return displayBlocks.values().stream()
-                .anyMatch(block -> block.getDisplayInfo() != null && block.getDisplayInfo().isActive);
-    }
 
     public boolean noSource() { return satellite == null; }
 
@@ -122,18 +121,46 @@ public class SatelliteDisplay {
         int zDiff = blockPos.getZ() - controller.getBlockPos().getZ();
 
         TripleInt chunkSelection = new TripleInt(target.x + xDiff, section, target.z + zDiff);
-        LevelChunk chunk = level.getChunk(chunkSelection.x, chunkSelection.z);
+        LevelChunk chunk = SatelliteManager.getChunk((ServerLevel) level, chunkSelection.x, chunkSelection.z);
+        if(chunk == null) return null;
         if(chunk.getSections().length <= section) return null;
 
         ChunkDisplayInfo info = INFO_CACHE.putIfAbsent(chunkSelection, new ChunkDisplayInfo(chunk, section));
         if(info != null) {
-            if(info.isActive)
-                info.resetUpdates();
-            else
+            info.resetUpdates();
+            if(!info.isActive)
                 info.refreshBits();
             info.isActive = true;
         }
         return INFO_CACHE.get(chunkSelection);
 
     }
+
+
+    //** STATICS
+
+    public static void init(EventRegistrar reg) {
+        reg.registerOnServerTick(TickType.ON_20_TICKS , SatelliteDisplay::onServerTick);
+        reg.registerOnServerStopped((event) -> INFO_CACHE.clear());
+    }
+
+
+    private static final int MAX_LIFETIME = 300; // 300s
+    private static void onServerTick(ServerTickEvent event) {
+
+        Iterator<Map.Entry<TripleInt, ChunkDisplayInfo>> iterator = INFO_CACHE.entrySet().iterator();
+        while (iterator.hasNext())
+        {
+            Map.Entry<TripleInt, ChunkDisplayInfo> entry = iterator.next();
+            ChunkDisplayInfo info = entry.getValue();
+            if(info.isActive) continue;
+            info.tick();
+            if(info.lifetime > MAX_LIFETIME) {
+                iterator.remove();
+                SatelliteManager.flagChunkForUnload(info.chunk.getPos());
+            }
+        }
+    }
+
+
 }

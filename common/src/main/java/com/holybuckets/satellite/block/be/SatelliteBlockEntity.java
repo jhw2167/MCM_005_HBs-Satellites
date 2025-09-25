@@ -10,10 +10,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBlockEntity, BlockEntityTicker<SatelliteBlockEntity>
 {
     int colorId;
+    LevelChunk currentChunk;
     private static final int HEXCODE_MAX = 0xFFFFFF;
 
     public SatelliteBlockEntity(BlockPos pos, BlockState state) {
@@ -33,10 +35,8 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBlock
         this.colorId = colorId;
     }
 
-    @Override
-    public void setRemoved() {
+    public void onDestroyed() {
         SatelliteManager.remove(this.colorId);
-        super.setRemoved();
     }
 
     @Override
@@ -48,5 +48,9 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBlock
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteBlockEntity satelliteBlockEntity) {
         if (this.level.isClientSide) return;
         SatelliteManager.put(this.colorId, this);
+    }
+
+    public void setLevelChunk(LevelChunk chunk) {
+        this.currentChunk = chunk;
     }
 }

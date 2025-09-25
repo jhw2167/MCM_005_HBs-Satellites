@@ -1,5 +1,6 @@
 package com.holybuckets.satellite.block.be;
 
+import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import com.holybuckets.satellite.core.SatelliteDisplay;
@@ -12,6 +13,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.*;
@@ -19,6 +21,7 @@ import java.util.*;
 public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBlock
 {
     int colorId;
+    BlockPos satelliteTargetPos;
     SatelliteDisplay source;
     SatelliteBlockEntity linkedSatellite;
 
@@ -89,6 +92,17 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     {
         super.tick(level, blockPos, blockState, satelliteBlockEntity);
         if (this.level.isClientSide) return;
+        if(this.linkedSatellite == null && this.satelliteTargetPos != null) {
+            LevelChunk distantChunk = SatelliteManager.getChunk(level, this.satelliteTargetPos);
+            if(distantChunk != null) {
+                BlockEntity be = distantChunk.getBlockEntity(this.satelliteTargetPos);
+                if(be instanceof SatelliteBlockEntity) {
+                    SatelliteManager.put(this.colorId, (SatelliteBlockEntity) be);
+                } else {
+                    this.satelliteTargetPos = null;
+                }
+            }
+        }
         if(this.linkedSatellite != SatelliteManager.get(this.colorId)) {
             this.linkedSatellite = SatelliteManager.get(this.colorId);
             if(this.source != null) this.source.clear();
@@ -96,6 +110,11 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             this.source.add(this.getBlockPos(), this);
 
             propagateToNeighbors();
+            if(this.linkedSatellite != null) {
+                this.satelliteTargetPos = this.linkedSatellite.getBlockPos();
+            } else {
+                this.satelliteTargetPos = null;
+            }
         }
 
         if(ticks++ >= PATH_REFRESH_TICKS) {
@@ -167,12 +186,20 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putInt("colorId", colorId);
+        if(satelliteTargetPos != null) {
+            String pos = HBUtil.BlockUtil.positionToString(satelliteTargetPos);
+            tag.putString("satelliteTargetPos", pos);
+        }
     }
 
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
         colorId = tag.getInt("colorId");
+        if(tag.contains("satelliteTargetPos")) {
+            String pos = tag.getString("satelliteTargetPos");
+            satelliteTargetPos = new BlockPos( HBUtil.BlockUtil.stringToBlockPos(pos) );
+        }
     }
 
 

@@ -55,8 +55,9 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         for(ChunkDisplayInfo info : displayInfo) {
             pos = pos.above();
             boolean proceedWithUpdates = false;
+            info.isActive = true;
             for(boolean b : info.hasUpdates ) {
-                if(b) proceedWithUpdates = true;
+                if(b) {proceedWithUpdates = true; break;}
             }
             if(!proceedWithUpdates) continue;
             SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, pos, info.hasUpdates);
@@ -69,6 +70,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         for(ChunkDisplayInfo info : displayInfo) {
             pos = pos.above();
             SatelliteMain.chiselBitsApi.clear(this.level, pos);
+            info.isActive = false;
         }
         //SatelliteControllerMessage.createAndFire(0,getBlockPos());
     }
@@ -77,7 +79,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         this.clearDisplay();
     }
 
-    private static final int REFRESH_RATE = 60;
+    private static final int REFRESH_RATE = 20;
     private static int ticks = 0;
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
