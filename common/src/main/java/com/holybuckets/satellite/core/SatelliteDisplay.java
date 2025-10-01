@@ -166,7 +166,7 @@ public class SatelliteDisplay {
 
         for( ChunkDisplayInfo info : INFO_CACHE.values() )
         {
-            if(!info.isActive || info.chunk != null) continue;
+            if(!info.isActive || info.chunk == null) continue;
             int xStart = info.chunk.getPos().getMinBlockX();
             int zStart = info.chunk.getPos().getMinBlockZ();
 
@@ -194,6 +194,11 @@ public class SatelliteDisplay {
 
     }
 
+        private boolean entityPredicate(Entity e) {
+         return (e instanceof LivingEntity) && e.isAlive() && !e.isRemoved()
+            && !displayEntities.contains(e);
+        }
+
 
     final static float RENDER_SCALE = 0.0625f; // 1/16
     public void renderEntities(BlockPos start)
@@ -217,7 +222,7 @@ public class SatelliteDisplay {
             int blockOffsetZ = e.blockPosition().getZ() - chunkWorldPos.getZ();
 
             final int Y_MIN = level.getMinBuildHeight();
-            int blockOffsetY = e.blockPosition().getY() - (((currentSection) * 16)+Y_MIN) + ((depth-1)+16);
+            int blockOffsetY = e.blockPosition().getY() - (((currentSection) * 16)+Y_MIN) + ((depth-1)*16);
             if(blockOffsetY < 0 ) { //under the table
                 continue;
             }
