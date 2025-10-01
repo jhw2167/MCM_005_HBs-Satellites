@@ -35,6 +35,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         this.ticks = new Random(this.hashCode()).nextInt(REFRESH_RATE);
     }
 
+
     @Override
     public void toggleOnOff(boolean toggle) {
         this.isDisplayOn = toggle;
@@ -100,7 +101,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
     }
 
-    private static final int REFRESH_RATE = 20;
+    private static final int REFRESH_RATE = 10;
     private void renderDisplay() {
         if( (ticks++) % REFRESH_RATE==0) {
             buildDisplay();
