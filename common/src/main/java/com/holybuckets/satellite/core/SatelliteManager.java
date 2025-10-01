@@ -9,6 +9,7 @@ import com.holybuckets.foundation.model.ManagedChunkUtility;
 import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import io.netty.util.collection.IntObjectHashMap;
+import io.netty.util.collection.LongObjectHashMap;
 import net.blay09.mods.balm.api.event.server.ServerStoppedEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -24,7 +25,7 @@ public class SatelliteManager {
     /** Maps colorId to satellite block entity */
     public static final IntObjectHashMap<SatelliteBlockEntity> SATELLITES = new IntObjectHashMap<>(24);
 
-    private static final Map<ChunkPos, CachedChunkInfo> CHUNK_CACHE = new HashMap<>();
+    private static final LongObjectHashMap<CachedChunkInfo> CHUNK_CACHE = new LongObjectHashMap<>(128);
     private static final int MAX_CHUNK_LIFETIME = 300; // 300 seconds
     
     private static class CachedChunkInfo {
@@ -64,17 +65,16 @@ public class SatelliteManager {
         CHUNK_CACHE.forEach((pos, info) -> {
             if (info.forceLoaded) {
                 HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(),
-                    HBUtil.ChunkUtil.getId(pos), Constants.MOD_ID);
+                    HBUtil.ChunkUtil.getId(info.chunk.getPos()), Constants.MOD_ID);
             }
         });
         CHUNK_CACHE.clear();
     }
 
     private static void onServerTick(ServerTickEvent event) {
-        Iterator<Map.Entry<ChunkPos, CachedChunkInfo>> iterator = CHUNK_CACHE.entrySet().iterator();
+        var iterator = CHUNK_CACHE.values().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<ChunkPos, CachedChunkInfo> entry = iterator.next();
-            CachedChunkInfo info = entry.getValue();
+            CachedChunkInfo info = iterator.next();
             if(SatelliteDisplay.hasActiveDisplay(info.chunk)) {
                 info.lifetime = 0; // Reset lifetime if chunk is actively used
                 continue;
@@ -83,7 +83,7 @@ public class SatelliteManager {
             
             if (info.lifetime > MAX_CHUNK_LIFETIME) {
                 if (info.forceLoaded) {
-                    String chunkId = HBUtil.ChunkUtil.getId(entry.getKey());
+                    String chunkId = HBUtil.ChunkUtil.getId(info.chunk.getPos());
                     HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(), chunkId, Constants.MOD_ID);
                 }
                 iterator.remove();
@@ -109,6 +109,7 @@ public class SatelliteManager {
         // Try to get active chunk first
         String chunkId = HBUtil.ChunkUtil.getId(pos);
         ManagedChunk chunk = ManagedChunkUtility.getManagedChunk(level, chunkId);
+        long chunkIdMap = HBUtil.ChunkUtil.getChunkPos1DMap(chunkId);
         if (chunk != null) {
             CHUNK_CACHE.put(pos, new CachedChunkInfo(chunk.getLevelChunk(), false));
             return chunk.getLevelChunk();
