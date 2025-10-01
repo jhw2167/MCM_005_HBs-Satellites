@@ -9,7 +9,8 @@ import com.holybuckets.foundation.model.ManagedChunkUtility;
 import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import io.netty.util.collection.IntObjectHashMap;
-import io.netty.util.collection.LongObjectHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.blay09.mods.balm.api.event.server.ServerStoppedEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -25,7 +26,7 @@ public class SatelliteManager {
     /** Maps colorId to satellite block entity */
     public static final IntObjectHashMap<SatelliteBlockEntity> SATELLITES = new IntObjectHashMap<>(24);
 
-    private static final LongObjectHashMap<CachedChunkInfo> CHUNK_CACHE = new LongObjectHashMap<>(128);
+    private static final Long2ObjectMap<CachedChunkInfo> CHUNK_CACHE = new Long2ObjectOpenHashMap<>(128);
     private static final int MAX_CHUNK_LIFETIME = 300; // 300 seconds
     
     private static class CachedChunkInfo {
@@ -100,7 +101,8 @@ public class SatelliteManager {
     }
 
     public static LevelChunk getChunk(ServerLevel level, ChunkPos pos) {
-        CachedChunkInfo cachedInfo = CHUNK_CACHE.get(pos);
+        long posKey = HBUtil.ChunkUtil.getChunkPos1DMap(pos.x, pos.z);
+        CachedChunkInfo cachedInfo = CHUNK_CACHE.get(posKey);
         if (cachedInfo != null) {
             cachedInfo.lifetime = 0;
             return cachedInfo.chunk;
@@ -109,9 +111,8 @@ public class SatelliteManager {
         // Try to get active chunk first
         String chunkId = HBUtil.ChunkUtil.getId(pos);
         ManagedChunk chunk = ManagedChunkUtility.getManagedChunk(level, chunkId);
-        long chunkIdMap = HBUtil.ChunkUtil.getChunkPos1DMap(chunkId);
         if (chunk != null) {
-            CHUNK_CACHE.put(pos, new CachedChunkInfo(chunk.getLevelChunk(), false));
+            CHUNK_CACHE.put(posKey, new CachedChunkInfo(chunk.getLevelChunk(), false));
             return chunk.getLevelChunk();
         }
 
@@ -119,7 +120,7 @@ public class SatelliteManager {
         HBUtil.ChunkUtil.forceLoadChunk(level, chunkId, Constants.MOD_ID);
         if (chunk != null) {
             LevelChunk levelChunk = chunk.getLevelChunk();
-            CHUNK_CACHE.put(pos, new CachedChunkInfo(levelChunk, true));
+            CHUNK_CACHE.put(posKey, new CachedChunkInfo(levelChunk, true));
             return levelChunk;
         }
 
@@ -127,7 +128,8 @@ public class SatelliteManager {
     }
 
     public static void flagChunkForUnload(ChunkPos pos) {
-        CachedChunkInfo info = CHUNK_CACHE.get(pos);
+        long posKey = HBUtil.ChunkUtil.getChunkPos1DMap(pos.x, pos.z);
+        CachedChunkInfo info = CHUNK_CACHE.get(posKey);
         if (info != null) {
             info.lifetime = MAX_CHUNK_LIFETIME; // This will trigger unload on next tick
         }
