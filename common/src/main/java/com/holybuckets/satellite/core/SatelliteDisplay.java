@@ -8,12 +8,23 @@ import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
+import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.phys.AABB;
+import org.antlr.v4.runtime.misc.MultiMap;
 
 import java.util.*;
 
@@ -27,6 +38,7 @@ public class SatelliteDisplay {
 
     private static Map<TripleInt, ChunkDisplayInfo> INFO_CACHE = new LinkedHashMap<>();
 
+
     Level level;
     SatelliteBlockEntity satellite;
     SatelliteControllerBlockEntity controller;
@@ -35,13 +47,15 @@ public class SatelliteDisplay {
     int currentSection;
     int depth;
     Map<BlockPos, ISatelliteDisplayBlock> displayBlocks;
+    Set<Entity> displayEntities;
 
     public SatelliteDisplay(Level level, SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller) {
         this.level = level;
         this.satellite = satellite;
         this.controller = controller;
         displayBlocks = new HashMap<>();
-        if( noSource() ) return;
+        displayEntities = new HashSet<>();
+        if(satellite == null) return;
 
         this.target = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
 
@@ -137,13 +151,105 @@ public class SatelliteDisplay {
     }
 
 
+    public void addEntity(Entity e) {
+        if(e == null) return;
+        displayEntities.add(e);
+    }
+
+    /**
+     * Collects all entities in all observed chunks in this area
+     */
+    public void collectEntities()
+    {
+
+        if(noSource() || this.target == null) return;
+
+        for( ChunkDisplayInfo info : INFO_CACHE.values() )
+        {
+            if(!info.isActive || info.chunk != null) continue;
+            int xStart = info.chunk.getPos().getMinBlockX();
+            int zStart = info.chunk.getPos().getMinBlockZ();
+
+            int xEnd = info.chunk.getPos().getMaxBlockX();
+            int zEnd = info.chunk.getPos().getMaxBlockZ();
+
+            int yStart = 16*info.levelSectionIndex + level.getMinBuildHeight();
+            int yEnd = yStart + 15;
+
+            AABB aabb = new AABB(
+                xStart, yStart, zStart,
+                xEnd, yEnd, zEnd
+            );
+
+            // Query entities in this AABB (living entities only)
+            List<Entity> entitiesInArea = level.getEntities(
+                (Entity) null, aabb,
+                entity -> {return (entity instanceof LivingEntity);}
+            );
+
+            for(Entity e : entitiesInArea) {
+                addEntity(e);
+            }
+        }
+
+    }
+
+
+    final static float RENDER_SCALE = 0.0625f; // 1/16
+    public void renderEntities(BlockPos start)
+    {
+        if(start == null || noSource() || this.target == null) return;
+
+        //Obtain an iterator to the entity list
+        Iterator<Entity> iterator = displayEntities.iterator();
+        while (iterator.hasNext())
+        {
+            Entity e = iterator.next();
+            if(e == null || !e.isAlive() || e.isRemoved()) {
+                iterator.remove(); continue;
+            }
+
+            int chunkOffsetX = e.chunkPosition().x - target.x;
+            int chunkOffsetZ = e.chunkPosition().z - target.z;
+
+            BlockPos chunkWorldPos = e.chunkPosition().getWorldPosition();
+            int blockOffsetX = e.blockPosition().getX() - chunkWorldPos.getX();
+            int blockOffsetZ = e.blockPosition().getZ() - chunkWorldPos.getZ();
+
+            final int Y_MIN = level.getMinBuildHeight();
+            int blockOffsetY = e.blockPosition().getY() - (((currentSection) * 16)+Y_MIN) + ((depth-1)+16);
+            if(blockOffsetY < 0 ) { //under the table
+                continue;
+            }
+
+            ParticleOptions particleType = getParticleType(e);
+            float x = start.getX() + chunkOffsetX + (blockOffsetX * RENDER_SCALE);
+            float z = start.getZ() + chunkOffsetZ + (blockOffsetZ * RENDER_SCALE);
+            float y = start.getY()+1 + (blockOffsetY * RENDER_SCALE);
+            ((ServerLevel) level).sendParticles(
+                particleType,                     // Particle type
+                x, y, z,
+                1,                                // Particle count
+                0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
+                0.0                               // Speed
+            );
+
+        }
+    }
+
+
+
     //** STATICS
 
     public static void init(EventRegistrar reg) {
         reg.registerOnServerTick(TickType.ON_20_TICKS , SatelliteDisplay::onServerTick);
         reg.registerOnServerStopped((event) -> INFO_CACHE.clear());
+        reg.registerOnBeforeServerStarted(SatelliteDisplay::loadParticleTypes);
     }
 
+    private static ParticleOptions getParticleType(Entity e) {
+        return PARTICLE_TYPE_MAP.getOrDefault(e.getType(), ParticleTypes.ELECTRIC_SPARK);
+    }
 
     private static final int MAX_LIFETIME = 300; // 300s
     private static void onServerTick(ServerTickEvent event) {
@@ -162,5 +268,16 @@ public class SatelliteDisplay {
         }
     }
 
+    private static Map<EntityType, ParticleOptions > PARTICLE_TYPE_MAP = new HashMap<>();
+    private static void loadParticleTypes(ServerStartingEvent  event) {
+
+        //For all entities in registry, test if it is hostile mob, the load as ParticleTypes.FLAME
+        for(EntityType<?> type : event.getServer().registryAccess().registryOrThrow(Registries.ENTITY_TYPE)) {
+            if(!type.getCategory().isFriendly()) {
+                PARTICLE_TYPE_MAP.put(type, ParticleTypes.FLAME);
+            }
+        }
+
+    }
 
 }

@@ -1,0 +1,35 @@
+Art needed
+---
+
+Hey, yes, some hologram textures would be most important.  I was thinking:
+
+
+1. Pale blue semi transparent hologram color with feint grey or blue lines denoting a grid. 64x64 px may be a better size here since it will be minituarized.
+2. Copy of above but in a lighter shade of blue (for lighter blocks)
+3. Copy of above but in darker shade of blue (for dark blocks like stone/deepslate)
+
+4. Maybe some special hologram block thats very transparent could be used to denote liquids or leaves - maybe instead of monochrome is totally transparent except with a polka dot color or something.
+
+5. Block texture for the "Satellite" Block itself. Player places this in the sky, it examines the chunks below it. Player can right click to block to change its id, probably represented as one of the wool colors.
+6. Block teture for the "Satellite Controller" Block - Connects to a Satellite with the same Color Id. Player can right click to change its color id, move the satellite in any ordinal direction or raise the chunks up and down.
+7. Block Texture for "Satellite Display Block" - Looks pretty closely to an iron block, some special top texture that suggests its capable of "projecting".
+
+8. 
+
+Satellite Controller Block Details
+
+
+
+1. Top left corner, color representing different “color id” of the Controller. This color must match a corresponding satellite
+2. Up/Down/Left/Right – player can move the satellite in any ordinal direction
+3. +/- - controllers the depth of the chunks the player would like to see
+4. Red/green “on/off” toggle for the device – probably must be two different textures and I can programmatically change the blockstate
+5. Some rectangles where I will dynamically render the coords of some selected area on the grid
+
+*Bottom – relative spacing of different sections
+**Maybe too crowded to fit the wool color on there, Maybe wool color should go on bottom under +/- because the coordinates could span many digits
+
+
+
+
+	

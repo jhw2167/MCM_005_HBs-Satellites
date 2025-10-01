@@ -9,6 +9,7 @@ import com.holybuckets.satellite.core.SatelliteManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -43,7 +44,20 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
     @Override
     public void setSatellite(SatelliteBlockEntity satellite) {
-        this.linkedSatellite = satellite;
+
+        if(this.source != null) this.source.clear();
+        this.source = new SatelliteDisplay(level, this.linkedSatellite, this);
+        this.source.add(this.getBlockPos(), this);
+
+        propagateToNeighbors();
+        if(this.linkedSatellite != null) {
+            this.satelliteTargetPos = this.linkedSatellite.getBlockPos();
+        } else {
+            this.satelliteTargetPos = null;
+        }
+        if(HBUtil.PlayerUtil.getAllPlayers().isEmpty()) return;
+        Player p = HBUtil.PlayerUtil.getAllPlayers().get(0);
+        this.source.addEntity(p);
     }
 
     public void onDestroyed() {
@@ -85,50 +99,59 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         return ModBlockEntities.satelliteControllerBlockEntity.get();
     }
 
-    private static final int PATH_REFRESH_TICKS = 100;
-    private int ticks = 0;
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteBlockEntity)
     {
         super.tick(level, blockPos, blockState, satelliteBlockEntity);
         if (this.level.isClientSide) return;
+        //1. Recover Satellite if lost
         if(this.linkedSatellite == null && this.satelliteTargetPos != null) {
-            LevelChunk distantChunk = SatelliteManager.getChunk(level, this.satelliteTargetPos);
-            if(distantChunk != null) {
-                BlockEntity be = distantChunk.getBlockEntity(this.satelliteTargetPos);
-                if(be instanceof SatelliteBlockEntity) {
-                    SatelliteManager.put(this.colorId, (SatelliteBlockEntity) be);
-                } else {
-                    this.satelliteTargetPos = null;
-                }
-            }
+            recoverSatellite();
         }
+
         if(this.linkedSatellite != SatelliteManager.get(this.colorId)) {
             this.linkedSatellite = SatelliteManager.get(this.colorId);
-            if(this.source != null) this.source.clear();
-            this.source = new SatelliteDisplay(level, this.linkedSatellite, this);
-            this.source.add(this.getBlockPos(), this);
+            setSatellite(this.linkedSatellite);
+        }
 
+
+        if(this.source != null && this.isDisplayOn ) {
+            renderDisplay();
+        }
+
+    }
+
+    private static final int PATH_REFRESH_TICKS = 100;
+    private static final int ENTITY_REFRESH_TICKS = 1;
+    private int ticks = 0;
+    private void renderDisplay() {
+        if(ticks++ >= PATH_REFRESH_TICKS) {
+            ticks = 0;
             propagateToNeighbors();
-            if(this.linkedSatellite != null) {
-                this.satelliteTargetPos = this.linkedSatellite.getBlockPos();
+        }
+
+        if(this.source != null && ticks % ENTITY_REFRESH_TICKS == 0)
+            this.source.renderEntities(this.getBlockPos());
+    }
+
+    private void recoverSatellite()
+    {
+        if(this.satelliteTargetPos == null) return;
+        LevelChunk distantChunk = SatelliteManager.getChunk(level, this.satelliteTargetPos);
+        if(distantChunk != null) {
+            BlockEntity be = distantChunk.getBlockEntity(this.satelliteTargetPos);
+            if(be instanceof SatelliteBlockEntity) {
+                SatelliteManager.put(this.colorId, (SatelliteBlockEntity) be);
             } else {
                 this.satelliteTargetPos = null;
             }
         }
-
-        if(ticks++ >= PATH_REFRESH_TICKS) {
-            ticks = 0;
-            if(this.source != null && this.isDisplayOn ) {
-                propagateToNeighbors();
-            }
-        }
-
     }
 
     public void propagateToNeighbors()
     {
         if (source == null) return;
+        this.source.collectEntities();
 
         Level level = getLevel();
         if (level == null || level.isClientSide()) return;

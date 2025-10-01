@@ -5,30 +5,34 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBloc
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteDisplayUpdate;
+import com.holybuckets.satellite.core.SatelliteManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.Random;
 
 public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelliteDisplayBlock, BlockEntityTicker<SatelliteDisplayBlockEntity> {
 
     protected  SatelliteDisplay source;
     protected Deque<ChunkDisplayInfo> displayInfo;
     protected boolean isDisplayOn;
+    private int ticks;  //tick counter for refresh rate
 
     public SatelliteDisplayBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.satelliteDisplayBlockEntity.get(), pos, state);
-        this.isDisplayOn = true;
+        this(ModBlockEntities.satelliteDisplayBlockEntity.get(), pos, state);
     }
 
     public SatelliteDisplayBlockEntity(BlockEntityType<? extends BlockEntity> beType, BlockPos pos, BlockState state) {
         super(beType, pos, state);
         this.isDisplayOn = true;
+        this.ticks = new Random(this.hashCode()).nextInt(REFRESH_RATE);
     }
 
     @Override
@@ -79,8 +83,6 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         this.clearDisplay();
     }
 
-    private static final int REFRESH_RATE = 20;
-    private static int ticks = 0;
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
 
@@ -93,12 +95,18 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         if(source.noSource() || !source.contains(this.getBlockPos()) || source.getDepth() < displayInfo.size()) {
             clearDisplay();
         } else if(displayInfo != null && !displayInfo.isEmpty()) {
-         if( (ticks++*this.hashCode()) % REFRESH_RATE==0) {
-             buildDisplay();
-         }
+            renderDisplay();
         }
 
     }
+
+    private static final int REFRESH_RATE = 20;
+    private void renderDisplay() {
+        if( (ticks++) % REFRESH_RATE==0) {
+            buildDisplay();
+        }
+    }
+
 
     @Override
     public void updateClient(SatelliteDisplayUpdate update)

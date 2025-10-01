@@ -101,7 +101,7 @@ public class SatelliteManager {
     }
 
     public static LevelChunk getChunk(ServerLevel level, ChunkPos pos) {
-        long posKey = HBUtil.ChunkUtil.getChunkPos1DMap(pos.x, pos.z);
+        long posKey = HBUtil.ChunkUtil.getChunkPos1DMap(pos);
         CachedChunkInfo cachedInfo = CHUNK_CACHE.get(posKey);
         if (cachedInfo != null) {
             cachedInfo.lifetime = 0;
@@ -128,7 +128,7 @@ public class SatelliteManager {
     }
 
     public static void flagChunkForUnload(ChunkPos pos) {
-        long posKey = HBUtil.ChunkUtil.getChunkPos1DMap(pos.x, pos.z);
+        long posKey = HBUtil.ChunkUtil.getChunkPos1DMap(pos);
         CachedChunkInfo info = CHUNK_CACHE.get(posKey);
         if (info != null) {
             info.lifetime = MAX_CHUNK_LIFETIME; // This will trigger unload on next tick
