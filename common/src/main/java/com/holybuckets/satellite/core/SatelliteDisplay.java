@@ -46,6 +46,10 @@ public class SatelliteDisplay {
     int depth;
     Map<BlockPos, ISatelliteDisplayBlock> displayBlocks;
     Set<Entity> displayEntities;
+    private int minX = Integer.MAX_VALUE;
+    private int maxX = Integer.MIN_VALUE;
+    private int minZ = Integer.MAX_VALUE;
+    private int maxZ = Integer.MIN_VALUE;
 
     public SatelliteDisplay(Level level, SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller) {
         this.level = level;
@@ -96,14 +100,36 @@ public class SatelliteDisplay {
 
     public void add(BlockPos blockPos, ISatelliteDisplayBlock displayBlock) {
         displayBlocks.put(blockPos, displayBlock);
+        updateBounds(blockPos);
+    }
+
+    private void updateBounds(BlockPos pos) {
+        minX = Math.min(minX, pos.getX());
+        maxX = Math.max(maxX, pos.getX());
+        minZ = Math.min(minZ, pos.getZ());
+        maxZ = Math.max(maxZ, pos.getZ());
+    }
+
+    private void recalculateBounds() {
+        minX = Integer.MAX_VALUE;
+        maxX = Integer.MIN_VALUE;
+        minZ = Integer.MAX_VALUE;
+        maxZ = Integer.MIN_VALUE;
+        for (BlockPos pos : displayBlocks.keySet()) {
+            updateBounds(pos);
+        }
     }
 
     public void addAll(Map<BlockPos, ISatelliteDisplayBlock> blocks) {
         displayBlocks.putAll(blocks);
+        for (BlockPos pos : blocks.keySet()) {
+            updateBounds(pos);
+        }
     }
 
     public void remove(BlockPos blockPos) {
         displayBlocks.remove(blockPos);
+        recalculateBounds();
     }
 
     public boolean contains(BlockPos blockPos) {
@@ -112,6 +138,10 @@ public class SatelliteDisplay {
 
     public void clear() {
         displayBlocks.clear();
+        minX = Integer.MAX_VALUE;
+        maxX = Integer.MIN_VALUE;
+        minZ = Integer.MAX_VALUE;
+        maxZ = Integer.MIN_VALUE;
     }
 
     public Deque<ChunkDisplayInfo> initDisplayInfo(SatelliteDisplayBlockEntity displayblock) {
