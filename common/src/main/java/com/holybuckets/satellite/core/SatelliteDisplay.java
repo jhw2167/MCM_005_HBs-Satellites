@@ -11,11 +11,10 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBloc
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,7 +23,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
-import org.antlr.v4.runtime.misc.MultiMap;
 
 import java.util.*;
 
@@ -182,9 +180,10 @@ public class SatelliteDisplay {
             );
 
             // Query entities in this AABB (living entities only)
+            info.clearEntities();
             List<Entity> entitiesInArea = level.getEntities(
                 (Entity) null, aabb,
-                entity -> {return (entity instanceof LivingEntity);}
+                entity -> entityPredicate(entity, info)
             );
 
             for(Entity e : entitiesInArea) {
@@ -194,9 +193,11 @@ public class SatelliteDisplay {
 
     }
 
-        private boolean entityPredicate(Entity e) {
-         return (e instanceof LivingEntity) && e.isAlive() && !e.isRemoved()
-            && !displayEntities.contains(e);
+        private boolean entityPredicate(Entity e, ChunkDisplayInfo info) {
+            if( !(e instanceof LivingEntity) || !e.isAlive() || e.isRemoved() || displayEntities.contains(e) ) return false;
+            if( e instanceof ServerPlayer ) return true;
+            //return info.acceptLocalEntity(e);
+            return false;
         }
 
 
@@ -253,7 +254,7 @@ public class SatelliteDisplay {
     }
 
     private static ParticleOptions getParticleType(Entity e) {
-        return PARTICLE_TYPE_MAP.getOrDefault(e.getType(), ParticleTypes.ELECTRIC_SPARK);
+        return PARTICLE_TYPE_MAP.getOrDefault(e.getType(), ParticleTypes.POOF);
     }
 
     private static final int MAX_LIFETIME = 300; // 300s
@@ -283,6 +284,7 @@ public class SatelliteDisplay {
             }
         }
 
+        PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ParticleTypes.ELECTRIC_SPARK);
     }
 
 }
