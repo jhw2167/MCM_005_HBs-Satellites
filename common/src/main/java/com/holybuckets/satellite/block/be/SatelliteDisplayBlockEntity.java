@@ -20,10 +20,11 @@ import java.util.Random;
 
 public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelliteDisplayBlock, BlockEntityTicker<SatelliteDisplayBlockEntity> {
 
-    protected  SatelliteDisplay source;
+    protected SatelliteDisplay source;
     protected Deque<ChunkDisplayInfo> displayInfo;
     protected boolean isDisplayOn;
     private int ticks;  //tick counter for refresh rate
+    private int height; // height of display area to clear
 
     public SatelliteDisplayBlockEntity(BlockPos pos, BlockState state) {
         this(ModBlockEntities.satelliteDisplayBlockEntity.get(), pos, state);
@@ -33,6 +34,24 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         super(beType, pos, state);
         this.isDisplayOn = true;
         this.ticks = new Random(this.hashCode()).nextInt(REFRESH_RATE);
+        this.height = 0;
+    }
+
+    public void setHeight(int height) {
+        if (height != this.height) {
+            this.height = height;
+            if (height > 0) {
+                clearAboveArea();
+            }
+        }
+    }
+
+    private void clearAboveArea() {
+        BlockPos pos = this.getBlockPos();
+        for (int y = 1; y <= height; y++) {
+            BlockPos clearPos = pos.above(y);
+            SatelliteMain.chiselBitsApi.clear(this.level, clearPos);
+        }
     }
 
 
@@ -76,6 +95,9 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
             pos = pos.above();
             SatelliteMain.chiselBitsApi.clear(this.level, pos);
             info.isActive = false;
+        }
+        if (height > 0) {
+            clearAboveArea();
         }
         //SatelliteControllerMessage.createAndFire(0,getBlockPos());
     }
