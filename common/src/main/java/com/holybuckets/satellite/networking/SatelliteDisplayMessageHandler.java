@@ -12,6 +12,6 @@ public class SatelliteDisplayMessageHandler {
     }
 
     public static void handle(Player player, SatelliteDisplayMessage message) {
-        ISatelliteDisplayBlock.handleClientUpdate(player, message);
+        //ISatelliteDisplayBlock.handleClientUpdate(player, message);
     }
 }

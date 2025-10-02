@@ -1,20 +1,17 @@
 package com.holybuckets.satellite.block.be;
 
+import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.holybuckets.satellite.core.SatelliteDisplay;
-import com.holybuckets.satellite.core.SatelliteDisplayUpdate;
-import com.holybuckets.satellite.core.SatelliteManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
 
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.Random;
 
@@ -25,6 +22,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     protected boolean isDisplayOn;
     private int ticks;  //tick counter for refresh rate
     private int height; // height of display area to clear
+    private boolean hasPlayer;
 
     public SatelliteDisplayBlockEntity(BlockPos pos, BlockState state) {
         this(ModBlockEntities.satelliteDisplayBlockEntity.get(), pos, state);
@@ -35,6 +33,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         this.isDisplayOn = true;
         this.ticks = new Random(this.hashCode()).nextInt(REFRESH_RATE);
         this.height = 0;
+        this.hasPlayer = false;
     }
 
     public void setHeight(int height) {
@@ -54,6 +53,13 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         }
     }
 
+    @Override
+    public void forceUpdate() {
+        //Set ticks equal to -x + -z offset
+        BlockPos offset = this.source.getOffset(this.getBlockPos());
+        this.ticks = -(Math.abs(offset.getX()) + Math.abs(offset.getZ()));
+    }
+
 
     @Override
     public void toggleOnOff(boolean toggle) {
@@ -70,22 +76,38 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         if(this.level.isClientSide) return;
         if(source == null || source.noSource() ) return;
         this.source = source;
-         this.displayInfo = source.initDisplayInfo(this);
-        //buildDisplay(); during tick loop
+        if(this.displayInfo != null && !this.displayInfo.isEmpty()) {
+            this.displayInfo.forEach( info -> info.isActive = false );
+        }
+        this.displayInfo = source.initDisplayInfo(this);
+
+        this.forceUpdate(); //force build over next few ticks
     }
 
-    public void buildDisplay() {
+    public void buildDisplay()
+    {
         BlockPos pos = getBlockPos();
-        for(ChunkDisplayInfo info : displayInfo) {
+        this.hasPlayer = false;
+
+        int newHeight = displayInfo.size();
+        if(newHeight < height) {
+            clearAboveArea(); this.height = newHeight;
+        }
+
+        for(ChunkDisplayInfo info : displayInfo)
+        {
             pos = pos.above();
-            boolean proceedWithUpdates = false;
             info.isActive = true;
+            this.hasPlayer |= info.hasPlayer;
+
+            boolean proceedWithUpdates = false;
             for(boolean b : info.hasUpdates ) {
                 if(b) {proceedWithUpdates = true; break;}
             }
             if(!proceedWithUpdates) continue;
             SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, pos, info.hasUpdates);
         }
+
     }
 
     public void clearDisplay() {
@@ -99,7 +121,6 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         if (height > 0) {
             clearAboveArea();
         }
-        //SatelliteControllerMessage.createAndFire(0,getBlockPos());
     }
 
     public void onDestroyed() {
@@ -123,38 +144,19 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
     }
 
-    private static final int REFRESH_RATE = 10;
+    private static final int REFRESH_RATE = 200;
+    private static final int PLAYER_REFRESH_RATE = 10;
     private void renderDisplay() {
+
         if( (ticks++) % REFRESH_RATE==0) {
-            buildDisplay();
-        }
-    }
-
-
-    @Override
-    public void updateClient(SatelliteDisplayUpdate update)
-    {
-        /**
-         * If update.bits is null, remove the block entity at the position, set to air
-         * else, create new ChunkDisplayInfo and call SatelliteMain.chiselBitsApi.build, add to Deque
-         */
-         BlockPos targetPos = update.pos;
-         if(targetPos == null) return;
-         if(targetPos == getBlockPos()) {
-            if(!update.displayOn) clearDisplay();
+            //this.displayInfo.forEach( info -> info.refreshBits() );
+        } else if(this.hasPlayer && (ticks % PLAYER_REFRESH_RATE==0)) {
+            //this.displayInfo.forEach( info -> info.refreshBits() );
+        } else {
             return;
-         }
-
-         if(update.displayData == null) {
-            BlockEntity be = level.getBlockEntity(targetPos);
-            //if(be != null) level.removeBlockEntity(targetPos);
-            //level.setBlock(targetPos, AIR.defaultBlockState(), Block.UPDATE_ALL_IMMEDIATE );
-         } else {
-            ChunkDisplayInfo info = new ChunkDisplayInfo(update.displayData);
-            BlockEntity be = SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, targetPos);
-            be.setChanged();
-         }
-
+        }
+        buildDisplay();
     }
+
 
 }

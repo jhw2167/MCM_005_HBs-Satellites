@@ -8,6 +8,7 @@ import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -22,7 +23,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.phys.AABB;
 
 import java.util.*;
 
@@ -81,10 +81,19 @@ public class SatelliteDisplay {
 
     public boolean noSource() { return satellite == null; }
 
+
+    public void setDepth(int newDepth) {
+        if(newDepth < 1)
+            newDepth = 1;
+        if(newDepth > 4)
+            newDepth = 4;
+        this.depth = newDepth;
+    }
+
     /** delta height
      * @return
      */
-    public void setDepth(int delta) {
+    public void adjDepth(int delta) {
          int temp = this.depth + delta;
          if(temp < 1 || temp > 4) return;
         this.depth += delta;
@@ -94,8 +103,18 @@ public class SatelliteDisplay {
         return this.depth;
     }
 
+    public int getCurrentSection() {
+        return currentSection;
+    }
+
     public void setCurrentSection(int section) {
         this.currentSection = section;
+    }
+
+    public void adjCurrentSection(int delta) {
+        int temp = this.currentSection + delta;
+        if( temp < 0 ||  temp >= level.getSectionsCount()-depth ) return;
+        this.currentSection = temp;
     }
 
     public void add(BlockPos blockPos, ISatelliteDisplayBlock displayBlock) {
@@ -142,6 +161,10 @@ public class SatelliteDisplay {
         maxX = Integer.MIN_VALUE;
         minZ = Integer.MAX_VALUE;
         maxZ = Integer.MIN_VALUE;
+    }
+
+    public BlockPos getOffset(BlockPos blockPos) {
+        return controller.getBlockPos().subtract(blockPos);
     }
 
     public Deque<ChunkDisplayInfo> initDisplayInfo(SatelliteDisplayBlockEntity displayblock) {
@@ -192,9 +215,13 @@ public class SatelliteDisplay {
 
         if(noSource() || this.target == null) return;
 
+        displayEntities.addAll(HBUtil.PlayerUtil.getAllPlayers());
+
+        /*
         for( ChunkDisplayInfo info : INFO_CACHE.values() )
         {
             if(!info.isActive || info.chunk == null) continue;
+
             int xStart = info.chunk.getPos().getMinBlockX();
             int zStart = info.chunk.getPos().getMinBlockZ();
 
@@ -220,14 +247,16 @@ public class SatelliteDisplay {
                 addEntity(e);
             }
         }
+        */
 
     }
 
+        private static HashSet<EntityType<?>> BLACKLISTED_ENTITIES = new HashSet<>();
         private boolean entityPredicate(Entity e, ChunkDisplayInfo info) {
             if( !(e instanceof LivingEntity) || !e.isAlive() || e.isRemoved() || displayEntities.contains(e) ) return false;
-            if( e instanceof ServerPlayer ) return true;
-            //return info.acceptLocalEntity(e);
-            return false;
+            if( e instanceof ServerPlayer ) return false;
+            return info.acceptLocalEntity(e);
+            //return false;
         }
 
 
@@ -256,12 +285,19 @@ public class SatelliteDisplay {
             int blockOffsetY = e.blockPosition().getY() - (((currentSection) * 16)+Y_MIN) + ((depth-1)*16);
             if(blockOffsetY < 0 ) { //under the table
                 continue;
+            } else if( blockOffsetY > (16*depth) ) { //above the table
+                if(!(e instanceof ServerPlayer)) continue; //only show players above the table
+                blockOffsetY = 16*(depth+1);
             }
 
             ParticleOptions particleType = getParticleType(e);
             float x = start.getX() + chunkOffsetX + (blockOffsetX * RENDER_SCALE);
             float z = start.getZ() + chunkOffsetZ + (blockOffsetZ * RENDER_SCALE);
-            float y = start.getY()+1 + (blockOffsetY * RENDER_SCALE);
+            float y = start.getY()+1.125f + (blockOffsetY * RENDER_SCALE);
+
+            // check against Max and min values
+            if(x < minX || x > maxX || z < minZ || z > maxZ) continue;
+
             ((ServerLevel) level).sendParticles(
                 particleType,                     // Particle type
                 x, y, z,
@@ -269,6 +305,7 @@ public class SatelliteDisplay {
                 0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
                 0.0                               // Speed
             );
+
 
         }
     }
@@ -284,13 +321,18 @@ public class SatelliteDisplay {
     }
 
     private static ParticleOptions getParticleType(Entity e) {
-        return PARTICLE_TYPE_MAP.getOrDefault(e.getType(), ParticleTypes.POOF);
+        return PARTICLE_TYPE_MAP.getOrDefault(e.getType(), ParticleTypes.MYCELIUM );
     }
 
     private static final int MAX_LIFETIME = 300; // 300s
     private static void onServerTick(ServerTickEvent event) {
 
         Iterator<Map.Entry<TripleInt, ChunkDisplayInfo>> iterator = INFO_CACHE.entrySet().iterator();
+        LongOpenHashSet chunksContainPlayer = new LongOpenHashSet();
+        HBUtil.PlayerUtil.getAllPlayers().forEach( p -> {
+            chunksContainPlayer.add( HBUtil.ChunkUtil.getChunkPos1DMap(p.chunkPosition()) );
+        });
+
         while (iterator.hasNext())
         {
             Map.Entry<TripleInt, ChunkDisplayInfo> entry = iterator.next();
@@ -300,7 +342,11 @@ public class SatelliteDisplay {
             if(info.lifetime > MAX_LIFETIME) {
                 iterator.remove();
                 SatelliteManager.flagChunkForUnload(info.chunk.getPos());
+                continue;
             }
+
+            long chunkId = HBUtil.ChunkUtil.getChunkPos1DMap(info.chunk.getPos());
+            info.hasPlayer = chunksContainPlayer.contains(chunkId);
         }
     }
 
@@ -315,6 +361,7 @@ public class SatelliteDisplay {
         }
 
         PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ParticleTypes.ELECTRIC_SPARK);
+        PARTICLE_TYPE_MAP.put(EntityType.SLIME, ParticleTypes.ITEM_SLIME);
     }
 
 }

@@ -2,11 +2,16 @@ package com.holybuckets.satellite.core;
 
 
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static com.holybuckets.foundation.HBUtil.TripleInt;
@@ -25,23 +30,30 @@ public class ChunkDisplayInfo {
     public boolean isActive;
     public int lifetime;
 
-    public ChunkDisplayInfo(int[] bits) {
-        holoBits = bits;
+    public Map<EntityType<?>, EntityInfo> localEntities;
+    public boolean hasPlayer;
+
+    private ChunkDisplayInfo() {
         this.currentYIndexForBatch = -1;
         this.isActive = false;
+        this.hasPlayer = false;
 
-        this.hasUpdates = new boolean[16];
+        hasUpdates = new boolean[16];
+        localEntities = new HashMap<>();
+    }
+
+    public ChunkDisplayInfo(int[] bits) {
+        this();
+        holoBits = bits;
     }
 
     public ChunkDisplayInfo(int levelSectionIndex, LevelChunk chunk, TripleInt blockOffset) {
+        this();
         this.levelSectionIndex = levelSectionIndex;
         this.chunk = chunk;
         this.blockOffset = blockOffset;
-        this.currentYIndexForBatch = -1;
-        this.isActive = false;
 
         holoBits = new int[4096];
-        hasUpdates = new boolean[16];
         updateBits(holoBits, this, true);
     }
 
@@ -62,6 +74,7 @@ public class ChunkDisplayInfo {
 
     public void refreshBits() {
         updateBits(holoBits, this, false);
+        resetUpdates();
         lifetime = 0;
     }
 
@@ -76,7 +89,7 @@ public class ChunkDisplayInfo {
     static Set<Integer> updateBits(int[] holoBits, ChunkDisplayInfo info, boolean init) {
         LevelChunk chunk = info.chunk;
         LevelChunkSection section = chunk.getSections()[info.levelSectionIndex];
-        Set<Integer> changed = new HashSet<>(64);
+        //Set<Integer> changed = new HashSet<>(64);
         // Process each position in the chunk section
         for (int y = 0; y < 16; y++) {
             info.hasUpdates[y] = false;
@@ -100,7 +113,7 @@ public class ChunkDisplayInfo {
                 }
             }
         }
-        return changed;
+        return null;
     }
 
 
@@ -109,6 +122,44 @@ public class ChunkDisplayInfo {
         blockOffset.x += dx;
         blockOffset.y += dy;
         blockOffset.z += dz;
+    }
+
+    /**
+     * returns true if the entity is new to this chunkInfo and should be accepted, false otherwise
+     * @param e
+     * @return
+     */
+    public boolean acceptLocalEntity(Entity e)
+    {
+        EntityInfo info = localEntities.get(e.getType());
+        if(info == null) {
+            info = new EntityInfo();
+            info.target = e;
+            info.others.add(e);
+            localEntities.put(e.getType(), info);
+            return true;
+        }
+
+        info.others.add(e);
+        if(info.target == null) {
+            info.target = e;
+            return true;
+        }
+        return false;
+    }
+
+    public void clearEntities() {
+        for(EntityInfo info : localEntities.values()) {
+            info.others.clear();
+            Entity e = info.target;
+            if( !(e instanceof LivingEntity) || !e.isAlive() || e.isRemoved() )
+                info.target = null;
+        }
+    }
+
+    static class EntityInfo {
+        public Entity target;
+        public HashSet<Entity> others = new HashSet<>();
     }
 
 

@@ -115,3 +115,6 @@ Temporary Items
 .apdisk
 .aider*
 .env
+
+# Additional no want
+*.xcf

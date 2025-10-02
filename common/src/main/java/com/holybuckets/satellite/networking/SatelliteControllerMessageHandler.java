@@ -20,6 +20,7 @@ public class SatelliteControllerMessageHandler {
 
     }
 
+    /*
     static void handle(Player player, SatelliteControllerMessage message) {
         //Get bock entity at blockPos, cast to ISatelliteDisplay and call updateClient
         GeneralConfig config = GeneralConfig.getInstance();
@@ -37,4 +38,6 @@ public class SatelliteControllerMessageHandler {
         }
 
     }
+    */
+
 }

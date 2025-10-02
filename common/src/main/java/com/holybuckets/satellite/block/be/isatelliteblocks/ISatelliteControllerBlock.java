@@ -18,9 +18,6 @@ public interface ISatelliteControllerBlock extends ISatelliteDisplayBlock {
 
     void setSatellite(SatelliteBlockEntity satellite);
 
-    void updateServer(SatelliteDisplayUpdate update);
-
-
 
     float ORDINAL_COORD_BLOCK_HORZ_THRESHOLD = 0.7f;
     float ORDINAL_COORD_BLOCK_VERT_THRESHOLD = 0.8f;

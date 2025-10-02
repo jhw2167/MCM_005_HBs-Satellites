@@ -15,6 +15,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public interface ISatelliteDisplayBlock {
 
+    void forceUpdate();
+
     void toggleOnOff(boolean toggle);
 
     SatelliteDisplay getSource();
@@ -22,8 +24,6 @@ public interface ISatelliteDisplayBlock {
     void setSource(SatelliteDisplay source);
 
     BlockPos getBlockPos();
-
-    void updateClient(SatelliteDisplayUpdate update);
 
     //0-4095
     static int getCachePos(int x, int y, int z) {
@@ -36,7 +36,7 @@ public interface ISatelliteDisplayBlock {
         return new Vec3(x*CONST, y*CONST, z*CONST);
     }
 
-
+    /*
     static final int DIST_THRESHOLD_SQR = 16*16;
     static void handleClientUpdate(Player player, SatelliteDisplayMessage message) {
         if( HBUtil.BlockUtil.distanceSqr(player.blockPosition(), message.pos) > DIST_THRESHOLD_SQR)
@@ -46,5 +46,6 @@ public interface ISatelliteDisplayBlock {
             display.updateClient( new SatelliteDisplayUpdate(message) );
         }
     }
+     */
 
 }

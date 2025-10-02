@@ -4,7 +4,6 @@ import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import com.holybuckets.satellite.core.SatelliteDisplay;
-import com.holybuckets.satellite.core.SatelliteDisplayUpdate;
 import com.holybuckets.satellite.core.SatelliteManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -48,6 +47,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         if(this.source != null) this.source.clear();
         this.source = new SatelliteDisplay(level, this.linkedSatellite, this);
         this.source.add(this.getBlockPos(), this);
+        this.source.setDepth(2);
 
         propagateToNeighbors();
         if(this.linkedSatellite != null) {
@@ -81,16 +81,20 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         } else if( cmd < 5) {   //adjust ordinally
             //not implemented
         } else if( cmd < 7) {   //adjust depth 5 - increase depth, 6 - decrease depth
-            this.source.setDepth( cmd == 5 ? 1 :-1 );
+            //this.source.adjDepth( cmd == 5 ? 1 :-1 );
+            this.source.adjCurrentSection( cmd == 5 ? -1 : 1 );
         }
 
-
+        this.ticks = PATH_REFRESH_TICKS; //force update next tick
     }
 
     public void turnOff() {
         this.toggleOnOff(false);
         this.clearDisplay();
-        if(this.source != null) this.source.clear();
+        if(this.source != null) {
+            this.source.clear();
+            this.source.setDepth(1);
+        }
     }
 
 
@@ -121,8 +125,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
     }
 
-    private static final int PATH_REFRESH_TICKS = 100;
-    private static final int ENTITY_REFRESH_TICKS = 1;
+    private static final int PATH_REFRESH_TICKS = 200;
+    private static final int ENTITY_REFRESH_TICKS = 5;
     private int ticks = 0;
     private void renderDisplay() {
         if(ticks++ >= PATH_REFRESH_TICKS) {
@@ -189,21 +193,6 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         source.addAll(nodes);
 
     }
-
-    /**
-     * This can adjust the colorId of the display
-     * or adjust the chunk direction in any ordinal direction or height
-     *  - 0-4 = N/S/E/W
-     *  - 5,6 = up/down
-     *  - 7-16 = reserved commands
-     *  - all other numbers, set colorId
-     * @param update
-     */
-    @Override
-    public void updateServer(SatelliteDisplayUpdate update) {
-
-    }
-
 
     @Override
     protected void saveAdditional(CompoundTag tag) {

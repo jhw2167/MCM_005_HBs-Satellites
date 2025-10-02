@@ -26,7 +26,7 @@ public class ModNetworking {
 
     public static void handleSatelliteControllerInput(Player p, SatelliteControllerMessage m) {
         RECEIVED++;
-        SatelliteControllerMessageHandler.handle(p, m);
+        //SatelliteControllerMessageHandler.handle(p, m);
         //POOL.submit(() -> ControllerInputMessageHandler.handle(p, m));
     }
 
