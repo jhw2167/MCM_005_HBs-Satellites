@@ -380,6 +380,9 @@ public class SatelliteDisplay {
         {
             Map.Entry<TripleInt, ChunkDisplayInfo> entry = iterator.next();
             ChunkDisplayInfo info = entry.getValue();
+
+            long chunkId = HBUtil.ChunkUtil.getChunkPos1DMap(info.chunk.getPos());
+            info.hasPlayer = chunksContainPlayer.contains(chunkId);
             if(info.isActive) continue;
             info.tick();
             if(info.lifetime > MAX_LIFETIME) {
@@ -388,8 +391,6 @@ public class SatelliteDisplay {
                 continue;
             }
 
-            long chunkId = HBUtil.ChunkUtil.getChunkPos1DMap(info.chunk.getPos());
-            info.hasPlayer = chunksContainPlayer.contains(chunkId);
         }
     }
 

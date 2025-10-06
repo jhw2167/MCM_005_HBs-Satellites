@@ -97,7 +97,7 @@ public class ChunkDisplayInfo {
         LevelChunkSection section = chunk.getSections()[info.levelSectionIndex];
         //Set<Integer> changed = new HashSet<>(64);
         for (int y = 0; y < 16; y++) {
-            info.hasUpdates[y] = false;
+            //info.hasUpdates[y] = false;
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     BlockState originalBlock = section.getBlockState(x, y, z);

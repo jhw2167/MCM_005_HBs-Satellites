@@ -32,7 +32,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
     public SatelliteDisplayBlockEntity(BlockEntityType<? extends BlockEntity> beType, BlockPos pos, BlockState state) {
         super(beType, pos, state);
-        this.isDisplayOn = true;
+        this.isDisplayOn = true; //false;
         this.ticks = new Random(this.hashCode()).nextInt(REFRESH_RATE);
         this.height = 0;
         this.holoLift = 0;
@@ -138,11 +138,12 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         }
 
         if( ticks % REFRESH_RATE==0) {
-            //this.displayInfo.forEach( info -> info.refreshBits(false) );
             this.displayInfo.forEach( info -> info.refreshBits(false) );
             buildDisplay();
+        } else if( this.hasPlayer && ticks % PLAYER_REFRESH_RATE == 0) {
+            this.displayInfo.forEach( info -> info.refreshBits(true) );
+            buildDisplay();
         }
-        //always refreshing, no considerationt to player
 
     }
 
