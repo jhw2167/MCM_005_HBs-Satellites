@@ -74,11 +74,11 @@ public interface ISatelliteControllerBlock extends ISatelliteDisplayBlock {
             if(y > upThreshold) {
                 input = 1; // Top Arrow
             } else if (y < downThreshold) {
-                input = 2; // South
+                input = 2; // Bottom Arrow
             } else if (xz < leftThreshold) {
-                input = 3; // West
+                input = 3; // Left Arrow
             } else if (xz > rightThreshold) {
-                input = 4; // East
+                input = 4; // Right Arrow
             }
 
             /**
@@ -87,7 +87,7 @@ public interface ISatelliteControllerBlock extends ISatelliteDisplayBlock {
             if( blockFacing == Direction.NORTH ) {
                 if(input == 1) cmd = 2; //Up arrow moves South
                 else if(input == 2) cmd = 1; //Down arrow moves North
-                else if(input == 3) cmd = 4; //West moves West
+                else if(input == 3) cmd = 4; //left moves East
                 else if(input == 4) cmd = 3; //East moves East
             } else if( blockFacing == Direction.SOUTH ) {
                 if(input == 1) cmd = 1; //Up arrow moves North

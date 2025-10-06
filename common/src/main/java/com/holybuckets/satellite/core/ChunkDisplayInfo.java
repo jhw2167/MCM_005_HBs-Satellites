@@ -35,7 +35,7 @@ public class ChunkDisplayInfo {
 
     private ChunkDisplayInfo() {
         this.currentYIndexForBatch = -1;
-        this.isActive = false;
+        this.isActive = true;
         this.hasPlayer = false;
 
         hasUpdates = new boolean[16];
@@ -70,12 +70,18 @@ public class ChunkDisplayInfo {
     public void resetUpdates() {
         for(int i=0; i<16; i++) hasUpdates[i] = true;
         lifetime = 0;
+        this.isActive = true;
     }
 
-    public void refreshBits() {
-        updateBits(holoBits, this, false);
-        resetUpdates();
+    public void refreshBits(boolean force) {
         lifetime = 0;
+        this.isActive = true;
+        if(chunk == null) return;
+        if( force  || chunk.isUnsaved())
+            updateBits(holoBits, this, false);
+
+        if(force)
+            this.resetUpdates();
     }
 
     public void tick() {
@@ -90,7 +96,6 @@ public class ChunkDisplayInfo {
         LevelChunk chunk = info.chunk;
         LevelChunkSection section = chunk.getSections()[info.levelSectionIndex];
         //Set<Integer> changed = new HashSet<>(64);
-        // Process each position in the chunk section
         for (int y = 0; y < 16; y++) {
             info.hasUpdates[y] = false;
             for (int x = 0; x < 16; x++) {
@@ -102,13 +107,11 @@ public class ChunkDisplayInfo {
                         temp = 0;
                     } else if( DARK.contains(originalBlock.getBlock()) ) {
                         temp = 4;
-                        info.hasUpdates[y] = true;
                     } else {
                         temp = 2;
-                        info.hasUpdates[y] = true;
                     }
 
-                    //if(!init && holoBits[p]!=temp) changed.add(p);
+                    info.hasUpdates[y] |= (holoBits[p]!=temp);
                     holoBits[p] = temp;
                 }
             }

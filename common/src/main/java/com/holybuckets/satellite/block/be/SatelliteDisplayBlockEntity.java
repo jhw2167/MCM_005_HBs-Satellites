@@ -6,6 +6,7 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBloc
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -20,8 +21,9 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     protected SatelliteDisplay source;
     protected Deque<ChunkDisplayInfo> displayInfo;
     protected boolean isDisplayOn;
-    private int ticks;  //tick counter for refresh rate
+    protected int ticks;  //tick counter for refresh rate
     private int height; // height of display area to clear
+    private int holoLift; //number of blocks above display block holo renders
     private boolean hasPlayer;
 
     public SatelliteDisplayBlockEntity(BlockPos pos, BlockState state) {
@@ -33,6 +35,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         this.isDisplayOn = true;
         this.ticks = new Random(this.hashCode()).nextInt(REFRESH_RATE);
         this.height = 0;
+        this.holoLift = 0;
         this.hasPlayer = false;
     }
 
@@ -40,13 +43,13 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         if (height != this.height) {
             this.height = height;
             if (height > 0) {
-                clearAboveArea();
+                clearAboveArea(height);
             }
         }
     }
 
-    private void clearAboveArea() {
-        BlockPos pos = this.getBlockPos();
+    private void clearAboveArea(int height) {
+        BlockPos pos = this.getBlockPos().above(holoLift);
         for (int y = 1; y <= height; y++) {
             BlockPos clearPos = pos.above(y);
             SatelliteMain.chiselBitsApi.clear(this.level, clearPos);
@@ -72,55 +75,38 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     }
 
     @Override
-    public void setSource(SatelliteDisplay source) {
+    public void setSource(SatelliteDisplay source, boolean forceUpdate) {
         if(this.level.isClientSide) return;
-        if(source == null || source.noSource() ) return;
+        if(this.source == source && !forceUpdate) return; //same source
+
         this.source = source;
-        if(this.displayInfo != null && !this.displayInfo.isEmpty()) {
-            this.displayInfo.forEach( info -> info.isActive = false );
-        }
+        if(this.source == null || source.noSource() ) return;
         this.displayInfo = source.initDisplayInfo(this);
 
-        this.forceUpdate(); //force build over next few ticks
+        this.forceUpdate();
     }
 
     public void buildDisplay()
     {
-        BlockPos pos = getBlockPos();
-        this.hasPlayer = false;
-
-        int newHeight = displayInfo.size();
-        if(newHeight < height) {
-            clearAboveArea(); this.height = newHeight;
-        }
-
+        BlockPos pos = this.getBlockPos().above(holoLift);
         for(ChunkDisplayInfo info : displayInfo)
         {
             pos = pos.above();
-            info.isActive = true;
-            this.hasPlayer |= info.hasPlayer;
-
             boolean proceedWithUpdates = false;
             for(boolean b : info.hasUpdates ) {
                 if(b) {proceedWithUpdates = true; break;}
             }
-            if(!proceedWithUpdates) continue;
-            SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, pos, info.hasUpdates);
+            if(proceedWithUpdates) {
+                SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, pos, info.hasUpdates);
+            }
         }
 
     }
 
     public void clearDisplay() {
         if(displayInfo == null) return;
-        BlockPos pos = this.getBlockPos();
-        for(ChunkDisplayInfo info : displayInfo) {
-            pos = pos.above();
-            SatelliteMain.chiselBitsApi.clear(this.level, pos);
-            info.isActive = false;
-        }
-        if (height > 0) {
-            clearAboveArea();
-        }
+        clearAboveArea(this.source.getDepth());
+        displayInfo.forEach( info -> info.isActive = false );
     }
 
     public void onDestroyed() {
@@ -130,32 +116,51 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
 
-        if (this.level.isClientSide) {
-            //BlockEntity be = level.getBlockEntity(blockPos.above());
-            return;
-        }
-        else if( source == null) { return; }
+        if(this.level.isClientSide) return;
+        if( source == null) return;
+        ticks++;
 
-        if(source.noSource() || !source.contains(this.getBlockPos()) || source.getDepth() < displayInfo.size()) {
-            clearDisplay();
+        if(source.noSource() || !source.contains(this.getBlockPos())) {
+            this.clearDisplay();
         } else if(displayInfo != null && !displayInfo.isEmpty()) {
             renderDisplay();
         }
 
     }
 
-    private static final int REFRESH_RATE = 200;
+    private static final int REFRESH_RATE = 100;
     private static final int PLAYER_REFRESH_RATE = 10;
     private void renderDisplay() {
 
-        if( (ticks++) % REFRESH_RATE==0) {
-            //this.displayInfo.forEach( info -> info.refreshBits() );
-        } else if(this.hasPlayer && (ticks % PLAYER_REFRESH_RATE==0)) {
-            //this.displayInfo.forEach( info -> info.refreshBits() );
-        } else {
-            return;
+        if(source.needsClear() ) {
+            this.clearAboveArea(this.height);
+            height = this.source.getDepth();
         }
-        buildDisplay();
+
+        if( ticks % REFRESH_RATE==0) {
+            //this.displayInfo.forEach( info -> info.refreshBits(false) );
+            this.displayInfo.forEach( info -> info.refreshBits(false) );
+            buildDisplay();
+        }
+        //always refreshing, no considerationt to player
+
+    }
+
+    //** ENITIY OVERRIDES
+
+    @Override
+    protected void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
+        tag.putInt("height", height);
+        tag.putInt("holoLift", holoLift);
+    }
+
+    @Override
+    public void load(CompoundTag tag) {
+        super.load(tag);
+        this.height = tag.getInt("height");
+        this.holoLift = tag.getInt("holoLift");
+        //if(height > 0) clearAboveArea(height);
     }
 
 

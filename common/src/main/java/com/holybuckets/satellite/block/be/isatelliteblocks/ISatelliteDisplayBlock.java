@@ -21,7 +21,7 @@ public interface ISatelliteDisplayBlock {
 
     SatelliteDisplay getSource();
 
-    void setSource(SatelliteDisplay source);
+    void setSource(SatelliteDisplay source, boolean forceUpdate);
 
     BlockPos getBlockPos();
 

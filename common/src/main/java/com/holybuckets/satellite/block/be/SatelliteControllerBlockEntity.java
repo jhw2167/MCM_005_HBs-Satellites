@@ -8,7 +8,6 @@ import com.holybuckets.satellite.core.SatelliteManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -22,12 +21,27 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 {
     int colorId;
     BlockPos satelliteTargetPos;
-    SatelliteDisplay source;
     SatelliteBlockEntity linkedSatellite;
+    boolean forceDisplayUpdates;
+    final Commands commands;
+
+    private static class Commands {
+        boolean hasUpdate;
+        int dDepth, dNS, dEW;
+        Commands() {
+            hasUpdate = false;
+            dDepth = 0; dNS = 0; dEW = 0;
+        }
+    }
 
     public SatelliteControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.satelliteControllerBlockEntity.get(), pos, state);
         this.setColorId(0);
+        this.forceDisplayUpdates = false;
+        this.linkedSatellite = null;
+        this.satelliteTargetPos = null;
+
+        commands = new Commands();
     }
 
 
@@ -47,17 +61,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         if(this.source != null) this.source.clear();
         this.source = new SatelliteDisplay(level, this.linkedSatellite, this);
         this.source.add(this.getBlockPos(), this);
-        this.source.setDepth(2);
 
-        propagateToNeighbors();
+        this.forceUpdate();
         if(this.linkedSatellite != null) {
             this.satelliteTargetPos = this.linkedSatellite.getBlockPos();
         } else {
             this.satelliteTargetPos = null;
         }
-        if(HBUtil.PlayerUtil.getAllPlayers().isEmpty()) return;
-        Player p = HBUtil.PlayerUtil.getAllPlayers().get(0);
-        this.source.addEntity(p);
     }
 
     public void onDestroyed() {
@@ -79,13 +89,30 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         if(cmd == 0) {
             //handled above
         } else if( cmd < 5) {   //adjust ordinally
-            //not implemented
+            int dNS=0,dEW=0;
+            switch (cmd) {
+                case 1: dNS = -1; break;   //north
+                case 2: dNS = 1; break;  //south
+                case 3: dEW = -1; break;   //east
+                case 4: dEW = 1; break;  //west
+                default: dNS = 0; dEW = 0; break;
+            }
+            //this.source.adjOrdinal(dNS, dEW);
+            commands.dNS += dNS;
+            commands.dEW += dEW;
+
         } else if( cmd < 7) {   //adjust depth 5 - increase depth, 6 - decrease depth
-            //this.source.adjDepth( cmd == 5 ? 1 :-1 );
-            this.source.adjCurrentSection( cmd == 5 ? -1 : 1 );
+            //this.source.adjCurrentSection( (cmd == 5 ? 1 : -1) );
+            commands.dDepth += (cmd == 5 ? 1 : -1);
         }
 
-        this.ticks = PATH_REFRESH_TICKS; //force update next tick
+        commands.hasUpdate = true;
+    }
+
+    @Override
+    public void forceUpdate() {
+        this.ticks = PATH_REFRESH_TICKS-1; //force update next tick
+        this.forceDisplayUpdates = true;
     }
 
     public void turnOff() {
@@ -93,8 +120,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.clearDisplay();
         if(this.source != null) {
             this.source.clear();
-            this.source.setDepth(1);
+            this.source.resetChunkSection();
+            this.source.resetOrdinal();
         }
+        this.forceUpdate();
     }
 
 
@@ -108,7 +137,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     {
         super.tick(level, blockPos, blockState, satelliteBlockEntity);
         if (this.level.isClientSide) return;
-        //1. Recover Satellite if lost
+        //1. Recover Satellite if lost between chunk loads
         if(this.linkedSatellite == null && this.satelliteTargetPos != null) {
             recoverSatellite();
         }
@@ -120,18 +149,38 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
 
         if(this.source != null && this.isDisplayOn ) {
+            processCommands();
             renderDisplay();
         }
 
     }
 
-    private static final int PATH_REFRESH_TICKS = 200;
+    private static final int UI_REFRESH_TICKS = 10;
+    private void processCommands()
+    {
+        if(ticks % UI_REFRESH_TICKS != 0) return;
+        if(!this.commands.hasUpdate) return;
+
+        this.source.adjCurrentSection(this.commands.dDepth);
+        this.commands.dDepth = 0;
+
+        this.source.adjOrdinal(this.commands.dNS, this.commands.dEW);
+        this.commands.dNS = 0;
+        this.commands.dEW = 0;
+
+        this.commands.hasUpdate = false;
+        this.forceUpdate();
+    }
+
+    private static final int PATH_REFRESH_TICKS = 60;
     private static final int ENTITY_REFRESH_TICKS = 5;
-    private int ticks = 0;
     private void renderDisplay() {
-        if(ticks++ >= PATH_REFRESH_TICKS) {
-            ticks = 0;
+        if(ticks % PATH_REFRESH_TICKS == 0 ){
             propagateToNeighbors();
+            if(true || forceDisplayUpdates) {
+                source.resetDisplayUpdates();
+                this.forceDisplayUpdates = false;
+            }
         }
 
         if(this.source != null && ticks % ENTITY_REFRESH_TICKS == 0)
@@ -172,7 +221,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         while (!toCheck.isEmpty()) {
             BlockPos current = toCheck.poll();
             ISatelliteDisplayBlock temp = (ISatelliteDisplayBlock) level.getBlockEntity(current);
-            temp.setSource(source);
+            temp.setSource(source, forceDisplayUpdates);
             nodes.put(current, temp);
 
             // Check all horizontal neighbors

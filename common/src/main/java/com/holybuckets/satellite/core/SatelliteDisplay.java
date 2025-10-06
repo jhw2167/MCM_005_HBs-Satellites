@@ -40,10 +40,12 @@ public class SatelliteDisplay {
     Level level;
     SatelliteBlockEntity satellite;
     SatelliteControllerBlockEntity controller;
-    TripleInt offset;
+    int zOffset;
+    int xOffset;
     ChunkPos target;
     int currentSection;
     int depth;
+    boolean needsUpdate;
     Map<BlockPos, ISatelliteDisplayBlock> displayBlocks;
     Set<Entity> displayEntities;
     private int minX = Integer.MAX_VALUE;
@@ -51,53 +53,27 @@ public class SatelliteDisplay {
     private int minZ = Integer.MAX_VALUE;
     private int maxZ = Integer.MIN_VALUE;
 
-    public SatelliteDisplay(Level level, SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller) {
+    public SatelliteDisplay(Level level, SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller)
+    {
+
         this.level = level;
         this.satellite = satellite;
         this.controller = controller;
+
+        this.zOffset = 0;
+        this.xOffset = 0;
+        this.depth = 2;
+        this.needsUpdate = true;
         displayBlocks = new HashMap<>();
         displayEntities = new HashSet<>();
         if(satellite == null) return;
 
         this.target = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
-
-        LevelChunkSection[] sections =  level.getChunk(target.x, target.z).getSections();
-        for (int i = sections.length - 1; i >= 1; i--) {
-            LevelChunkSection section = sections[i];
-            if (section == null || section.hasOnlyAir()) continue;
-            this.currentSection = i;
-            break;
-        }
-        this.depth = 1;
-    }
-
-    public static boolean hasActiveDisplay(LevelChunk chunk) {
-        for(ChunkDisplayInfo info : INFO_CACHE.values()) {
-            if(info.chunk == chunk && info.isActive) return true;
-        }
-        return false;
+        resetChunkSection();
     }
 
 
-    public boolean noSource() { return satellite == null; }
-
-
-    public void setDepth(int newDepth) {
-        if(newDepth < 1)
-            newDepth = 1;
-        if(newDepth > 4)
-            newDepth = 4;
-        this.depth = newDepth;
-    }
-
-    /** delta height
-     * @return
-     */
-    public void adjDepth(int delta) {
-         int temp = this.depth + delta;
-         if(temp < 1 || temp > 4) return;
-        this.depth += delta;
-    }
+    //** GETTERS SETTERS
 
     public int getDepth() {
         return this.depth;
@@ -107,15 +83,83 @@ public class SatelliteDisplay {
         return currentSection;
     }
 
+
+    public void adjOrdinal(int dNS, int dEW) {
+        zOffset += dNS;
+        xOffset += dEW;
+        this.target = new ChunkPos(target.x + dEW, target.z + dNS);
+        this.needsUpdate = true;
+    }
+
+    public void adjDepth(int delta) {
+         int temp = this.depth + delta;
+         if(temp < 1 || temp > 4) return;
+        this.depth += delta;
+        this.needsUpdate = true;
+    }
+
+    public void setDepth(int newDepth) {
+        if(newDepth < 1)
+            newDepth = 1;
+        if(newDepth > 4)
+            newDepth = 4;
+        this.depth = newDepth;
+        this.needsUpdate = true;
+    }
+
     public void setCurrentSection(int section) {
         this.currentSection = section;
+        this.needsUpdate = true;
     }
 
     public void adjCurrentSection(int delta) {
         int temp = this.currentSection + delta;
         if( temp < 0 ||  temp >= level.getSectionsCount()-depth ) return;
         this.currentSection = temp;
+        this.needsUpdate = true;
     }
+
+    public void resetChunkSection() {
+        if(noSource() || this.target == null) return;
+        LevelChunkSection[] sections =  level.getChunk(target.x, target.z).getSections();
+        for (int i = sections.length - 1; i >= 1; i--) {
+            LevelChunkSection section = sections[i];
+            if (section == null || section.hasOnlyAir()) continue;
+            this.currentSection = i;
+            break;
+        }
+        this.needsUpdate = true;
+    }
+
+    public void resetOrdinal() {
+        this.zOffset = 0;
+        this.xOffset = 0;
+        if(noSource() || this.satellite == null) return;
+        this.target = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
+        this.needsUpdate = true;
+    }
+
+    public boolean needsClear() { return needsUpdate; }
+
+    public void resetDisplayUpdates() {
+        if(needsUpdate) {
+            INFO_CACHE.values().forEach( info -> {
+                if(info.isActive) info.resetUpdates();
+            });
+        }
+        this.needsUpdate = false;
+    }
+
+    //** DISPLAY METHODS
+
+    public static boolean hasActiveDisplay(LevelChunk chunk) {
+        for(ChunkDisplayInfo info : INFO_CACHE.values()) {
+            if(info.chunk == chunk && info.isActive) return true;
+        }
+        return false;
+    }
+
+    public boolean noSource() { return satellite == null; }
 
     public void add(BlockPos blockPos, ISatelliteDisplayBlock displayBlock) {
         displayBlocks.put(blockPos, displayBlock);
@@ -164,7 +208,7 @@ public class SatelliteDisplay {
     }
 
     public BlockPos getOffset(BlockPos blockPos) {
-        return controller.getBlockPos().subtract(blockPos);
+        return blockPos.subtract( controller.getBlockPos() );
     }
 
     public Deque<ChunkDisplayInfo> initDisplayInfo(SatelliteDisplayBlockEntity displayblock) {
@@ -180,25 +224,24 @@ public class SatelliteDisplay {
         return infoList;
     }
 
-    public ChunkDisplayInfo getDisplayInfo(SatelliteDisplayBlockEntity displayblock, int section) {
-        BlockPos blockPos = displayblock.getBlockPos();
-        int xDiff = blockPos.getX() - controller.getBlockPos().getX();
-        int zDiff = blockPos.getZ() - controller.getBlockPos().getZ();
+    public ChunkDisplayInfo getDisplayInfo(SatelliteDisplayBlockEntity displayblock, int section)
+    {
+        BlockPos dispOffset = getOffset(displayblock.getBlockPos());
 
-        TripleInt chunkSelection = new TripleInt(target.x + xDiff, section, target.z + zDiff);
+        TripleInt chunkSelection = new TripleInt(target.x + dispOffset.getX(), section, target.z + dispOffset.getZ());
+        if(INFO_CACHE.containsKey(chunkSelection)) {
+            ChunkDisplayInfo info = INFO_CACHE.get(chunkSelection);
+            if(!info.isActive) info.refreshBits(true);
+            info.isActive = true;
+            return info;
+        }
+
         LevelChunk chunk = SatelliteManager.getChunk((ServerLevel) level, chunkSelection.x, chunkSelection.z);
         if(chunk == null) return null;
         if(chunk.getSections().length <= section) return null;
 
-        ChunkDisplayInfo info = INFO_CACHE.putIfAbsent(chunkSelection, new ChunkDisplayInfo(chunk, section));
-        if(info != null) {
-            info.resetUpdates();
-            if(!info.isActive)
-                info.refreshBits();
-            info.isActive = true;
-        }
+        INFO_CACHE.put(chunkSelection, new ChunkDisplayInfo(chunk, section));
         return INFO_CACHE.get(chunkSelection);
-
     }
 
 
@@ -363,5 +406,6 @@ public class SatelliteDisplay {
         PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ParticleTypes.ELECTRIC_SPARK);
         PARTICLE_TYPE_MAP.put(EntityType.SLIME, ParticleTypes.ITEM_SLIME);
     }
+
 
 }
