@@ -13,6 +13,9 @@ public class SatellitesMainForge {
         super();
         Balm.initialize(Constants.MOD_ID, CommonClass::init);
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> BalmClient.initialize(Constants.MOD_ID, CommonClass::initClient));
+        
+        // Register the block highlight event handler
+        MinecraftForge.EVENT_BUS.addListener(ChiselBitsAPI::onRenderBlockHighlight);
     }
 
 
