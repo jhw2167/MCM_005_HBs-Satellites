@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "hbs_satellites:block/holo_base_block" }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "hbs_satellites:block/holo_base_block"
+  }
+}
