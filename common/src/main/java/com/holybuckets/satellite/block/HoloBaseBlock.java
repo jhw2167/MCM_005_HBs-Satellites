@@ -10,11 +10,20 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 
 public class HoloBaseBlock extends Block {
-    public HoloBaseBlock() {
-        super(BlockBehaviour.Properties.copy(Blocks.GLASS)
-            .noOcclusion()  // Makes the block transparent
-            .isViewBlocking((state, level, pos) -> false)
-            .isSuffocating((state, level, pos) -> false));
+    
+    public static final BlockBehaviour.Properties HOLO_BASE_PROPERTIES = BlockBehaviour.Properties.copy(Blocks.GLASS)
+        .noOcclusion()
+        .isViewBlocking((state, level, pos) -> false)
+        .isSuffocating((state, level, pos) -> false);
+
+    public static final BlockBehaviour.Properties HOLO_AIR_PROPERTIES = BlockBehaviour.Properties.copy(Blocks.AIR)
+        .noOcclusion()
+        .isViewBlocking((state, level, pos) -> false)
+        .isSuffocating((state, level, pos) -> false)
+        .noCollission();
+
+    public HoloBaseBlock(Properties properties) {
+        super(properties);
     }
 
     @Override
@@ -31,5 +40,4 @@ public class HoloBaseBlock extends Block {
     public boolean useShapeForLightOcclusion(BlockState state) {
         return false;
     }
-
 }

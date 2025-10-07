@@ -21,8 +21,9 @@ public class ClientEvents {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onBuildCreativeModeTabsEvent(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.holoBaseBlock , RenderType.translucent());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.holoDarkBlock , RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.holoBaseBlock, RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.holoDarkBlock, RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.holoAirBlock, RenderType.cutout()); // Make it invisible
 
         });
     }

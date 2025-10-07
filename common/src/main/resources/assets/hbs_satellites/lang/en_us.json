@@ -3,6 +3,8 @@
   "block.hbs_satellites.holo_base_block.desc": "Base block for holographic displays",
   "block.hbs_satellites.holo_dark_block": "Holoblock Dark",
   "block.hbs_satellites.holo_dark_block.desc": "Dark variant of the holographic base block",
+  "block.hbs_satellites.holo_air_block": "Holoblock Air",
+  "block.hbs_satellites.holo_air_block.desc": "Invisible holographic block",
   "block.hbs_satellites.satellite_block": "Satellite Block",
   "block.hbs_satellites.satellite_block.desc": "A block that can be used to create satellite networks",
   "block.hbs_satellites.satellite_controller_block": "Satellite Controller",
