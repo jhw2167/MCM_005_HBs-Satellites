@@ -17,6 +17,7 @@ public class ClientEvents {
     public static void onBuildCreativeModeTabsEvent(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.holoBaseBlock , RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.holoDarkBlock , RenderType.translucent());
 
         });
     }
