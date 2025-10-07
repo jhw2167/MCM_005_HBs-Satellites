@@ -32,8 +32,4 @@ public class HoloBaseBlock extends Block {
         return false;
     }
 
-    @Override
-    public PushReaction getPistonPushReaction(BlockState state) {
-        return PushReaction.NORMAL;
-    }
 }

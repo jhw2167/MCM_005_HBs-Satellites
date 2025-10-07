@@ -22,7 +22,7 @@ public class ModBlocks {
     public static void initialize(BalmBlocks blocks) {
         //blocks.register(() -> templateBlock = new EmptyBlock(defaultProperties()), () -> itemBlock(templateBlock), id("template_block"));
         blocks.register(() -> holoBaseBlock = new HoloBaseBlock(), () -> itemBlock(holoBaseBlock), id("holo_base_block"));
-        blocks.register(() -> holoDarkBlock = new HoloDarkBlock(), () -> itemBlock(holoDarkBlock), id("holo_dark_block"));
+        blocks.register(() -> holoDarkBlock = new HoloBaseBlock(), () -> itemBlock(holoDarkBlock), id("holo_dark_block"));
         blocks.register(() -> satelliteBlock = new SatelliteBlock(), () -> itemBlock(satelliteBlock), id("satellite_block"));
         blocks.register(() -> satelliteControllerBlock = new SatelliteControllerBlock(), () -> itemBlock(satelliteControllerBlock), id("satellite_controller_block"));
         blocks.register(() -> satelliteDisplayBlock = new SatelliteDisplayBlock(), () -> itemBlock(satelliteDisplayBlock), id("satellite_display_block"));

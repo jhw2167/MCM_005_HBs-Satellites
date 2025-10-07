@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.api;
 
 import com.holybuckets.foundation.event.EventRegistrar;
+import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -98,11 +100,10 @@ public interface ChiselBitsAPI {
 
     static Block HOLO_LIGHT() { return Blocks.WHITE_STAINED_GLASS; }
     static Block HOLO_BASE() {
-        //return Blocks.WATER;
-        return Blocks.LIGHT_BLUE_STAINED_GLASS;
+        return ModBlocks.holoBaseBlock;
     }
-    static Block HOLO_DARK() { return  Blocks.CLAY ; }
-    static Block HOLO_BLACK() { return  Blocks.STONE; }
+    static Block HOLO_DARK() { return  ModBlocks.holoDarkBlock ; }
+    static Block HOLO_BLACK() { return  ModBlocks.holoDarkBlock; }
 
 
     public BlockEntity build(Level level, int[] bits, BlockPos pos);
@@ -117,4 +118,14 @@ public interface ChiselBitsAPI {
 
     public void offset(ChunkDisplayInfo info, int[] bits, List<int[][][]> adj, TripleInt offset, BlockPos pos);
 
+    /* Add these args to method
+     // Get the block being highlighted
+        BlockHitResult hitResult = event.getTarget();
+        BlockPos pos = hitResult.getBlockPos();
+        BlockState state = event.getCamera().getEntity().level().getBlockState(pos);
+
+     */
+    static void onRenderBlockHighlight(BlockHitResult hitResult, BlockPos pos, BlockState state) {
+        // NO-OP default implementation
+    }
 }
