@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.server.level.ServerPlayer;
+import java.util.stream.Collectors;
 
 import java.util.*;
 
@@ -25,12 +27,16 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     boolean forceDisplayUpdates;
     final Commands commands;
 
+    private static final double PLAYER_RANGE = 64.0;
+
     private static class Commands {
         boolean hasUpdate;
         int dDepth, dNS, dEW;
+        BlockHitResult playerSelection;
         Commands() {
             hasUpdate = false;
             dDepth = 0; dNS = 0; dEW = 0;
+            playerSelection = null;
         }
     }
 
