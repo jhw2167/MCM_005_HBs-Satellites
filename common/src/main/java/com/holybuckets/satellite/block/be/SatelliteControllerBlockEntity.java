@@ -151,6 +151,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         if(this.source != null && this.isDisplayOn ) {
             processCommands();
             renderDisplay();
+            renderPlayerUI();
         }
 
     }
@@ -172,7 +173,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.forceUpdate();
     }
 
-    private static final int PATH_REFRESH_TICKS = 60;
+    private static final int PATH_REFRESH_TICKS = 200;
     private static final int ENTITY_REFRESH_TICKS = 5;
     private void renderDisplay() {
         if(ticks % PATH_REFRESH_TICKS == 0 ){
