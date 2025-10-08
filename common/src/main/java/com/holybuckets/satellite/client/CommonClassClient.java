@@ -14,6 +14,7 @@ public class CommonClassClient {
         ClientBalmEventRegister.registerEvents();
         ModRenderers.clientInitialize(BalmClient.getRenderers());
         ModScreens.clientInitialize(BalmClient.getScreens());
+        ModParticles.initialize(BalmClient.getParticles());
         //ModItems.clientInitialize();
     }
 

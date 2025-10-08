@@ -41,6 +41,7 @@ public class CommonClass {
         ModBlockEntities.initialize(Balm.getBlockEntities());
         ModItems.initialize(Balm.getItems());
         ModMenus.initialize(Balm.getMenus());
+        ModParticles.initialize(Balm.getParticles());
         ModNetworking.initialize();
         
         isInitialized = true;
