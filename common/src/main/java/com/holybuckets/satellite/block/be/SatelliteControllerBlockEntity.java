@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import com.holybuckets.satellite.core.SatelliteDisplay;
@@ -15,9 +16,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.server.level.ServerPlayer;
-import java.util.stream.Collectors;
+import net.minecraft.world.phys.HitResult;
 
 import java.util.*;
+
+import static com.holybuckets.satellite.SatelliteMain.chiselBitsApi;
 
 public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBlock
 {
@@ -27,7 +30,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     boolean forceDisplayUpdates;
     final Commands commands;
 
-    private static final double PLAYER_RANGE = 64.0;
+    private static final int PLAYER_RANGE = 64;
 
     private static class Commands {
         boolean hasUpdate;
@@ -192,6 +195,24 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         if(this.source != null && ticks % ENTITY_REFRESH_TICKS == 0)
             this.source.renderEntities(this.getBlockPos());
+    }
+
+    private static int PLAYER_UI_REFRESH_TICKS = 4;
+    private static int REACH_DIST_BLOCKS = 3;
+    private void renderPlayerUI()
+    {
+        //Get all players within 64 blocks
+        if(ticks % PLAYER_UI_REFRESH_TICKS != 0) return;
+
+        List<ServerPlayer> players = HBUtil.PlayerUtil
+            .getAllPlayersInBlockRange(getBlockPos(), PLAYER_RANGE );
+        for(ServerPlayer player : players) {
+            HitResult res = player.pick(REACH_DIST_BLOCKS, 0.5f, true);
+            if( !source.isHitWithinDisplay(res.getLocation()) ) continue;
+            BlockHitResult bhr = (BlockHitResult) res;
+            if( !chiselBitsApi.isViewingHoloBlock(player.level(), bhr)) continue;
+            this.source.renderUI( res.getLocation() );
+        }
     }
 
     private void recoverSatellite()

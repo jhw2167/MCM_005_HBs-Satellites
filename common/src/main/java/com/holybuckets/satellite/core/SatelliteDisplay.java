@@ -23,6 +23,8 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
@@ -85,9 +87,10 @@ public class SatelliteDisplay {
 
 
     public void adjOrdinal(int dNS, int dEW) {
-        zOffset += dNS;
-        xOffset += dEW;
-        this.target = new ChunkPos(target.x + dEW, target.z + dNS);
+        zOffset -= dNS;
+        xOffset -= dEW;
+        ChunkPos satellitePos = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
+        this.target = new ChunkPos(satellitePos.x + xOffset, satellitePos.z + zOffset);
         this.needsUpdate = true;
     }
 
@@ -181,6 +184,29 @@ public class SatelliteDisplay {
         for (BlockPos pos : displayBlocks.keySet()) {
             updateBounds(pos);
         }
+    }
+
+    //** Do not truncate the Vec3, bounds should be forgiving
+    public boolean isHitWithinDisplay(Vec3 hit) {
+        // Small epsilon for floating point comparison tolerance
+        double epsilon = 0.001;
+
+        // Adjust boundaries to account for block edges
+        // minX is the block position, so valid hits range from minX to minX+1
+        double adjustedMinX = minX - epsilon;
+        double adjustedMaxX = maxX + 1.0 + epsilon;
+        double adjustedMinZ = minZ - epsilon;
+        double adjustedMaxZ = maxZ + 1.0 + epsilon;
+
+        double adjustedMinY = controller.getBlockPos().getY() + 1.0 - epsilon;
+        double adjustedMaxY = controller.getBlockPos().getY() + depth + 1.0 + epsilon;
+
+        if (hit.x < adjustedMinX || hit.x > adjustedMaxX
+            || hit.z < adjustedMinZ || hit.z > adjustedMaxZ
+            || hit.y < adjustedMinY || hit.y > adjustedMaxY) {
+            return false;
+        }
+        return true;
     }
 
     public void addAll(Map<BlockPos, ISatelliteDisplayBlock> blocks) {
@@ -353,6 +379,16 @@ public class SatelliteDisplay {
         }
     }
 
+    public void renderUI(Vec3 cursorPos) {
+        //Render flame particle effect at cursor
+        ((ServerLevel) level).sendParticles(
+            ParticleTypes.FLAME,                     // Particle type
+            cursorPos.x, cursorPos.y, cursorPos.z,
+            1,                                // Particle count
+            0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
+            0.0                               // Speed
+        );
+    }
 
 
     //** STATICS

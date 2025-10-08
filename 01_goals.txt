@@ -84,6 +84,9 @@ Okkk
 	- Satellite controller model
 	- Satellite display holo model
 
+	- Create a holoblock air copy instance so it still registers as holo and wireframe is voided
+
+
 14. Get nicer blocks and lighting affects for hologram itself
 ---
 
@@ -102,6 +105,7 @@ Okkk
 
 17. Get some Art going on Satellite looking blocks
 ---
+
 
 
 18. Add custom hologram looking blocks that can be chiseled

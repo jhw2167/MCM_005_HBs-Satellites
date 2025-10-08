@@ -1,15 +1,15 @@
 package com.holybuckets.satellite.api;
 
 import com.holybuckets.foundation.event.EventRegistrar;
+import com.holybuckets.satellite.SatelliteMain;
+import com.holybuckets.satellite.block.HoloBaseBlock;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -30,8 +31,9 @@ import static com.holybuckets.foundation.HBUtil.TripleInt;
 
 public interface ChiselBitsAPI {
 
-    Set<Block> IGNORE = new HashSet<>();
+    int DEMARCATOR_START_IDX = 8;
 
+    Set<Block> IGNORE = new HashSet<>();
     Set<Block> DARK = new HashSet<>();
 
     static void init(EventRegistrar reg) {
@@ -98,6 +100,7 @@ public interface ChiselBitsAPI {
 
     }
 
+    static Block HOLO_EMPTY() { return ModBlocks.holoAirBlock; }
     static Block HOLO_LIGHT() { return Blocks.WHITE_STAINED_GLASS; }
     static Block HOLO_BASE() {
         return ModBlocks.holoBaseBlock;
@@ -105,6 +108,18 @@ public interface ChiselBitsAPI {
     static Block HOLO_DARK() { return  ModBlocks.holoDarkBlock ; }
     static Block HOLO_BLACK() { return  ModBlocks.holoDarkBlock; }
 
+    static Block DEMARCATOR(int i) {
+        //Up to 9 stained glass
+        if(i < 0 || i > 8) i = 0;
+        switch(i) {
+            case 0: return Blocks.ORANGE_STAINED_GLASS;
+            case 1: return Blocks.YELLOW_STAINED_GLASS;
+            case 2: return Blocks.LIME_STAINED_GLASS;
+            case 3: return Blocks.GREEN_STAINED_GLASS;
+            default: return Blocks.ORANGE_STAINED_GLASS;
+
+        }
+    }
 
     public BlockEntity build(Level level, int[] bits, BlockPos pos);
 
@@ -118,14 +133,67 @@ public interface ChiselBitsAPI {
 
     public void offset(ChunkDisplayInfo info, int[] bits, List<int[][][]> adj, TripleInt offset, BlockPos pos);
 
-    /* Add these args to method
-     // Get the block being highlighted
-        BlockHitResult hitResult = event.getTarget();
-        BlockPos pos = hitResult.getBlockPos();
-        BlockState state = event.getCamera().getEntity().level().getBlockState(pos);
+    public void updateAreaClient(Level level, BlockPos pos, Vec3[] area, int[] colors);
 
+
+    public boolean isViewingHoloBlock(Level level, BlockHitResult hitResult);
+
+    double _16TH = 0.0625;
+    int CUBE_SELECTED_RADIUS = 2;
+
+    /**
+     * Goal is to integrate with Satellite display and ChunkInfo to set the selected hitPos
+     * area a distinct color from the rest of the display
+     * 1. Must obtain the Coresponding SatelliteDisplayBlock, ControllerBlock, and ChunkDisplayInfo
+     * 2. Map hitResult to some internal chiseled block in holoBits[]
+     * 3. Change that internal block to a distinct color (e.g. yellow stained glass)
+     * @param level
+     * @param pos
+     * @param state
      */
-    static void onRenderBlockHighlight(BlockHitResult hitResult, BlockPos pos, BlockState state) {
-        // NO-OP default implementation
+    static void onRenderBlockHighlight(Level level, Vec3 internalTarget,
+         BlockPos pos, BlockState state) {
+        //find all points in a CUBE_SELECTED_RADIUS cube around target
+        final int volume = (int) Math.pow(CUBE_SELECTED_RADIUS*2+1, 3);
+        int[] colors = new int[volume];
+        Vec3[] area = new Vec3[volume];
+        for(int x = -CUBE_SELECTED_RADIUS; x <= CUBE_SELECTED_RADIUS; x++) {
+            for(int y = -CUBE_SELECTED_RADIUS; y <= CUBE_SELECTED_RADIUS; y++) {
+                for(int z = -CUBE_SELECTED_RADIUS; z <= CUBE_SELECTED_RADIUS; z++) {
+                    int index = (x+CUBE_SELECTED_RADIUS)* (CUBE_SELECTED_RADIUS*2+1) * (CUBE_SELECTED_RADIUS*2+1)
+                        + (y+CUBE_SELECTED_RADIUS)*(CUBE_SELECTED_RADIUS*2+1)
+                        + (z+CUBE_SELECTED_RADIUS);
+                    area[index] = internalTarget.add(x*_16TH, y*_16TH, z*_16TH);
+                    colors[index] = DEMARCATOR_START_IDX;
+                }
+            }
+        }
+        //END FOR
+        SatelliteMain.chiselBitsApi.updateAreaClient(level, pos, area, colors);
+
+    }
+
+    static final double EPSILON = 0.0001;
+    static Vec3 clamp(Vec3 hitLoc, Vec3i pos, Vec3 center) {
+        Vec3 target = hitLoc.subtract(pos.getX(), pos.getY(), pos.getZ());
+
+        // Clamp to (EPSILON, 1.0 - EPSILON) range - handles all boundaries
+        double x = Math.max(EPSILON, Math.min(1.0 - EPSILON, target.x));
+        double y = Math.max(EPSILON, Math.min(1.0 - EPSILON, target.y));
+        double z = Math.max(EPSILON, Math.min(1.0 - EPSILON, target.z));
+
+        // Move point closer to center by EPSILON
+        // If x > center.x, subtract EPSILON (move left toward center)
+        // If x < center.x, add EPSILON (move right toward center)
+        x += (center.x > x) ? EPSILON : -EPSILON;
+        y += (center.y > y) ? EPSILON : -EPSILON;
+        z += (center.z > z) ? EPSILON : -EPSILON;
+
+        // Ensure we didn't push outside bounds after adjustment
+        x = Math.max(EPSILON, Math.min(1.0 - EPSILON, x));
+        y = Math.max(EPSILON, Math.min(1.0 - EPSILON, y));
+        z = Math.max(EPSILON, Math.min(1.0 - EPSILON, z));
+
+        return new Vec3(x, y, z);
     }
 }
