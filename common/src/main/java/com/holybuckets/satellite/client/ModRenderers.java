@@ -25,6 +25,9 @@ public class ModRenderers {
         //Particle Rendering
         renderers.registerParticleProvider(ModParticles.basePingId,
             () -> ModParticles.basePing, BubblePopParticle.Provider::new );
+            
+        renderers.registerParticleProvider(ModParticles.hoverOrangeId,
+            () -> ModParticles.hoverOrange, FlameParticle.Provider::new);
     }
 
     private static ResourceLocation id(String name) {
