@@ -4,6 +4,7 @@ package com.holybuckets.satellite;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.satellite.api.ChiselBitsAPI;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
+import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.config.TemplateConfig;
 import com.holybuckets.satellite.core.SatelliteManager;
 import net.blay09.mods.balm.api.Balm;
@@ -15,10 +16,10 @@ import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
  */
 public class SatelliteMain {
     private static boolean DEV_MODE = false;;
-    private static TemplateConfig CONFIG;
     public static SatelliteMain INSTANCE;
 
     public static ChiselBitsAPI chiselBitsApi;
+    public static SatelliteConfig CONFIG;
 
     public SatelliteMain()
     {
@@ -54,12 +55,17 @@ public class SatelliteMain {
     }
 
 
+
+    //** EVENTS
+
+
+
     //** Events
 
     private void onServerStarting(ServerStartingEvent e) {
-        //CONFIG = Balm.getConfig().getActiveConfig(TemplateConfig.class);
         //this.DEV_MODE = CONFIG.devMode;
         this.DEV_MODE = false;
+        CONFIG = Balm.getConfig().getActiveConfig(SatelliteConfig.class);
     }
 
 

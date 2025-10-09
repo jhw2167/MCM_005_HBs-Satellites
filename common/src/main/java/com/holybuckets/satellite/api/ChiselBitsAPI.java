@@ -2,7 +2,6 @@ package com.holybuckets.satellite.api;
 
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.satellite.SatelliteMain;
-import com.holybuckets.satellite.block.HoloBaseBlock;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
@@ -10,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -23,6 +23,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -108,6 +109,20 @@ public interface ChiselBitsAPI {
     static Block HOLO_DARK() { return  ModBlocks.holoDarkBlock ; }
     static Block HOLO_BLACK() { return  ModBlocks.holoDarkBlock; }
 
+    static List<Player> players = new ArrayList<>();
+    static int DEMARCATOR(Player p) {
+        int color = 0;
+        if(p != null) {
+            color = players.indexOf(p);
+            if(color < 0) {
+                players.add(p);
+                color = players.size() - 1;
+            }
+            color = (color % DEMARCATOR_START_IDX);
+        }
+        return color;
+    }
+
     static Block DEMARCATOR(int i) {
         //Up to 9 stained glass
         if(i < 0 || i > 8) i = 0;
@@ -133,7 +148,7 @@ public interface ChiselBitsAPI {
 
     public void offset(ChunkDisplayInfo info, int[] bits, List<int[][][]> adj, TripleInt offset, BlockPos pos);
 
-    public void updateAreaClient(Level level, BlockPos pos, Vec3[] area, int[] colors);
+    public void highlightArea(Level level, BlockPos pos, Vec3[] area, int[] colors);
 
 
     public boolean isViewingHoloBlock(Level level, BlockHitResult hitResult);
@@ -148,12 +163,12 @@ public interface ChiselBitsAPI {
      * 2. Map hitResult to some internal chiseled block in holoBits[]
      * 3. Change that internal block to a distinct color (e.g. yellow stained glass)
      * @param level
-     * @param pos
-     * @param state
+     * @param center
      */
-    static void onRenderBlockHighlight(Level level, Vec3 internalTarget,
-         BlockPos pos, BlockState state) {
+    static void highlightLocalArea(Level level, Vec3 target, BlockPos center, int color)
+    {
         //find all points in a CUBE_SELECTED_RADIUS cube around target
+        Vec3 internalTarget = clamp(target, center );
         final int volume = (int) Math.pow(CUBE_SELECTED_RADIUS*2+1, 3);
         int[] colors = new int[volume];
         Vec3[] area = new Vec3[volume];
@@ -164,19 +179,19 @@ public interface ChiselBitsAPI {
                         + (y+CUBE_SELECTED_RADIUS)*(CUBE_SELECTED_RADIUS*2+1)
                         + (z+CUBE_SELECTED_RADIUS);
                     area[index] = internalTarget.add(x*_16TH, y*_16TH, z*_16TH);
-                    colors[index] = DEMARCATOR_START_IDX;
+                    colors[index] = color+DEMARCATOR_START_IDX;
                 }
             }
         }
         //END FOR
-        SatelliteMain.chiselBitsApi.updateAreaClient(level, pos, area, colors);
+        SatelliteMain.chiselBitsApi.highlightArea(level, center, area, colors);
 
     }
 
     static final double EPSILON = 0.0001;
-    static Vec3 clamp(Vec3 hitLoc, Vec3i pos, Vec3 center) {
+    static Vec3 clamp(Vec3 hitLoc, BlockPos pos) {
         Vec3 target = hitLoc.subtract(pos.getX(), pos.getY(), pos.getZ());
-
+        Vec3 center = pos.getCenter();
         // Clamp to (EPSILON, 1.0 - EPSILON) range - handles all boundaries
         double x = Math.max(EPSILON, Math.min(1.0 - EPSILON, target.x));
         double y = Math.max(EPSILON, Math.min(1.0 - EPSILON, target.y));

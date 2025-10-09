@@ -4,10 +4,15 @@ import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.TickType;
+import com.holybuckets.satellite.SatelliteMain;
+import com.holybuckets.satellite.api.ChiselBitsAPI;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
+import com.holybuckets.satellite.config.SatelliteConfig;
+import com.holybuckets.satellite.particle.ModParticles;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
@@ -23,6 +28,8 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -55,6 +62,8 @@ public class SatelliteDisplay {
     private int minZ = Integer.MAX_VALUE;
     private int maxZ = Integer.MIN_VALUE;
 
+    private static SatelliteConfig CONFIG;
+
     public SatelliteDisplay(Level level, SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller)
     {
 
@@ -72,6 +81,7 @@ public class SatelliteDisplay {
 
         this.target = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
         resetChunkSection();
+        CONFIG = SatelliteMain.CONFIG;
     }
 
 
@@ -283,22 +293,25 @@ public class SatelliteDisplay {
     {
 
         if(noSource() || this.target == null) return;
+        displayEntities.clear();
 
-        displayEntities.addAll(HBUtil.PlayerUtil.getAllPlayers());
-
-        /*
-        for( ChunkDisplayInfo info : INFO_CACHE.values() )
+        if(this.needsUpdate)
         {
-            if(!info.isActive || info.chunk == null) continue;
+            BlockPos cntrlPos = controller.getBlockPos();
+            int xChunkStart = (maxX - cntrlPos.getX()) + target.x;
+            int xChunkEnd = (minX - cntrlPos.getX()) + target.x;
 
-            int xStart = info.chunk.getPos().getMinBlockX();
-            int zStart = info.chunk.getPos().getMinBlockZ();
+            int zChunkStart = (maxZ - cntrlPos.getZ()) + target.z;
+            int zChunkEnd = (minZ - cntrlPos.getZ()) + target.z;
 
-            int xEnd = info.chunk.getPos().getMaxBlockX();
-            int zEnd = info.chunk.getPos().getMaxBlockZ();
+            int xStart = level.getChunk(xChunkStart, zChunkStart).getPos().getMinBlockX();
+            int zStart = level.getChunk(xChunkStart, zChunkStart).getPos().getMinBlockZ();
 
-            int yStart = 16*info.levelSectionIndex + level.getMinBuildHeight();
-            int yEnd = yStart + 15;
+            int xEnd = level.getChunk(xChunkEnd, zChunkEnd).getPos().getMaxBlockX();
+            int zEnd = level.getChunk(xChunkEnd, zChunkEnd).getPos().getMaxBlockZ();
+
+            int yEnd = (16*currentSection+1) + level.getMinBuildHeight();
+            int yStart = yEnd - (16*depth);
 
             AABB aabb = new AABB(
                 xStart, yStart, zStart,
@@ -306,33 +319,42 @@ public class SatelliteDisplay {
             );
 
             // Query entities in this AABB (living entities only)
-            info.clearEntities();
             List<Entity> entitiesInArea = level.getEntities(
-                (Entity) null, aabb,
-                entity -> entityPredicate(entity, info)
+                (Entity) null, aabb, this::entityPredicate
             );
 
             for(Entity e : entitiesInArea) {
                 addEntity(e);
             }
+
         }
-        */
+
+        displayEntities.addAll(HBUtil.PlayerUtil.getAllPlayers());
 
     }
 
         private static HashSet<EntityType<?>> BLACKLISTED_ENTITIES = new HashSet<>();
-        private boolean entityPredicate(Entity e, ChunkDisplayInfo info) {
+        private boolean entityPredicate(Entity e) {
             if( !(e instanceof LivingEntity) || !e.isAlive() || e.isRemoved() || displayEntities.contains(e) ) return false;
             if( e instanceof ServerPlayer ) return false;
-            return info.acceptLocalEntity(e);
-            //return false;
+
+            if(CONFIG.hostileEntityTypes.contains(e.getType())) {}
+            else if(CONFIG.friendlyEntityTypes .contains(e.getType())) {}
+            else if(CONFIG.neutralEntityTypes.contains(e.getType()  )) {}
+            else if(CONFIG.herdEntityTypes.contains(e.getType()     )) {}
+            else return false;
+
+            //ChunkDisplayInfo info = INFO_CACHE.get(new TripleInt(e.chunkPosition().x, currentSection, e.chunkPosition().z ));
+            //return info.acceptLocalEntity(e);
+            return true;
         }
 
 
+
     final static float RENDER_SCALE = 0.0625f; // 1/16
-    public void renderEntities(BlockPos start)
+    public void renderEntities(BlockPos cntrlPos)
     {
-        if(start == null || noSource() || this.target == null) return;
+        if(cntrlPos == null || noSource() || this.target == null) return;
 
         //Obtain an iterator to the entity list
         Iterator<Entity> iterator = displayEntities.iterator();
@@ -350,6 +372,14 @@ public class SatelliteDisplay {
             int blockOffsetX = e.blockPosition().getX() - chunkWorldPos.getX();
             int blockOffsetZ = e.blockPosition().getZ() - chunkWorldPos.getZ();
 
+            //Check if this block is in displayBlocks using y coord from cntrlPos
+            if(!displayBlocks.containsKey(new BlockPos(
+                cntrlPos.getX() + chunkOffsetX,
+                cntrlPos.getY(),
+                cntrlPos.getZ() + chunkOffsetZ
+            ))) continue;
+
+
             final int Y_MIN = level.getMinBuildHeight();
             int blockOffsetY = e.blockPosition().getY() - (((currentSection) * 16)+Y_MIN) + ((depth-1)*16);
             if(blockOffsetY < 0 ) { //under the table
@@ -360,9 +390,9 @@ public class SatelliteDisplay {
             }
 
             ParticleOptions particleType = getParticleType(e);
-            float x = start.getX() + chunkOffsetX + (blockOffsetX * RENDER_SCALE);
-            float z = start.getZ() + chunkOffsetZ + (blockOffsetZ * RENDER_SCALE);
-            float y = start.getY()+1.125f + (blockOffsetY * RENDER_SCALE);
+            float x = cntrlPos.getX() + chunkOffsetX + (blockOffsetX * RENDER_SCALE);
+            float z = cntrlPos.getZ() + chunkOffsetZ + (blockOffsetZ * RENDER_SCALE);
+            float y = cntrlPos.getY()+1.125f + (blockOffsetY * RENDER_SCALE);
 
             // check against Max and min values
             if(x < minX || x > maxX || z < minZ || z > maxZ) continue;
@@ -379,15 +409,48 @@ public class SatelliteDisplay {
         }
     }
 
-    public void renderUI(Vec3 cursorPos) {
+    public void renderUI(ServerPlayer p, BlockHitResult hitResult)
+    {
         //Render flame particle effect at cursor
+        Vec3 cursorPos = hitResult.getLocation();
+        BlockPos blockPos = hitResult.getBlockPos();
+
+        int color = ChiselBitsAPI.DEMARCATOR(p);
         ((ServerLevel) level).sendParticles(
-            ParticleTypes.FLAME,                     // Particle type
-            cursorPos.x, cursorPos.y, cursorPos.z,
+            ModParticles.hoverOrange,                     // Particle type
+            cursorPos.x, cursorPos.y-RENDER_SCALE, cursorPos.z,
             1,                                // Particle count
             0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
             0.0                               // Speed
         );
+
+        BlockPos cntrlPos = controller.getBlockPos();
+        BlockPos blockOffset = blockPos.subtract(cntrlPos);
+        BlockPos displayInfoPos = cntrlPos.offset(
+            blockOffset.getX(), 0, blockOffset.getZ() );
+        TripleInt infoKey = new TripleInt(
+        blockOffset.getX()+target.x,
+        blockOffset.getY()+(this.currentSection-depth),
+        blockOffset.getZ()+target.z
+        );
+
+        ChunkDisplayInfo info = INFO_CACHE.get(infoKey);
+        Vec3 internalTarget = ChiselBitsAPI.clamp(cursorPos, displayInfoPos);
+
+        //internalTarget will always be relative to x,y,z: 0 -> 1 axis
+        // but we need to convert to distant block offsets in the appropriate axis
+        TripleInt chunkBlockOffset = new TripleInt(
+            (int) internalTarget.x * 16,      //0.7235 into the block means 16*0.7235 = 11 blocks displayed from the chunkPos
+            (int) internalTarget.y * 16,
+            (int) internalTarget.z * 16
+        );
+        if( info == null) return;
+
+        BlockPos startPos = new HBUtil.WorldPos(chunkBlockOffset,
+         info.levelSectionIndex, info.chunk).getWorldPos();
+
+        //ChiselBitsAPI.highlightLocalArea(level, cursorPos, displayInfoPos, color );
+
     }
 
 
@@ -440,7 +503,7 @@ public class SatelliteDisplay {
             }
         }
 
-        PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ParticleTypes.ELECTRIC_SPARK);
+        PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ModParticles.basePing);
         PARTICLE_TYPE_MAP.put(EntityType.SLIME, ParticleTypes.ITEM_SLIME);
     }
 

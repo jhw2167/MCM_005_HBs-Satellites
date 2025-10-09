@@ -211,7 +211,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             if( !source.isHitWithinDisplay(res.getLocation()) ) continue;
             BlockHitResult bhr = (BlockHitResult) res;
             if( !chiselBitsApi.isViewingHoloBlock(player.level(), bhr)) continue;
-            this.source.renderUI( res.getLocation() );
+            this.source.renderUI( player, bhr );
         }
     }
 

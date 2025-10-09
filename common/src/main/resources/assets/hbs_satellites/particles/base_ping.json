@@ -1,0 +1,9 @@
+{
+  "textures": [
+    "hbs_satellites:base_ping_0",
+    "hbs_satellites:base_ping_1",
+    "hbs_satellites:base_ping_2",
+    "hbs_satellites:base_ping_3",
+    "hbs_satellites:base_ping_4"
+  ]
+}

@@ -4,7 +4,8 @@ import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.particle.ModParticles;
 import net.blay09.mods.balm.api.client.rendering.BalmRenderers;
-import net.minecraft.client.particle.FlameParticle;
+import net.minecraft.client.particle.EndRodParticle;
+import net.minecraft.client.particle.GlowParticle;
 import net.minecraft.client.particle.BubblePopParticle;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.particles.ParticleTypes;
@@ -23,11 +24,10 @@ public class ModRenderers {
         //renderers.setBlockRenderType(() -> ModBlocks.stoneBrickBlockEntity, RenderType.cutout());
 
         //Particle Rendering
-        renderers.registerParticleProvider(ModParticles.basePingId,
-            () -> ModParticles.basePing, BubblePopParticle.Provider::new );
+        //renderers.registerParticleProvider(ModParticles.basePingId, () -> ModParticles.basePing, BubblePopParticle.Provider::new );
+        renderers.registerParticleProvider(ModParticles.basePingId, () -> ModParticles.basePing, EndRodParticle.Provider::new );
             
-        renderers.registerParticleProvider(ModParticles.hoverOrangeId,
-            () -> ModParticles.hoverOrange, FlameParticle.Provider::new);
+        renderers.registerParticleProvider(ModParticles.hoverOrangeId, () -> ModParticles.hoverOrange, EndRodParticle.Provider::new );
     }
 
     private static ResourceLocation id(String name) {
