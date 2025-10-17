@@ -14,7 +14,10 @@ public class HoloBaseBlock extends Block {
     public static final BlockBehaviour.Properties HOLO_BASE_PROPERTIES = BlockBehaviour.Properties.copy(Blocks.GLASS)
         .noOcclusion()
         .isViewBlocking((state, level, pos) -> false)
-        .isSuffocating((state, level, pos) -> false);
+        .isSuffocating((state, level, pos) -> false)
+        .destroyTime(0.1f)
+        .sound(Blocks.WHITE_WOOL.getSoundType(null))
+        .noCollission();
 
     public static final BlockBehaviour.Properties HOLO_AIR_PROPERTIES = BlockBehaviour.Properties.copy(Blocks.AIR)
         .noOcclusion()
