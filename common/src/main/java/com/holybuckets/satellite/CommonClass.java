@@ -1,9 +1,11 @@
 package com.holybuckets.satellite;
 
 import com.holybuckets.foundation.event.BalmEventRegister;
+import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.ModBlockEntities;
 import com.holybuckets.satellite.client.ModRenderers;
+import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.item.ModItems;
 import com.holybuckets.satellite.menu.ModMenus;
@@ -46,6 +48,10 @@ public class CommonClass {
         ModMenus.initialize(Balm.getMenus());
         ModParticles.initialize(Balm.getParticles());
         ModNetworking.initialize();
+
+        EventRegistrar reg = EventRegistrar.getInstance();
+        SatelliteMain.INSTANCE.init(reg);
+        ModConfig.init(reg);
         
         isInitialized = true;
     }

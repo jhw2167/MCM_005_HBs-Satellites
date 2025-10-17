@@ -1,5 +1,11 @@
 package com.holybuckets.satellite.config;
 
+import com.holybuckets.foundation.event.EventRegistrar;
+import com.holybuckets.satellite.SatelliteMain;
+import net.blay09.mods.balm.api.event.EventPriority;
+import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
@@ -14,58 +20,51 @@ public class ModConfig {
     private static Set<EntityType<?>> neutralEntities = new HashSet<>();
     private static Set<EntityType<?>> herdEntities = new HashSet<>();
 
-    public static void initializeEntitySets(ServerLevel level) {
+    public static void init(EventRegistrar reg) {
+        reg.registerOnBeforeServerStarted(ModConfig::onServerStarted, EventPriority.High);
+    }
+
+    private static void onServerStarted(ServerStartingEvent event)
+    {
         friendlyEntities.clear();
         hostileEntities.clear();
         neutralEntities.clear();
         herdEntities.clear();
 
-        var registry = level.registryAccess().registryOrThrow(Registries.ENTITY_TYPE);
+        Registry<EntityType<?>> registry = event.getServer().registryAccess().registryOrThrow(Registries.ENTITY_TYPE);
+        SatelliteConfig config = SatelliteMain.CONFIG;
         
         // Convert friendly entities
-        for (String entityId : SatelliteConfig.getInstance().friendlyEntityTypes) {
-            String[] parts = entityId.split(":");
-            if (parts.length == 2) {
-                EntityType<?> type = registry.get(new ResourceLocation(parts[0], parts[1]));
-                if (type != null) {
-                    friendlyEntities.add(type);
-                }
-            }
+        for (String entityId : config.friendlyEntityTypes) {
+            addEntity(entityId, registry, friendlyEntities);
         }
 
         // Convert hostile entities
-        for (String entityId : SatelliteConfig.getInstance().hostileEntityTypes) {
-            String[] parts = entityId.split(":");
-            if (parts.length == 2) {
-                EntityType<?> type = registry.get(new ResourceLocation(parts[0], parts[1]));
-                if (type != null) {
-                    hostileEntities.add(type);
-                }
-            }
+        for (String entityId : config.hostileEntityTypes) {
+            addEntity(entityId, registry, hostileEntities);
         }
-
         // Convert neutral entities
-        for (String entityId : SatelliteConfig.getInstance().neutralEntityTypes) {
-            String[] parts = entityId.split(":");
-            if (parts.length == 2) {
-                EntityType<?> type = registry.get(new ResourceLocation(parts[0], parts[1]));
-                if (type != null) {
-                    neutralEntities.add(type);
-                }
-            }
+        for (String entityId : config.neutralEntityTypes) {
+            addEntity(entityId, registry, neutralEntities);
         }
-
         // Convert herd entities
-        for (String entityId : SatelliteConfig.getInstance().herdEntityTypes) {
-            String[] parts = entityId.split(":");
-            if (parts.length == 2) {
-                EntityType<?> type = registry.get(new ResourceLocation(parts[0], parts[1]));
-                if (type != null) {
-                    herdEntities.add(type);
-                }
-            }
+        for (String entityId : config.herdEntityTypes) {
+            addEntity(entityId, registry, herdEntities);
         }
     }
+
+        private static void addEntity(String entityId, Registry<EntityType<?>> registry, Set<EntityType<?>> targetSet) {
+            String[] parts = entityId.split(":");
+            EntityType<?> type;
+            if (parts.length == 2) {
+              type = registry.get(new ResourceLocation(parts[0], parts[1]));
+            } else {
+                type = registry.get(new ResourceLocation("minecraft", parts[0]));
+            }
+            if (type != null) {
+                targetSet.add(type);
+            }
+        }
 
     public static Set<EntityType<?>> getFriendlyEntities() {
         return friendlyEntities;

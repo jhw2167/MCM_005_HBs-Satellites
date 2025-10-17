@@ -11,9 +11,11 @@ import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
+import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.particle.ModParticles;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import net.blay09.mods.balm.api.event.EventPriority;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -297,35 +299,80 @@ public class SatelliteDisplay {
 
         if(this.needsUpdate)
         {
-            BlockPos cntrlPos = controller.getBlockPos();
-            int xChunkStart = (maxX - cntrlPos.getX()) + target.x;
-            int xChunkEnd = (minX - cntrlPos.getX()) + target.x;
+            //for(ISatelliteDisplayBlock displayBlock : displayBlocks.values())
+            {
+                BlockPos cntrlPos = controller.getBlockPos();
+                //*
+                    //For total area entity collection
+                int xChunkStart = (maxX - cntrlPos.getX()) + target.x;
+                int xChunkEnd = (minX - cntrlPos.getX()) + target.x;
 
-            int zChunkStart = (maxZ - cntrlPos.getZ()) + target.z;
-            int zChunkEnd = (minZ - cntrlPos.getZ()) + target.z;
+                int zChunkStart = (maxZ - cntrlPos.getZ()) + target.z;
+                int zChunkEnd = (minZ - cntrlPos.getZ()) + target.z;
 
-            int xStart = level.getChunk(xChunkStart, zChunkStart).getPos().getMinBlockX();
-            int zStart = level.getChunk(xChunkStart, zChunkStart).getPos().getMinBlockZ();
+                LevelChunk startChunk = SatelliteManager.getChunk((ServerLevel) level, xChunkStart, zChunkStart);
+                LevelChunk endChunk = SatelliteManager.getChunk((ServerLevel) level, xChunkEnd, zChunkEnd);
 
-            int xEnd = level.getChunk(xChunkEnd, zChunkEnd).getPos().getMaxBlockX();
-            int zEnd = level.getChunk(xChunkEnd, zChunkEnd).getPos().getMaxBlockZ();
+                int xStart, xEnd, zStart, zEnd;
 
-            int yEnd = (16*currentSection+1) + level.getMinBuildHeight();
-            int yStart = yEnd - (16*depth);
 
-            AABB aabb = new AABB(
-                xStart, yStart, zStart,
-                xEnd, yEnd, zEnd
-            );
+                if (xChunkStart <= xChunkEnd) {
+                    xStart = startChunk.getPos().getMinBlockX();
+                    xEnd = endChunk.getPos().getMaxBlockX();
+                } else {
+                    LevelChunk extendedChunk = SatelliteManager.getChunk((ServerLevel) level, xChunkEnd - 1, zChunkStart);
+                    if(extendedChunk == null) return;
+                    xStart = extendedChunk.getPos().getMinBlockX();
+                    xEnd = startChunk.getPos().getMaxBlockX();
+                }
 
-            // Query entities in this AABB (living entities only)
-            List<Entity> entitiesInArea = level.getEntities(
-                (Entity) null, aabb, this::entityPredicate
-            );
+                if (zChunkStart <= zChunkEnd) {
 
-            for(Entity e : entitiesInArea) {
-                addEntity(e);
+                    zStart = startChunk.getPos().getMinBlockZ();
+                    zEnd = endChunk.getPos().getMaxBlockZ();
+                } else {
+
+                    LevelChunk extendedChunk = SatelliteManager.getChunk((ServerLevel) level, xChunkStart, zChunkEnd - 1);
+                    if(extendedChunk == null) return;
+                    zStart = extendedChunk.getPos().getMinBlockZ();
+                    zEnd = startChunk.getPos().getMaxBlockZ();
+                }
+
+                // Ensure min/max order is correct
+                int minX = Math.min(xStart, xEnd);
+                int maxX = Math.max(xStart, xEnd);
+                int minZ = Math.min(zStart, zEnd);
+                int maxZ = Math.max(zStart, zEnd);
+
+                 //*/
+                 /*
+                //For each display block, query its chunk area
+                BlockPos dispOffset = getOffset(displayBlock.getBlockPos());
+                int xChunk = target.x + dispOffset.getX();
+                int zChunk = target.z + dispOffset.getZ();
+                LevelChunk chunk = SatelliteManager.getChunk((ServerLevel) level, xChunk, zChunk);
+
+                  */
+
+                int yEnd = (16*currentSection+1) + level.getMinBuildHeight();
+                int yStart = yEnd - (16*depth);
+
+                AABB aabb = new AABB(
+                    minX, yStart, minZ,
+                    maxX, yEnd,   maxZ
+                );
+
+                // Query entities in this AABB (living entities only)
+                List<Entity> entitiesInArea = level.getEntities(
+                    (Entity) null, aabb, this::entityPredicate
+                );
+
+                for(Entity e : entitiesInArea) {
+                    addEntity(e);
+                }
+
             }
+
 
         }
 
@@ -338,10 +385,10 @@ public class SatelliteDisplay {
             if( !(e instanceof LivingEntity) || !e.isAlive() || e.isRemoved() || displayEntities.contains(e) ) return false;
             if( e instanceof ServerPlayer ) return false;
 
-            if(CONFIG.hostileEntityTypes.contains(e.getType())) {}
-            else if(CONFIG.friendlyEntityTypes .contains(e.getType())) {}
-            else if(CONFIG.neutralEntityTypes.contains(e.getType()  )) {}
-            else if(CONFIG.herdEntityTypes.contains(e.getType()     )) {}
+            if(ModConfig.getHostileEntities().contains(e.getType())) {}
+            else if(ModConfig.getFriendlyEntities().contains(e.getType())) {}
+            else if(ModConfig.getNeutralEntities().contains(e.getType())) {}
+            else if(ModConfig.getHerdEntities().contains(e.getType())) {}
             else return false;
 
             //ChunkDisplayInfo info = INFO_CACHE.get(new TripleInt(e.chunkPosition().x, currentSection, e.chunkPosition().z ));
@@ -459,7 +506,7 @@ public class SatelliteDisplay {
     public static void init(EventRegistrar reg) {
         reg.registerOnServerTick(TickType.ON_20_TICKS , SatelliteDisplay::onServerTick);
         reg.registerOnServerStopped((event) -> INFO_CACHE.clear());
-        reg.registerOnBeforeServerStarted(SatelliteDisplay::loadParticleTypes);
+        reg.registerOnBeforeServerStarted(SatelliteDisplay::loadParticleTypes, EventPriority.Lowest);
     }
 
     private static ParticleOptions getParticleType(Entity e) {
@@ -497,10 +544,8 @@ public class SatelliteDisplay {
     private static void loadParticleTypes(ServerStartingEvent  event) {
 
         //For all entities in registry, test if it is hostile mob, the load as ParticleTypes.FLAME
-        for(EntityType<?> type : event.getServer().registryAccess().registryOrThrow(Registries.ENTITY_TYPE)) {
-            if(!type.getCategory().isFriendly()) {
-                PARTICLE_TYPE_MAP.put(type, ParticleTypes.FLAME);
-            }
+        for(EntityType et : ModConfig.getHostileEntities()) {
+            PARTICLE_TYPE_MAP.put(et, ModParticles.redPing);
         }
 
         PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ModParticles.basePing);

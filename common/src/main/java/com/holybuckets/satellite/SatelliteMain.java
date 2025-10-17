@@ -25,11 +25,10 @@ public class SatelliteMain {
     {
         super();
         INSTANCE = this;
-        init();
         // LoggerProject.logInit( "001000", this.getClass().getName() ); // Uncomment if you have a logging system in place
     }
 
-    private void init()
+    void init(EventRegistrar reg)
     {
 
         /*
@@ -44,13 +43,13 @@ public class SatelliteMain {
             .build();
 
         //Events
-        EventRegistrar registrar = EventRegistrar.getInstance();
-        SatelliteManager.init(registrar);
-        ChiselBitsAPI.init(registrar);
+        SatelliteManager.init(reg);
+        ChiselBitsAPI.init(reg);
+
 
 
         //register local events
-        registrar.registerOnBeforeServerStarted(this::onServerStarting);
+        reg.registerOnBeforeServerStarted(this::onServerStarting);
 
     }
 
