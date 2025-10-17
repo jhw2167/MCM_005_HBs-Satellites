@@ -2,6 +2,7 @@ package com.holybuckets.satellite.block;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
@@ -28,6 +29,7 @@ public class HoloBaseBlock extends Block {
     public HoloBaseBlock(Properties properties) {
         super(properties);
     }
+
 
     @Override
     public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos) {

@@ -295,10 +295,11 @@ public class SatelliteDisplay {
     {
 
         if(noSource() || this.target == null) return;
-        displayEntities.clear();
+
 
         if(this.needsUpdate)
         {
+            displayEntities.clear();
             //for(ISatelliteDisplayBlock displayBlock : displayBlocks.values())
             {
                 BlockPos cntrlPos = controller.getBlockPos();
@@ -354,12 +355,13 @@ public class SatelliteDisplay {
 
                   */
 
-                int yEnd = (16*currentSection+1) + level.getMinBuildHeight();
-                int yStart = yEnd - (16*depth);
+                int yTop = cntrlPos.getY();
+                int sectionTop = (16*currentSection+1) + level.getMinBuildHeight();
+                int yStart = sectionTop - (16*(depth+1));
 
                 AABB aabb = new AABB(
                     minX, yStart, minZ,
-                    maxX, yEnd,   maxZ
+                    maxX, yTop,   maxZ
                 );
 
                 // Query entities in this AABB (living entities only)
@@ -463,6 +465,7 @@ public class SatelliteDisplay {
         BlockPos blockPos = hitResult.getBlockPos();
 
         int color = ChiselBitsAPI.DEMARCATOR(p);
+        /*
         ((ServerLevel) level).sendParticles(
             ModParticles.hoverOrange,                     // Particle type
             cursorPos.x, cursorPos.y-RENDER_SCALE, cursorPos.z,
@@ -470,6 +473,8 @@ public class SatelliteDisplay {
             0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
             0.0                               // Speed
         );
+        */
+
 
         BlockPos cntrlPos = controller.getBlockPos();
         BlockPos blockOffset = blockPos.subtract(cntrlPos);
@@ -546,6 +551,18 @@ public class SatelliteDisplay {
         //For all entities in registry, test if it is hostile mob, the load as ParticleTypes.FLAME
         for(EntityType et : ModConfig.getHostileEntities()) {
             PARTICLE_TYPE_MAP.put(et, ModParticles.redPing);
+        }
+
+        for(EntityType et : ModConfig.getFriendlyEntities()) {
+            PARTICLE_TYPE_MAP.put(et, ModParticles.greenPing);
+        }
+
+        for(EntityType et : ModConfig.getNeutralEntities()) {
+            PARTICLE_TYPE_MAP.put(et, ModParticles.basePing);
+        }
+
+        for(EntityType et : ModConfig.getHerdEntities()) {
+            PARTICLE_TYPE_MAP.put(et, ModParticles.basePing);
         }
 
         PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ModParticles.basePing);

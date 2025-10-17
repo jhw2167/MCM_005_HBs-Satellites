@@ -7,6 +7,7 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.resources.ResourceLocation;
 
+
 public class ModParticles {
     public static ResourceLocation basePingId = id("base_ping");
     public static SimpleParticleType basePing;

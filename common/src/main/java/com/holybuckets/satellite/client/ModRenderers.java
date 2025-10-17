@@ -26,6 +26,10 @@ public class ModRenderers {
         //Particle Rendering
         //renderers.registerParticleProvider(ModParticles.basePingId, () -> ModParticles.basePing, BubblePopParticle.Provider::new );
         renderers.registerParticleProvider(ModParticles.basePingId, () -> ModParticles.basePing, EndRodParticle.Provider::new );
+        renderers.registerParticleProvider(ModParticles.redPingId, () -> ModParticles.redPing, EndRodParticle.Provider::new );
+        renderers.registerParticleProvider(ModParticles.bluePingId, () -> ModParticles.bluePing, EndRodParticle.Provider::new );
+        renderers.registerParticleProvider(ModParticles.greenPingId, () -> ModParticles.greenPing, EndRodParticle.Provider::new );
+        renderers.registerParticleProvider(ModParticles.orangePingId, () -> ModParticles.orangePing, EndRodParticle.Provider::new );
             
         renderers.registerParticleProvider(ModParticles.hoverOrangeId, () -> ModParticles.hoverOrange, EndRodParticle.Provider::new );
     }

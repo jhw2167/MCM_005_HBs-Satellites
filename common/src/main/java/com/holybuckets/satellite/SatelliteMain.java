@@ -8,6 +8,7 @@ import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.config.TemplateConfig;
 import com.holybuckets.satellite.core.SatelliteManager;
 import net.blay09.mods.balm.api.Balm;
+import net.blay09.mods.balm.api.event.EventPriority;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 
 /**
@@ -49,7 +50,7 @@ public class SatelliteMain {
 
 
         //register local events
-        reg.registerOnBeforeServerStarted(this::onServerStarting);
+        reg.registerOnBeforeServerStarted(this::onServerStarting, EventPriority.Highest);
 
     }
 

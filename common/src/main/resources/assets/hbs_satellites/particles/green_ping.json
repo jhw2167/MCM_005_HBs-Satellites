@@ -1,9 +1,5 @@
 {
   "textures": [
-    "hbs_satellites:green_ping_0",
-    "hbs_satellites:green_ping_1",
-    "hbs_satellites:green_ping_2",
-    "hbs_satellites:green_ping_3",
-    "hbs_satellites:green_ping_4"
+    "hbs_satellites:ping_green_0"
   ]
 }
