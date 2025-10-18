@@ -1,7 +1,6 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
-import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import com.holybuckets.satellite.core.SatelliteDisplay;
@@ -34,12 +33,20 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
     private static class Commands {
         boolean hasUpdate;
-        int dDepth, dNS, dEW;
+        int dSection, dNS, dEW, dDepth, dIdAdj, dIdSet;
         BlockHitResult playerSelection;
         Commands() {
             hasUpdate = false;
-            dDepth = 0; dNS = 0; dEW = 0;
+            dSection = 0; dNS = 0; dEW = 0; dDepth = 0;
+            dIdAdj = 0; dIdSet = 0;
             playerSelection = null;
+        }
+
+        public void reset() {
+            dSection = 0; dNS = 0; dEW = 0; dDepth = 0;
+            dIdAdj = 0; dIdSet = 0;
+            playerSelection = null;
+            this.hasUpdate = false;
         }
     }
 
@@ -112,7 +119,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         } else if( cmd < 7) {   //adjust depth 5 - increase depth, 6 - decrease depth
             //this.source.adjCurrentSection( (cmd == 5 ? 1 : -1) );
-            commands.dDepth += (cmd == 5 ? 1 : -1);
+            commands.dSection += (cmd == 5 ? 1 : -1);
+        } else if ( cmd < 9) {   //adjust display height
+            commands.dDepth += (cmd == 7 ? 1 : -1);
+        } else if (cmd == 16){
+            commands.dIdAdj += 1; //next wool color
+        } else if (cmd >= 17) {
+            commands.dIdSet = cmd - 16; //set wool color
         }
 
         commands.hasUpdate = true;
@@ -171,12 +184,30 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         if(ticks % UI_REFRESH_TICKS != 0) return;
         if(!this.commands.hasUpdate) return;
 
-        this.source.adjCurrentSection(this.commands.dDepth);
-        this.commands.dDepth = 0;
+        if(this.commands.dIdSet > 0) {
+            this.setColorId(this.commands.dIdSet);
+            this.commands.dIdSet = 0;
+        } else if(this.commands.dIdAdj != 0) {
+            int newId = (this.getColorId() + this.commands.dIdAdj) % 16;
+            if(newId < 0) newId += 16;
+            this.setColorId(newId);
+            this.commands.dIdAdj = 0;
+        }
+
+        if(this.source == null || this.source.noSource() || !this.isDisplayOn) {
+            this.commands.reset();
+            return;
+        }
+
+        this.source.adjCurrentSection(this.commands.dSection);
+        this.commands.dSection = 0;
 
         this.source.adjOrdinal(this.commands.dNS, this.commands.dEW);
         this.commands.dNS = 0;
         this.commands.dEW = 0;
+
+        this.source.adjDisplayDepth(this.commands.dDepth);
+        this.commands.dDepth = 0;
 
         this.commands.hasUpdate = false;
         this.forceUpdate();
@@ -232,7 +263,6 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void propagateToNeighbors()
     {
         if (source == null) return;
-        this.source.collectEntities();
 
         Level level = getLevel();
         if (level == null || level.isClientSide()) return;
@@ -269,6 +299,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         source.clear();
         source.addAll(nodes);
 
+        this.source.collectEntities();
     }
 
     @Override

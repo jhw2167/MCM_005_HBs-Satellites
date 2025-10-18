@@ -3,6 +3,7 @@ package com.holybuckets.satellite.client;
 import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.particle.ModParticles;
+import com.holybuckets.satellite.particle.StaticGlowParticle;
 import net.blay09.mods.balm.api.client.rendering.BalmRenderers;
 import net.minecraft.client.particle.EndRodParticle;
 import net.minecraft.client.particle.GlowParticle;
@@ -25,11 +26,11 @@ public class ModRenderers {
 
         //Particle Rendering
         //renderers.registerParticleProvider(ModParticles.basePingId, () -> ModParticles.basePing, BubblePopParticle.Provider::new );
-        renderers.registerParticleProvider(ModParticles.basePingId, () -> ModParticles.basePing, EndRodParticle.Provider::new );
-        renderers.registerParticleProvider(ModParticles.redPingId, () -> ModParticles.redPing, EndRodParticle.Provider::new );
-        renderers.registerParticleProvider(ModParticles.bluePingId, () -> ModParticles.bluePing, EndRodParticle.Provider::new );
-        renderers.registerParticleProvider(ModParticles.greenPingId, () -> ModParticles.greenPing, EndRodParticle.Provider::new );
-        renderers.registerParticleProvider(ModParticles.orangePingId, () -> ModParticles.orangePing, EndRodParticle.Provider::new );
+        renderers.registerParticleProvider(ModParticles.basePingId, () -> ModParticles.basePing, StaticGlowParticle.Provider::new );
+        renderers.registerParticleProvider(ModParticles.redPingId, () -> ModParticles.redPing, StaticGlowParticle.Provider::new );
+        renderers.registerParticleProvider(ModParticles.bluePingId, () -> ModParticles.bluePing, StaticGlowParticle.Provider::new );
+        renderers.registerParticleProvider(ModParticles.greenPingId, () -> ModParticles.greenPing, StaticGlowParticle.Provider::new );
+        renderers.registerParticleProvider(ModParticles.orangePingId, () -> ModParticles.orangePing, StaticGlowParticle.Provider::new );
             
         renderers.registerParticleProvider(ModParticles.hoverOrangeId, () -> ModParticles.hoverOrange, EndRodParticle.Provider::new );
     }

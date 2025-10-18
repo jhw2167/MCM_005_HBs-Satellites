@@ -1,7 +1,6 @@
 package com.holybuckets.satellite.block.be.isatelliteblocks;
 
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
-import com.holybuckets.satellite.core.SatelliteDisplayUpdate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.BlockHitResult;
@@ -19,11 +18,26 @@ public interface ISatelliteControllerBlock extends ISatelliteDisplayBlock {
     void setSatellite(SatelliteBlockEntity satellite);
 
 
-    float ORDINAL_COORD_BLOCK_HORZ_THRESHOLD = 0.7f;
-    float ORDINAL_COORD_BLOCK_VERT_THRESHOLD = 0.8f;
+    float ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD = 0.7f;
+    float ORDINAL_COORD_BLOCK_HORZ_LEFT_THRESHOLD = 0.3f;
+    float ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD = 0.7f;
+    float ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD = 0.2f;
     float ORDINAL_COORD_BUFFER_V = 0.25f;
     float ORDINAL_COORD_BUFFER_H = 0.25f;
 
+    /**
+     * Return int command value based off where the block was struck
+     *  - -1 = no command
+     *  - 0 = toggle on/off
+     *  - 1-4 = move satellite ordinally North (-1 Z), South (+1 Z), West (-1 X), East (+1 X)
+     *  - 5-6 = adj satellite scanning section (+1 Y) or down (-1 Y)
+     *  - 7-8 = adj display depth (+1) to a max of 4 then back to 1
+     *  - 9 = adj to next wool color
+     *  - 10-15 = undefined
+     *  - 16+ = selects different wool color
+     * @param res
+     * @return
+     */
     static int calculateHitCommand(BlockHitResult res)
     {
         int cmd = -1;
@@ -42,33 +56,41 @@ public interface ISatelliteControllerBlock extends ISatelliteDisplayBlock {
             xz = z;
         }
         // Determine which quadrant was hit
-        boolean isRightSide = (xz > ORDINAL_COORD_BLOCK_HORZ_THRESHOLD);
-        boolean isTopHalf = y > ORDINAL_COORD_BLOCK_VERT_THRESHOLD;
+        boolean isRightColumn = (xz > ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD);
+        boolean isTopSection = y > ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD;
+        boolean isBotSection = y < ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD;
 
-        if (isTopHalf && isRightSide) {
-            // Quadrant 3: Top right - Toggle on/off button
-            cmd = 0;
-
-        } else if (isTopHalf && !isRightSide) {
-            // Quadrant 4: Top left - Color change (pending implementation)
-            cmd = -1; // No logic implemented yet
-
-        } else if (!isTopHalf && isRightSide) {
-            // Quadrant 2: Bottom right - Up/Down arrows only
-            if (y > 0.4) { // Upper half of bottom right quadrant
-                cmd = 5; // Up arrow
-            } else { // Lower half of bottom right quadrant
-                cmd = 6; // Down arrow
+        if (isRightColumn)
+        {
+             if(y > ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD) {
+                 //nothing, block position area
+             }
+            else if(y > ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD) {
+                //Chunk section depth up down
+                float diff = ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD - ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD;
+                cmd = (y > ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD + diff / 2) ? 5 : 6;
+            } else {
+                cmd = 7; //Display height adjust
             }
 
-        } else {
-            // Quadrant 1: Bottom left - Four directional panels (N/S/E/W)
-            // Divide this quadrant into 4 even sections
+        } else if (isTopSection) {
+            //Nothing, block position area
 
-            double upThreshold = ORDINAL_COORD_BLOCK_VERT_THRESHOLD - ORDINAL_COORD_BUFFER_V;
+        } else if (isBotSection) {
+
+            if (xz > ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD ) {
+                cmd = 7; //Display height adjust - prob never reaches
+            } else if( xz < ORDINAL_COORD_BLOCK_HORZ_LEFT_THRESHOLD ) {
+                cmd = 0; //Toggle on/off
+            } else {    //in the middle
+                cmd = 16; //Change wool color
+            }
+
+        } else { // Quadrant 4:  Four directional panels (N/S/E/W)
+            double upThreshold = ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD - ORDINAL_COORD_BUFFER_V;
             double downThreshold = ORDINAL_COORD_BUFFER_V;
             double leftThreshold = ORDINAL_COORD_BUFFER_H;
-            double rightThreshold = ORDINAL_COORD_BLOCK_HORZ_THRESHOLD - ORDINAL_COORD_BUFFER_H;
+            double rightThreshold = ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD - ORDINAL_COORD_BUFFER_H;
             int input = 0;
 
             if(y > upThreshold) {

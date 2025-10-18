@@ -9,7 +9,6 @@ import com.holybuckets.satellite.api.ChiselBitsAPI;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
-import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.config.SatelliteConfig;
@@ -20,7 +19,6 @@ import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -32,7 +30,6 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
@@ -55,6 +52,7 @@ public class SatelliteDisplay {
     int xOffset;
     ChunkPos target;
     int currentSection;
+    int maxSection;
     int depth;
     boolean needsUpdate;
     Map<BlockPos, ISatelliteDisplayBlock> displayBlocks;
@@ -99,6 +97,7 @@ public class SatelliteDisplay {
 
 
     public void adjOrdinal(int dNS, int dEW) {
+        if(noSource() || this.satellite == null) return;
         zOffset -= dNS;
         xOffset -= dEW;
         ChunkPos satellitePos = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
@@ -106,10 +105,14 @@ public class SatelliteDisplay {
         this.needsUpdate = true;
     }
 
+    private static int MAX_DEPTH = 4;
     public void adjDepth(int delta) {
          int temp = this.depth + delta;
-         if(temp < 1 || temp > 4) return;
-        this.depth += delta;
+         if(temp < 1) {
+             depth = MAX_DEPTH;
+         } else {
+             this.depth = temp % (MAX_DEPTH + 1);
+         }
         this.needsUpdate = true;
     }
 
@@ -123,21 +126,33 @@ public class SatelliteDisplay {
     }
 
     public void setCurrentSection(int section) {
+        if( section < 0 ||  section >= maxSection-depth ) return;
         this.currentSection = section;
         this.needsUpdate = true;
     }
 
     public void adjCurrentSection(int delta) {
         int temp = this.currentSection + delta;
-        if( temp < 0 ||  temp >= level.getSectionsCount()-depth ) return;
+        if( temp < 0 ||  temp >= maxSection-depth ) return;
         this.currentSection = temp;
         this.needsUpdate = true;
     }
 
-    public void resetChunkSection() {
-        if(noSource() || this.target == null) return;
+    public void adjDisplayDepth(int dDepth) {
+        int temp = this.depth + dDepth;
+        if(temp < 1 || temp > 4) return;
+        this.depth += dDepth;
+        this.needsUpdate = true;
+    }
+
+    public void resetChunkSection()
+    {
+        if(noSource() || this.satellite == null || this.target == null) return;
         LevelChunkSection[] sections =  level.getChunk(target.x, target.z).getSections();
-        for (int i = sections.length - 1; i >= 1; i--) {
+
+        maxSection = HBUtil.WorldPos.yToSectionIndex(
+            satellite.getBlockPos().getY(), level.getMinBuildHeight()) - 1;
+        for (int i = maxSection; i >= 1; i--) {
             LevelChunkSection section = sections[i];
             if (section == null || section.hasOnlyAir()) continue;
             this.currentSection = i;
@@ -568,6 +583,7 @@ public class SatelliteDisplay {
         PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ModParticles.basePing);
         PARTICLE_TYPE_MAP.put(EntityType.SLIME, ParticleTypes.ITEM_SLIME);
     }
+
 
 
 }

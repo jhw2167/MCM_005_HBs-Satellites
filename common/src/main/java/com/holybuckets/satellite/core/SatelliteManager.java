@@ -11,11 +11,14 @@ import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.blay09.mods.balm.api.event.server.ServerStoppedEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 
@@ -28,7 +31,9 @@ public class SatelliteManager {
 
     private static final Long2ObjectMap<CachedChunkInfo> CHUNK_CACHE = new Long2ObjectOpenHashMap<>(128);
     private static final int MAX_CHUNK_LIFETIME = 300; // 300 seconds
-    
+
+    private static final List<Block> WOOL_IDS = new ArrayList<>(64);
+
     private static class CachedChunkInfo {
         LevelChunk chunk;
         int lifetime;
@@ -42,12 +47,14 @@ public class SatelliteManager {
     }
 
     public static void init(EventRegistrar reg) {
+        reg.registerOnBeforeServerStarted(SatelliteManager::onServerStarting);
         reg.registerOnServerStopped(SatelliteManager::onServerStopped);
         reg.registerOnServerTick(TickType.ON_20_TICKS, SatelliteManager::onServerTick);
 
         //SatelliteDisplay
         SatelliteDisplay.init(reg);
     }
+
 
     public static SatelliteBlockEntity get(int colorId) {
         return SATELLITES.get(colorId);
@@ -59,14 +66,50 @@ public class SatelliteManager {
         be.setLevelChunk( getChunk(be.getLevel(), be.getBlockPos()) );
     }
 
+    public static int totalIds() {
+        return WOOL_IDS.size();
+    }
+
+    public static Block getWool(int id) {
+        return new ArrayList<>(WOOL_IDS).get(id % WOOL_IDS.size());
+    }
+
+
     //** Events
+    private static void onServerStarting(ServerStartingEvent event)
+    {
+        SATELLITES.clear();
+        CHUNK_CACHE.clear();
+
+        //Load all Wool Ids
+        WOOL_IDS.clear();
+        {
+            WOOL_IDS.add(Blocks.RED_WOOL);
+            WOOL_IDS.add(Blocks.ORANGE_WOOL);
+            WOOL_IDS.add(Blocks.YELLOW_WOOL);
+            WOOL_IDS.add(Blocks.LIME_WOOL);
+            WOOL_IDS.add(Blocks.GREEN_WOOL);
+            WOOL_IDS.add(Blocks.CYAN_WOOL);
+            WOOL_IDS.add(Blocks.LIGHT_BLUE_WOOL);
+            WOOL_IDS.add(Blocks.BLUE_WOOL);
+            WOOL_IDS.add(Blocks.PURPLE_WOOL);
+            WOOL_IDS.add(Blocks.MAGENTA_WOOL);
+            WOOL_IDS.add(Blocks.PINK_WOOL);
+            WOOL_IDS.add(Blocks.WHITE_WOOL);
+            WOOL_IDS.add(Blocks.LIGHT_GRAY_WOOL);
+            WOOL_IDS.add(Blocks.GRAY_WOOL);
+            WOOL_IDS.add(Blocks.BROWN_WOOL);
+            WOOL_IDS.add(Blocks.BLACK_WOOL);
+        }
+    }
+
     private static void onServerStopped(ServerStoppedEvent event) {
         SATELLITES.clear();
         // Unforce load all chunks before clearing cache
         CHUNK_CACHE.forEach((pos, info) -> {
             if (info.forceLoaded) {
                 HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(),
-                    HBUtil.ChunkUtil.getId(info.chunk.getPos()), Constants.MOD_ID);
+                    info.chunk.getPos(), Constants.MOD_ID);
             }
         });
         CHUNK_CACHE.clear();
@@ -84,8 +127,8 @@ public class SatelliteManager {
             
             if (info.lifetime > MAX_CHUNK_LIFETIME) {
                 if (info.forceLoaded) {
-                    String chunkId = HBUtil.ChunkUtil.getId(info.chunk.getPos());
-                    HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(), chunkId, Constants.MOD_ID);
+                    HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(),
+                     info.chunk.getPos(), Constants.MOD_ID);
                 }
                 iterator.remove();
             }
@@ -117,7 +160,7 @@ public class SatelliteManager {
         }
 
         // Try force loading
-        HBUtil.ChunkUtil.forceLoadChunk(level, chunkId, Constants.MOD_ID);
+        HBUtil.ChunkUtil.forceLoadChunk(level, pos, Constants.MOD_ID);
         if (chunk != null) {
             LevelChunk levelChunk = chunk.getLevelChunk();
             CHUNK_CACHE.put(posKey, new CachedChunkInfo(levelChunk, true));

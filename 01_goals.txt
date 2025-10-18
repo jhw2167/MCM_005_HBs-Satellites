@@ -52,7 +52,7 @@ Okkk
 
 	** ADded max depth of 4, you can only view downward
 
-9. Player hands highlight certain blocks orange for interactive display
+9. Player hands highlight certain blocks orange for interactive display	X
 ---
 
 	- get ray trace of players hand, paint spot orange
@@ -60,18 +60,20 @@ Okkk
 
 	- Must remove wireFrame!!
 
-10. Install chunk loading for far away satellites
+10. Install chunk loading for far away satellites			XXX
 ---
 
 	- Chunk the satellite exists in must always be loaded
 	- Load area around chunk by choice
 	- Add a button on controller to force chunkLoading
 
-11. Satellite must be able to set its id
+11. Satellite must be able to set its id				X
 ---
 
 	- Satellite sets id by right clicking
 	- Controller sets ID by right clicking as well
+
+	- Need to add this functionality to satelliteBlockEntity
 
 
 12. Add crafting recipes for all items
@@ -90,37 +92,60 @@ Okkk
 14. Get nicer blocks and lighting affects for hologram itself
 ---
 
-15. Set glowing effects on display for entities
-----
-
-	- Get all entities in chunk
-	- Send information to holo display
-	- Forward to client and display info as well
-
 
 16. Refactor satellite depth so it cannot be cheesed by placing blocks high in the sky
 ---
 
 
+20. Satellite Update cards
+---
 
-17. Get some Art going on Satellite looking blocks
+	- Allow players to hold cards that display them as green on satellite
+	- Ore Scanning Card
+	- Wide range card
+	- Extra depth card
+	- Fast refresh card
+
+21. Add Seperate Targeting block
+---
+
+	- Shows currently exported blockpos
+	- "Select" Option
+	- "Trigger" Option
+
+
+22. Satellite Integrations
+---
+	- Create big cannons 
+	- Orbital Railgun
+	- 
+
+
+23. Expanded play configs
+---
+
+	- Player Radius auto turnoff
+	- Satellite limited range
+	- Satellite limited depth
+	- Satellite minimum operational depth
+
+
+
+24. Satellite Player Messages
+---
+
+	- WARNING: Satellite not high enough
+	- WARNING: Satellite cannot view further range
+	- WARNING: Satellite cannot view deeper
+	- 
+
+
+20. Satellite Update cards
 ---
 
 
-
-18. Add custom hologram looking blocks that can be chiseled
+20. Satellite Update cards
 ---
-
-	- Remove the wireframe on these specific blocks
-	- Pale blue, 30% transparent with soft terrain map lines or dots on top face only
-
-
-19. Queue an auto refresh when player interacts with the controller
----
-
-20.
----
-
 
 
 
