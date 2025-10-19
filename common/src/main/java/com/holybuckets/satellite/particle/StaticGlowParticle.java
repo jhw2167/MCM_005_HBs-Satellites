@@ -50,7 +50,7 @@ public class StaticGlowParticle extends TextureSheetParticle {
     }
 
     private static final int DURATION_FADE_IN = 1;
-    private static final int DURATION_FADE_OUT = 1;
+    private static final int DURATION_FADE_OUT = 5;
     private static final float TEMPO_FADE = 1.0F / DURATION_FADE_IN;
     @Override
     public void tick() {

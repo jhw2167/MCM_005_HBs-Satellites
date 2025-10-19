@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be.isatelliteblocks;
 
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.BlockHitResult;
@@ -10,6 +11,8 @@ import net.minecraft.world.phys.Vec3;
  * Controller block has a color id set by the player and can link to a satellite
  */
 public interface ISatelliteControllerBlock extends ISatelliteDisplayBlock {
+
+    TextureAtlasSprite getDisplayColor();
 
     int getColorId();
 

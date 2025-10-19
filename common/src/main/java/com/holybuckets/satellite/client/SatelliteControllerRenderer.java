@@ -2,14 +2,22 @@ package com.holybuckets.satellite.client;
 
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -17,56 +25,90 @@ import net.minecraft.world.inventory.InventoryMenu;
 public class SatelliteControllerRenderer implements BlockEntityRenderer<SatelliteControllerBlockEntity> {
 
     public SatelliteControllerRenderer(BlockEntityRendererProvider.Context context) {
+
     }
 
     @Override
     public void render(SatelliteControllerBlockEntity blockEntity, float partialTick, PoseStack poseStack, 
-                      MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        
-        BlockState blockState = blockEntity.getBlockState();
-        Direction facing = Direction.NORTH; // Get actual facing from blockstate when implemented
-        
-        // Save the current transformation state
+                      MultiBufferSource bufferSource, int packedLight, int packedOverlay)
+    {
+
         poseStack.pushPose();
 
-        // Translate to block center
-        poseStack.translate(0.5D, 0.5D, 0.5D);
-        
-        // Rotate based on facing direction
-        switch(facing) {
-            case SOUTH:
-                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180));
-                break;
-            case WEST:
-                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90));
-                break;
-            case EAST:
-                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-90));
-                break;
-            default:
-                break;
+        // Get VertexConsumer AFTER pushPose and BEFORE building vertices
+        VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
+
+        // Get texture
+        TextureAtlasSprite woolSprite = blockEntity.getDisplayColor();
+
+        Matrix4f matrix = poseStack.last().pose();
+        Matrix3f normal = poseStack.last().normal();
+
+        // Use the wool sprite UVs
+        float u0 = woolSprite.getU0();
+        float v0 = woolSprite.getV0();
+        float u1 = woolSprite.getU1();
+        float v1 = woolSprite.getV1();
+
+        int light = packedLight; // Use the light passed to the method
+        int overlay = packedOverlay;
+
+        Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+
+        float minX = 0.35f;
+        float maxX = 0.65f;
+        float minY = 0.025f;
+        float maxY = 0.175f;
+        float offset = 0.01f; // Small offset from face
+
+// Transform based on facing direction
+        switch (facing) {
+            case NORTH -> {
+                // Face toward negative Z
+                builder.vertex(matrix, minX, minY, -offset)
+                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+                builder.vertex(matrix, maxX, minY, -offset)
+                    .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+                builder.vertex(matrix, maxX, maxY, -offset)
+                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+                builder.vertex(matrix, minX, maxY, -offset)
+                    .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+            }
+            case SOUTH -> {
+                // Face toward positive Z
+                builder.vertex(matrix, minX, minY, 1 + offset)
+                    .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
+                builder.vertex(matrix, maxX, minY, 1 + offset)
+                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
+                builder.vertex(matrix, maxX, maxY, 1 + offset)
+                    .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
+                builder.vertex(matrix, minX, maxY, 1 + offset)
+                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
+            }
+            case WEST -> {
+                // Face toward negative X
+                builder.vertex(matrix, -offset, minY, minX)
+                    .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
+                builder.vertex(matrix, -offset, minY, maxX)
+                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
+                builder.vertex(matrix, -offset, maxY, maxX)
+                    .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
+                builder.vertex(matrix, -offset, maxY, minX)
+                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
+            }
+            case EAST -> {
+                // Face toward positive X
+                builder.vertex(matrix, 1 + offset, minY, minX)
+                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+                builder.vertex(matrix, 1 + offset, minY, maxX)
+                    .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+                builder.vertex(matrix, 1 + offset, maxY, maxX)
+                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+                builder.vertex(matrix, 1 + offset, maxY, minX)
+                    .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+            }
         }
 
-        // Translate back
-        poseStack.translate(-0.5D, -0.5D, -0.5D);
-
-        // Get the vertex builder for the render type you want
-        VertexConsumer builder = bufferSource.getBuffer(RenderType.translucent());
-
-        // Example: Render a colored overlay on the front face
-        Matrix4f matrix = poseStack.last().pose();
-        float alpha = 0.8f; // Transparency
-        float red = 1.0f;   // Example color values
-        float green = 0.0f;
-        float blue = 0.0f;
-
-        // Front face (adjust Z position as needed)
-        builder.vertex(matrix, 0, 0, 0.01f).color(red, green, blue, alpha).endVertex();
-        builder.vertex(matrix, 1, 0, 0.01f).color(red, green, blue, alpha).endVertex();
-        builder.vertex(matrix, 1, 1, 0.01f).color(red, green, blue, alpha).endVertex();
-        builder.vertex(matrix, 0, 1, 0.01f).color(red, green, blue, alpha).endVertex();
-
-        // Restore the transformation state
         poseStack.popPose();
     }
 }

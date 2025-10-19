@@ -9,10 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -41,6 +38,12 @@ public class SatelliteControllerBlock extends Block implements EntityBlock {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
+    // In your Block class
+    @Override
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
+    }
+
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new SatelliteControllerBlockEntity(pos, state);
@@ -55,13 +58,13 @@ public class SatelliteControllerBlock extends Block implements EntityBlock {
         super.destroy(level, pos, state);
     }
 
-    public InteractionResult use(BlockState $$0, Level $$1, BlockPos $$2, Player $$3, InteractionHand $$4, BlockHitResult $$5) {
+    public InteractionResult use(BlockState $$0, Level $$1, BlockPos $$2, Player p, InteractionHand hand, BlockHitResult hitResult) {
         if ($$1.isClientSide) {
             return InteractionResult.CONSUME;
         } else {
             BlockEntity be = $$1.getBlockEntity($$2);
             if (be instanceof SatelliteControllerBlockEntity controller) {
-                controller.use($$5);
+                controller.use(p, hand, hitResult);
                 return InteractionResult.SUCCESS;
             }
         }

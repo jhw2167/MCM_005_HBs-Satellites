@@ -1,5 +1,6 @@
 package com.holybuckets.satellite.core;
 
+import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
@@ -13,14 +14,21 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.blay09.mods.balm.api.event.server.ServerStoppedEvent;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
@@ -33,6 +41,7 @@ public class SatelliteManager {
     private static final int MAX_CHUNK_LIFETIME = 300; // 300 seconds
 
     private static final List<Block> WOOL_IDS = new ArrayList<>(64);
+
 
     private static class CachedChunkInfo {
         LevelChunk chunk;
@@ -72,6 +81,22 @@ public class SatelliteManager {
 
     public static Block getWool(int id) {
         return new ArrayList<>(WOOL_IDS).get(id % WOOL_IDS.size());
+    }
+
+    public static int getColorId(Block b) {
+        return WOOL_IDS.indexOf(b);
+    }
+
+    public static TextureAtlasSprite getColor(int colorId) {
+        Block wool = getWool(colorId);
+        if(wool == null) return null;
+        TextureAtlas textureAtlas = Minecraft.getInstance().getModelManager()
+            .getAtlas(InventoryMenu.BLOCK_ATLAS);
+        ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(wool);
+        ResourceLocation woolLoc = new ResourceLocation( blockId.getNamespace(),
+            "block/" + blockId.getPath() );
+
+        return textureAtlas.getSprite( woolLoc );
     }
 
 

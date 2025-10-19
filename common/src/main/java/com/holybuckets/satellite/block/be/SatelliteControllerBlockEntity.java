@@ -5,10 +5,15 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerB
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -38,13 +43,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         Commands() {
             hasUpdate = false;
             dSection = 0; dNS = 0; dEW = 0; dDepth = 0;
-            dIdAdj = 0; dIdSet = 0;
+            dIdAdj = 0; dIdSet = -1;
             playerSelection = null;
         }
 
         public void reset() {
             dSection = 0; dNS = 0; dEW = 0; dDepth = 0;
-            dIdAdj = 0; dIdSet = 0;
+            dIdAdj = 0; dIdSet = -1;
             playerSelection = null;
             this.hasUpdate = false;
         }
@@ -60,6 +65,16 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         commands = new Commands();
     }
 
+
+    @Override
+    public TextureAtlasSprite getDisplayColor() {
+        TextureAtlasSprite s = SatelliteManager.getColor(this.colorId);
+        if(s == null) {
+            this.setColorId(0);
+            return SatelliteManager.getColor(0);
+        }
+        return s;
+    }
 
     @Override
     public int getColorId() {
@@ -90,15 +105,32 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.turnOff();
     }
 
-    public void use(BlockHitResult res)
+    public void use(Player p, InteractionHand hand, BlockHitResult res)
     {
         int cmd = -1;
         cmd = ISatelliteControllerBlock.calculateHitCommand(res);
 
         if(cmd == 0) this.toggleOnOff(!this.isDisplayOn);
 
+
+        if (cmd == 16)
+        {
+            //If player is holding wool in their hand, set to that color
+            if( p.getItemInHand(hand).getItem() instanceof BlockItem bi ) {
+                Block b = bi.getBlock();
+                commands.dIdSet = SatelliteManager.getColorId(b);
+            }
+
+            if(commands.dIdSet < 0) {
+                commands.dIdAdj += 1; //next wool color
+            }
+            commands.hasUpdate = true;
+        } else if (cmd >= 17) {
+            commands.dIdSet = cmd - 17; //set wool color
+            commands.hasUpdate = true;
+        }
+
         if(!this.isDisplayOn || this.source == null) {
-            this.turnOff();
             return;
         }
 
@@ -122,10 +154,6 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             commands.dSection += (cmd == 5 ? 1 : -1);
         } else if ( cmd < 9) {   //adjust display height
             commands.dDepth += (cmd == 7 ? 1 : -1);
-        } else if (cmd == 16){
-            commands.dIdAdj += 1; //next wool color
-        } else if (cmd >= 17) {
-            commands.dIdSet = cmd - 16; //set wool color
         }
 
         commands.hasUpdate = true;
@@ -170,8 +198,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         }
 
 
+        processCommands();
         if(this.source != null && this.isDisplayOn ) {
-            processCommands();
             renderDisplay();
             renderPlayerUI();
         }
@@ -184,9 +212,9 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         if(ticks % UI_REFRESH_TICKS != 0) return;
         if(!this.commands.hasUpdate) return;
 
-        if(this.commands.dIdSet > 0) {
+        if(this.commands.dIdSet > -1) {
             this.setColorId(this.commands.dIdSet);
-            this.commands.dIdSet = 0;
+            this.commands.dIdSet = -1;
         } else if(this.commands.dIdAdj != 0) {
             int newId = (this.getColorId() + this.commands.dIdAdj) % 16;
             if(newId < 0) newId += 16;
@@ -214,7 +242,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     }
 
     private static final int PATH_REFRESH_TICKS = 200;
-    private static final int ENTITY_REFRESH_TICKS = 5;
+    private static final int ENTITY_REFRESH_TICKS = 10;
     private void renderDisplay() {
         if(ticks % PATH_REFRESH_TICKS == 0 ){
             propagateToNeighbors();

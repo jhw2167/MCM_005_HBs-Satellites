@@ -2,6 +2,7 @@ package com.holybuckets.satellite.client;
 
 import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.block.ModBlocks;
+import com.holybuckets.satellite.block.be.ModBlockEntities;
 import com.holybuckets.satellite.particle.ModParticles;
 import com.holybuckets.satellite.particle.StaticGlowParticle;
 import net.blay09.mods.balm.api.client.rendering.BalmRenderers;
@@ -33,6 +34,10 @@ public class ModRenderers {
         renderers.registerParticleProvider(ModParticles.orangePingId, () -> ModParticles.orangePing, StaticGlowParticle.Provider::new );
             
         renderers.registerParticleProvider(ModParticles.hoverOrangeId, () -> ModParticles.hoverOrange, EndRodParticle.Provider::new );
+
+        //Block Entity Renderers
+        renderers.registerBlockEntityRenderer( id("satellite_controller_block_entity"),
+            ModBlockEntities.satelliteControllerBlockEntity::get, SatelliteControllerRenderer::new );
     }
 
     private static ResourceLocation id(String name) {
