@@ -29,7 +29,8 @@ public class SatelliteMain {
         // LoggerProject.logInit( "001000", this.getClass().getName() ); // Uncomment if you have a logging system in place
     }
 
-    void init(EventRegistrar reg)
+
+    static void init(EventRegistrar reg)
     {
 
         /*
@@ -39,18 +40,17 @@ public class SatelliteMain {
             .withForge("com.holybuckets.challengetemple.externalapi.ForgePortalApi")
             .build();
             */
-        this.chiselBitsApi = (ChiselBitsAPI) Balm.platformProxy()
+        INSTANCE.chiselBitsApi = (ChiselBitsAPI) Balm.platformProxy()
             .withForge("com.holybuckets.satellite.externalapi.ChiselBitsAPIForge")
             .build();
 
         //Events
         SatelliteManager.init(reg);
         ChiselBitsAPI.init(reg);
-
-
+        
 
         //register local events
-        reg.registerOnBeforeServerStarted(this::onServerStarting, EventPriority.Highest);
+        reg.registerOnBeforeServerStarted(INSTANCE::onServerStarting, EventPriority.Highest);
 
     }
 

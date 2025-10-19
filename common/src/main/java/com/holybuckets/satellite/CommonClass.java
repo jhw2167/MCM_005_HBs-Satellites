@@ -40,6 +40,10 @@ public class CommonClass {
         Balm.getConfig().registerConfig(SatelliteConfig.class);
 
         SatelliteMain.INSTANCE = new SatelliteMain();
+        EventRegistrar reg = EventRegistrar.getInstance();
+        SatelliteMain.init(reg);
+        ModConfig.init(reg);
+
         BalmEventRegister.registerEvents();
         BalmEventRegister.registerCommands();
         ModBlocks.initialize(Balm.getBlocks());
@@ -48,10 +52,6 @@ public class CommonClass {
         ModMenus.initialize(Balm.getMenus());
         ModParticles.initialize(Balm.getParticles());
         ModNetworking.initialize();
-
-        EventRegistrar reg = EventRegistrar.getInstance();
-        SatelliteMain.INSTANCE.init(reg);
-        ModConfig.init(reg);
         
         isInitialized = true;
     }

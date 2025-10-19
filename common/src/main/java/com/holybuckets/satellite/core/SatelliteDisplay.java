@@ -569,12 +569,14 @@ public class SatelliteDisplay {
     //** STATICS
 
     public static void init(EventRegistrar reg) {
-        reg.registerOnServerTick(TickType.ON_20_TICKS , SatelliteDisplay::onServerTick);
-        reg.registerOnServerStopped((event) -> INFO_CACHE.clear());
-        reg.registerOnBeforeServerStarted(SatelliteDisplay::onBeforeServerStarted, EventPriority.Lowest);
 
         //Player Events
         reg.registerOnUseBlock(SatelliteDisplay::onBlockUsed);
+
+        //Server
+        reg.registerOnBeforeServerStarted(SatelliteDisplay::onBeforeServerStarted, EventPriority.Lowest);
+        reg.registerOnServerTick(TickType.ON_20_TICKS , SatelliteDisplay::onServerTick);
+        reg.registerOnServerStopped((event) -> INFO_CACHE.clear());
     }
 
 
