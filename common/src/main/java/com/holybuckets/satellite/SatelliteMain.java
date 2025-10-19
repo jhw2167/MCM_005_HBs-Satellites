@@ -47,7 +47,7 @@ public class SatelliteMain {
         //Events
         SatelliteManager.init(reg);
         ChiselBitsAPI.init(reg);
-        
+
 
         //register local events
         reg.registerOnBeforeServerStarted(INSTANCE::onServerStarting, EventPriority.Highest);

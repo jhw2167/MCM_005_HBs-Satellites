@@ -272,7 +272,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     }
 
     private static int PLAYER_UI_REFRESH_TICKS = 4;
-    private static int REACH_DIST_BLOCKS = 3;
+    public static int REACH_DIST_BLOCKS = 3;
     private void renderPlayerUI()
     {
         //Get all players within 64 blocks

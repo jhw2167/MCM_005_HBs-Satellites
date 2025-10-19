@@ -2,9 +2,11 @@ package com.holybuckets.satellite.client;
 
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.RenderType;
@@ -39,45 +41,48 @@ public class SatelliteRenderer implements BlockEntityRenderer<SatelliteBlockEnti
         float maxY = 0.175f;
         float offset = 0.01f;
 
+        int light = LightTexture.FULL_BRIGHT;
+        int overlay = OverlayTexture.NO_OVERLAY;
+
         // North face
         builder.vertex(matrix, minX, minY, -offset)
-            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 0, 0, -1).endVertex();
+            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
         builder.vertex(matrix, maxX, minY, -offset)
-            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 0, 0, -1).endVertex();
+            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
         builder.vertex(matrix, maxX, maxY, -offset)
-            .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 0, 0, -1).endVertex();
+            .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
         builder.vertex(matrix, minX, maxY, -offset)
-            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 0, 0, -1).endVertex();
+            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
 
         // South face
         builder.vertex(matrix, minX, minY, 1 + offset)
-            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 0, 0, 1).endVertex();
+            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
         builder.vertex(matrix, maxX, minY, 1 + offset)
-            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 0, 0, 1).endVertex();
+            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
         builder.vertex(matrix, maxX, maxY, 1 + offset)
-            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 0, 0, 1).endVertex();
+            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
         builder.vertex(matrix, minX, maxY, 1 + offset)
-            .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 0, 0, 1).endVertex();
+            .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
 
         // West face
         builder.vertex(matrix, -offset, minY, minX)
-            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, -1, 0, 0).endVertex();
+            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
         builder.vertex(matrix, -offset, minY, maxX)
-            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, -1, 0, 0).endVertex();
+            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
         builder.vertex(matrix, -offset, maxY, maxX)
-            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, -1, 0, 0).endVertex();
+            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
         builder.vertex(matrix, -offset, maxY, minX)
-            .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, -1, 0, 0).endVertex();
+            .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
 
         // East face
         builder.vertex(matrix, 1 + offset, minY, minX)
-            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 1, 0, 0).endVertex();
+            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
         builder.vertex(matrix, 1 + offset, minY, maxX)
-            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 1, 0, 0).endVertex();
+            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
         builder.vertex(matrix, 1 + offset, maxY, maxX)
-            .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 1, 0, 0).endVertex();
+            .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
         builder.vertex(matrix, 1 + offset, maxY, minX)
-            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(packedOverlay).uv2(packedLight).normal(normal, 1, 0, 0).endVertex();
+            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
 
         poseStack.popPose();
     }

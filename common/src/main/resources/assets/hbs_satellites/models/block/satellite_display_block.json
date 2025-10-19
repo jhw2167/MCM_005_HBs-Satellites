@@ -2,7 +2,7 @@
   "parent": "block/cube",
   "textures": {
     "particle": "hbs_satellites:block/satellite_display_block",
-    "down": "hbs_satellites:block/satellite_block_bottom",
+    "down": "hbs_satellites:block/satellite_display_block",
     "up": "hbs_satellites:block/satellite_display_block_top",
     "north": "hbs_satellites:block/satellite_display_block",
     "east": "hbs_satellites:block/satellite_display_block",

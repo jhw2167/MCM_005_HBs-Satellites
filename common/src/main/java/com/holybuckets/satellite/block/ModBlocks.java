@@ -22,8 +22,8 @@ public class ModBlocks {
 
     public static void initialize(BalmBlocks blocks) {
         //blocks.register(() -> templateBlock = new EmptyBlock(defaultProperties()), () -> itemBlock(templateBlock), id("template_block"));
-        blocks.register(() -> holoBaseBlock = new HoloBaseBlock(HoloBaseBlock.HOLO_BASE_PROPERTIES), () -> itemBlock(holoBaseBlock), id("holo_base_block"));
-        blocks.register(() -> holoDarkBlock = new HoloBaseBlock(HoloBaseBlock.HOLO_BASE_PROPERTIES), () -> itemBlock(holoDarkBlock), id("holo_dark_block"));
+        blocks.register(() -> holoBaseBlock = new HoloBlock(HoloBaseBlock.HOLO_BASE_PROPERTIES), () -> itemBlock(holoBaseBlock), id("holo_base_block"));
+        blocks.register(() -> holoDarkBlock = new HoloBlock(HoloBaseBlock.HOLO_BASE_PROPERTIES), () -> itemBlock(holoDarkBlock), id("holo_dark_block"));
         blocks.register(() -> holoAirBlock = new HoloBaseBlock(HoloBaseBlock.HOLO_AIR_PROPERTIES), () -> itemBlock(holoAirBlock), id("holo_air_block"));
         blocks.register(() -> satelliteBlock = new SatelliteBlock(), () -> itemBlock(satelliteBlock), id("satellite_block"));
         blocks.register(() -> satelliteControllerBlock = new SatelliteControllerBlock(), () -> itemBlock(satelliteControllerBlock), id("satellite_controller_block"));

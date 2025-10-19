@@ -50,8 +50,8 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
         float u1 = woolSprite.getU1();
         float v1 = woolSprite.getV1();
 
-        int light = packedLight; // Use the light passed to the method
-        int overlay = packedOverlay;
+        int light = LightTexture.FULL_BRIGHT;
+        int overlay = OverlayTexture.NO_OVERLAY;
 
         Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 

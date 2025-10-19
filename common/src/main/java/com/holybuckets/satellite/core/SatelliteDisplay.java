@@ -6,7 +6,6 @@ import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.TickType;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.api.ChiselBitsAPI;
-import com.holybuckets.satellite.block.HoloBaseBlock;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
@@ -35,6 +34,8 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.blay09.mods.balm.api.event.UseBlockEvent;
+//import mod.chiselsandbits.api.item.chiseled;
 
 import java.util.*;
 
@@ -646,10 +647,13 @@ public class SatelliteDisplay {
 
         BlockHitResult res = useBlockEvent.getHitResult();
         BlockPos pos = res.getBlockPos();
-        if( !level.getBlockState(pos).is(ModBlocks.holoBaseBlock) ) return;
+        if( !SatelliteMain.chiselBitsApi.isViewingHoloBlock(level, res) ) return;
 
         BlockPos displayBlockPos = pos.below();
-        while(level.getBlockState(displayBlockPos).getBlock() instanceof HoloBaseBlock) {
+        int dDepth = 0;
+        while( dDepth++ < MAX_DEPTH ) {
+            if(level.getBlockState(displayBlockPos).is(ModBlocks.satelliteDisplayBlock) )
+                break;
             displayBlockPos = displayBlockPos.below();
         }
 
