@@ -33,7 +33,7 @@ public class SatelliteConfig {
 
     @NestedType(String.class)
     @Comment("Entity types produce red ping on the satellite display")
-    public Set<String> hostileEntityTypes = Set.of("minecraft:zombie", "minecraft:skeleton", "minecraft:creeper", "minecraft:spider", "minecraft:enderman", "minecraft:wither_skeleton", "minecraft:husk", "minecraft:stray", "minecraft:drowned", "minecraft:phantom", "minecraft:evoker", "minecraft:vindicator", "minecraft:ravager", "minecraft:pillager", "minecraft:witch", "minecraft:blaze", "minecraft:magma_cube", "minecraft:ghast", "minecraft:endermite", "minecraft:silverfish", "minecraft:cave_spider");
+    public Set<String> hostileEntityTypes = Set.of("minecraft:zombie", "minecraft:zombie_villager", "minecraft:skeleton", "minecraft:creeper", "minecraft:spider", "minecraft:enderman", "minecraft:wither_skeleton", "minecraft:husk", "minecraft:stray", "minecraft:drowned", "minecraft:phantom", "minecraft:evoker", "minecraft:vindicator", "minecraft:ravager", "minecraft:pillager", "minecraft:witch", "minecraft:blaze", "minecraft:magma_cube", "minecraft:ghast", "minecraft:endermite", "minecraft:silverfish", "minecraft:cave_spider");
 
     @NestedType(String.class)
     @Comment("Entity types produce a white ping")

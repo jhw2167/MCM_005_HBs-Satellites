@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.core;
 
 
+import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -140,15 +141,15 @@ public class ChunkDisplayInfo {
             info.target = e;
             info.others.add(e);
             localEntities.put(e.getType(), info);
-            return true;
+            return false;
         }
 
         info.others.add(e);
         if(info.target == null) {
             info.target = e;
-            return true;
+            return false;
         }
-        return false;
+        return info.others.size() >= SatelliteMain.CONFIG.minHerdCountThreshold;
     }
 
     public void clearEntities() {

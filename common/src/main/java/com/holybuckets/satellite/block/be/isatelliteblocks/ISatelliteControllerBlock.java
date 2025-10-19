@@ -1,6 +1,6 @@
 package com.holybuckets.satellite.block.be.isatelliteblocks;
 
-import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
+import com.holybuckets.satellite.core.SatelliteDisplay;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,13 +12,15 @@ import net.minecraft.world.phys.Vec3;
  */
 public interface ISatelliteControllerBlock extends ISatelliteDisplayBlock {
 
+    BlockPos getUiPosition();
+
     TextureAtlasSprite getDisplayColor();
 
     int getColorId();
 
     void setColorId(int colorId);
 
-    void setSatellite(SatelliteBlockEntity satellite);
+    void setSource(SatelliteDisplay display);
 
 
     float ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD = 0.7f;

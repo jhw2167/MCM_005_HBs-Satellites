@@ -4,11 +4,13 @@ import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
 import com.holybuckets.satellite.core.SatelliteManager;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -57,9 +59,20 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBlock
     }
 
     @Override
+    public TextureAtlasSprite getDisplayColor() {
+        TextureAtlasSprite s = SatelliteManager.getColor(this.colorId);
+        if(s == null) {
+            this.setColorId(0);
+            return SatelliteManager.getColor(0);
+        }
+        return s;
+    }
+
+    @Override
     public void setColorId(int colorId) {
         SatelliteManager.remove(this.colorId);
         this.colorId = colorId;
+        this.markUpdated();
     }
 
     public void onDestroyed() {
@@ -80,4 +93,39 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBlock
     public void setLevelChunk(LevelChunk chunk) {
         this.currentChunk = chunk;
     }
+
+
+    //** Serialization
+
+    @Override
+    protected void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
+        tag.putInt("colorId", colorId);
+    }
+
+    @Override
+    public void load(CompoundTag tag) {
+        super.load(tag);
+        colorId = tag.getInt("colorId");
+    }
+
+    //** Networking
+    private void markUpdated() {
+        this.setChanged();
+        if(this.level == null) return;
+        level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        CompoundTag tag = super.getUpdateTag();
+        this.saveAdditional(tag);
+        return tag;
+    }
+
 }

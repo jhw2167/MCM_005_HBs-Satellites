@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -21,6 +22,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
@@ -29,6 +31,7 @@ import static com.holybuckets.satellite.SatelliteMain.chiselBitsApi;
 public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBlock
 {
     int colorId;
+    BlockPos selectedPosition;
     BlockPos satelliteTargetPos;
     SatelliteBlockEntity linkedSatellite;
     boolean forceDisplayUpdates;
@@ -58,6 +61,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public SatelliteControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.satelliteControllerBlockEntity.get(), pos, state);
         this.setColorId(0);
+        this.selectedPosition = BlockPos.ZERO;
         this.forceDisplayUpdates = false;
         this.linkedSatellite = null;
         this.satelliteTargetPos = null;
@@ -65,6 +69,16 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         commands = new Commands();
     }
 
+
+    @Override
+    public BlockPos getUiPosition() {
+        return selectedPosition;
+    }
+
+    public void setUiPosition(BlockPos blockTarget) {
+        this.selectedPosition = blockTarget;
+        markUpdated();
+    }
 
     @Override
     public TextureAtlasSprite getDisplayColor() {
@@ -84,15 +98,14 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     @Override
     public void setColorId(int colorId) {
         this.colorId = colorId;
+        this.markUpdated();
     }
 
+
     @Override
-    public void setSatellite(SatelliteBlockEntity satellite) {
-
-        if(this.source != null) this.source.clear();
-        this.source = new SatelliteDisplay(level, this.linkedSatellite, this);
-        this.source.add(this.getBlockPos(), this);
-
+    public void setSource(SatelliteDisplay source)
+    {
+        this.source = source;
         this.forceUpdate();
         if(this.linkedSatellite != null) {
             this.satelliteTargetPos = this.linkedSatellite.getBlockPos();
@@ -194,7 +207,9 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         if(this.linkedSatellite != SatelliteManager.get(this.colorId)) {
             this.linkedSatellite = SatelliteManager.get(this.colorId);
-            setSatellite(this.linkedSatellite);
+            SatelliteDisplay source = SatelliteManager.generateSource(this.level,
+                this.linkedSatellite, this);
+            setSource(source);
         }
 
 
@@ -330,10 +345,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.source.collectEntities();
     }
 
+    //** Serialization
+
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putInt("colorId", colorId);
+        tag.putString("blockTargetPos", HBUtil.BlockUtil.positionToString(selectedPosition));
         if(satelliteTargetPos != null) {
             String pos = HBUtil.BlockUtil.positionToString(satelliteTargetPos);
             tag.putString("satelliteTargetPos", pos);
@@ -344,11 +362,32 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void load(CompoundTag tag) {
         super.load(tag);
         colorId = tag.getInt("colorId");
+        String targetPosStr = tag.getString("blockTargetPos");
+        selectedPosition = new BlockPos( HBUtil.BlockUtil.stringToBlockPos(targetPosStr) );
         if(tag.contains("satelliteTargetPos")) {
             String pos = tag.getString("satelliteTargetPos");
             satelliteTargetPos = new BlockPos( HBUtil.BlockUtil.stringToBlockPos(pos) );
         }
     }
 
+    //** Networking
+
+    private void markUpdated() {
+        this.setChanged();
+        if(this.level == null) return;
+        level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+    }
+
+    @Override
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        CompoundTag tag = super.getUpdateTag();
+        this.saveAdditional(tag);
+        return tag;
+    }
 
 }

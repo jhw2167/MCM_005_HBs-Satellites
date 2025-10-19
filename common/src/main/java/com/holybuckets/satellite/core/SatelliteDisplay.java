@@ -6,6 +6,8 @@ import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.TickType;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.api.ChiselBitsAPI;
+import com.holybuckets.satellite.block.HoloBaseBlock;
+import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
@@ -15,8 +17,10 @@ import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.particle.ModParticles;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.blay09.mods.balm.api.event.EventPriority;
+import net.blay09.mods.balm.api.event.UseBlockEvent;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -44,7 +48,6 @@ public class SatelliteDisplay {
 
     private static Map<TripleInt, ChunkDisplayInfo> INFO_CACHE = new LinkedHashMap<>();
 
-
     Level level;
     SatelliteBlockEntity satellite;
     SatelliteControllerBlockEntity controller;
@@ -63,6 +66,8 @@ public class SatelliteDisplay {
     private int maxZ = Integer.MIN_VALUE;
 
     private static SatelliteConfig CONFIG;
+    public int lifetime;
+    private Vec3 cursorPos;
 
     public SatelliteDisplay(Level level, SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller)
     {
@@ -143,6 +148,39 @@ public class SatelliteDisplay {
         if(temp < 1 || temp > 4) return;
         this.depth += dDepth;
         this.needsUpdate = true;
+    }
+
+    private void setPosition()
+    {
+        if(this.controller == null) return;
+        //Convert cursorPos to overworld block position using offsets
+        //calculate chunkOffset from satellite, then blockOffset from fractional cursorPos
+
+        Vec3i holoBlock = new Vec3i((int)cursorPos.x, (int) cursorPos.y, (int) cursorPos.z);
+        Vec3i controllerOffset = controller.getBlockPos().subtract(holoBlock);
+        //Calculate chunk offset from satellite position considering controller offset and any ordinal shifts
+        Vec3i chunkSecOffset = new Vec3i(
+            target.x + controllerOffset.getX(),
+            ( currentSection - depth ) - controllerOffset.getY(),
+            target.z + controllerOffset.getZ()
+        );
+
+        Vec3 blockOffset = new Vec3(
+            (cursorPos.x - holoBlock.getX()) * 16,
+            (cursorPos.y - holoBlock.getY()) * 16,
+            (cursorPos.z - holoBlock.getZ()) * 16
+        );
+
+        int yOffset = HBUtil.WorldPos.sectionIndexToYMin(chunkSecOffset.getY(),
+         this.level.getMinBuildHeight() ) + (int) blockOffset.y;
+        BlockPos blockTarget = level.getChunk(chunkSecOffset.getX(), chunkSecOffset.getZ())
+            .getPos().getBlockAt(
+                (int) blockOffset.x,
+                (int) yOffset,
+                (int) blockOffset.z
+            );
+
+        this.controller.setUiPosition(blockTarget);
     }
 
     public void resetChunkSection()
@@ -252,7 +290,8 @@ public class SatelliteDisplay {
         return displayBlocks.containsKey(blockPos);
     }
 
-    public void clear() {
+    public void clear()
+    {
         displayBlocks.clear();
         minX = Integer.MAX_VALUE;
         maxX = Integer.MIN_VALUE;
@@ -298,10 +337,7 @@ public class SatelliteDisplay {
     }
 
 
-    public void addEntity(Entity e) {
-        if(e == null) return;
-        displayEntities.add(e);
-    }
+    //** Render Methods
 
     /**
      * Collects all entities in all observed chunks in this area
@@ -397,7 +433,6 @@ public class SatelliteDisplay {
 
     }
 
-        private static HashSet<EntityType<?>> BLACKLISTED_ENTITIES = new HashSet<>();
         private boolean entityPredicate(Entity e) {
             if( !(e instanceof LivingEntity) || !e.isAlive() || e.isRemoved() || displayEntities.contains(e) ) return false;
             if( e instanceof ServerPlayer ) return false;
@@ -408,11 +443,21 @@ public class SatelliteDisplay {
             else if(ModConfig.getHerdEntities().contains(e.getType())) {}
             else return false;
 
-            //ChunkDisplayInfo info = INFO_CACHE.get(new TripleInt(e.chunkPosition().x, currentSection, e.chunkPosition().z ));
-            //return info.acceptLocalEntity(e);
+            if( ModConfig.getHerdEntities().contains(e.getType()) ) {
+                ChunkDisplayInfo info = INFO_CACHE.get(new TripleInt(e.chunkPosition().x, currentSection, e.chunkPosition().z ));
+                return info.acceptLocalEntity(e);
+            }
             return true;
         }
 
+        public void addEntity(Entity e) {
+            if(e == null) return;
+            displayEntities.add(e);
+        }
+
+        private static ParticleOptions getParticleType(Entity e) {
+            return PARTICLE_TYPE_MAP.getOrDefault(e.getType(), ParticleTypes.MYCELIUM );
+        }
 
 
     final static float RENDER_SCALE = 0.0625f; // 1/16
@@ -476,7 +521,7 @@ public class SatelliteDisplay {
     public void renderUI(ServerPlayer p, BlockHitResult hitResult)
     {
         //Render flame particle effect at cursor
-        Vec3 cursorPos = hitResult.getLocation();
+        cursorPos = hitResult.getLocation();
         BlockPos blockPos = hitResult.getBlockPos();
 
         int color = ChiselBitsAPI.DEMARCATOR(p);
@@ -526,12 +571,14 @@ public class SatelliteDisplay {
     public static void init(EventRegistrar reg) {
         reg.registerOnServerTick(TickType.ON_20_TICKS , SatelliteDisplay::onServerTick);
         reg.registerOnServerStopped((event) -> INFO_CACHE.clear());
-        reg.registerOnBeforeServerStarted(SatelliteDisplay::loadParticleTypes, EventPriority.Lowest);
+        reg.registerOnBeforeServerStarted(SatelliteDisplay::onBeforeServerStarted, EventPriority.Lowest);
+
+        //Player Events
+        reg.registerOnUseBlock(SatelliteDisplay::onBlockUsed);
     }
 
-    private static ParticleOptions getParticleType(Entity e) {
-        return PARTICLE_TYPE_MAP.getOrDefault(e.getType(), ParticleTypes.MYCELIUM );
-    }
+
+    //** EVENTS
 
     private static final int MAX_LIFETIME = 300; // 300s
     private static void onServerTick(ServerTickEvent event) {
@@ -560,9 +607,14 @@ public class SatelliteDisplay {
         }
     }
 
-    private static Map<EntityType, ParticleOptions > PARTICLE_TYPE_MAP = new HashMap<>();
-    private static void loadParticleTypes(ServerStartingEvent  event) {
+    private static void onBeforeServerStarted(ServerStartingEvent event) {
+        INFO_CACHE.clear();
+        loadParticleTypes();
+    }
 
+    private static Map<EntityType, ParticleOptions > PARTICLE_TYPE_MAP = new HashMap<>();
+    private static void loadParticleTypes()
+    {
         //For all entities in registry, test if it is hostile mob, the load as ParticleTypes.FLAME
         for(EntityType et : ModConfig.getHostileEntities()) {
             PARTICLE_TYPE_MAP.put(et, ModParticles.redPing);
@@ -584,6 +636,26 @@ public class SatelliteDisplay {
         PARTICLE_TYPE_MAP.put(EntityType.SLIME, ParticleTypes.ITEM_SLIME);
     }
 
+    private static void onBlockUsed(UseBlockEvent useBlockEvent)
+    {
 
+        Level level = useBlockEvent.getLevel();
+        if(level == null || !(level instanceof ServerLevel)) return;
+
+        BlockHitResult res = useBlockEvent.getHitResult();
+        BlockPos pos = res.getBlockPos();
+        if( !level.getBlockState(pos).is(ModBlocks.holoBaseBlock) ) return;
+
+        BlockPos displayBlockPos = pos.below();
+        while(level.getBlockState(displayBlockPos).getBlock() instanceof HoloBaseBlock) {
+            displayBlockPos = displayBlockPos.below();
+        }
+
+        if( level.getBlockEntity(displayBlockPos) instanceof SatelliteDisplayBlockEntity displayBlockEntity ) {
+            SatelliteDisplay source = displayBlockEntity.getSource();
+            if(source != null) { source.setPosition(); }
+        }
+
+    }
 
 }

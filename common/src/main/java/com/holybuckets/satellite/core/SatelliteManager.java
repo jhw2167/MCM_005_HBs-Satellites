@@ -1,6 +1,5 @@
 package com.holybuckets.satellite.core;
 
-import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
@@ -9,6 +8,7 @@ import com.holybuckets.foundation.model.ManagedChunk;
 import com.holybuckets.foundation.model.ManagedChunkUtility;
 import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
+import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -19,7 +19,6 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -28,7 +27,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
@@ -36,12 +34,32 @@ public class SatelliteManager {
 
     /** Maps colorId to satellite block entity */
     public static final IntObjectHashMap<SatelliteBlockEntity> SATELLITES = new IntObjectHashMap<>(24);
+    public static final Map<SourceKey, SatelliteDisplay> DISPLAY_SOURCES = new HashMap<>();
 
     private static final Long2ObjectMap<CachedChunkInfo> CHUNK_CACHE = new Long2ObjectOpenHashMap<>(128);
     private static final int MAX_CHUNK_LIFETIME = 300; // 300 seconds
+    private static final int MAX_DISPLAY_LIFETIME = 300; // 300 seconds
 
     private static final List<Block> WOOL_IDS = new ArrayList<>(64);
 
+    private static class SourceKey {
+        SatelliteBlockEntity satellite;
+        SatelliteControllerBlockEntity controller;
+
+        SourceKey(SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller) {
+            this.satellite = satellite;
+            this.controller = controller;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof SourceKey)) return false;
+            SourceKey other = (SourceKey) obj;
+            return Objects.equals(satellite, other.satellite) &&
+                   Objects.equals(controller, other.controller);
+        }
+    }
 
     private static class CachedChunkInfo {
         LevelChunk chunk;
@@ -100,6 +118,20 @@ public class SatelliteManager {
     }
 
 
+    public static SatelliteDisplay generateSource(Level level, SatelliteBlockEntity satellite,
+         SatelliteControllerBlockEntity controller)
+    {
+        SourceKey key = new SourceKey(satellite, controller);
+        SatelliteDisplay satelliteDisplay = DISPLAY_SOURCES.get(key);
+        if(satelliteDisplay != null) return satelliteDisplay;
+
+        satelliteDisplay = new SatelliteDisplay(level, satellite, controller);
+        satelliteDisplay.add(controller.getBlockPos(), controller);
+        DISPLAY_SOURCES.put(key, satelliteDisplay);
+        return satelliteDisplay;
+    }
+
+
     //** Events
     private static void onServerStarting(ServerStartingEvent event)
     {
@@ -140,9 +172,30 @@ public class SatelliteManager {
         CHUNK_CACHE.clear();
     }
 
-    private static void onServerTick(ServerTickEvent event) {
+    private static void onServerTick(ServerTickEvent event)
+    {
+        //Check lifetime of sources
+        Iterator<Map.Entry<SourceKey, SatelliteDisplay>> sourceIterator = DISPLAY_SOURCES.entrySet().iterator();
+        while (sourceIterator.hasNext())
+        {
+            Map.Entry<SourceKey, SatelliteDisplay> entry = sourceIterator.next();
+            SatelliteDisplay display = entry.getValue();
+            if(display == entry.getKey().controller.getSource()) {
+                display.lifetime = 0; // Reset lifetime if any display is actively used
+                continue;
+            }
+            display.lifetime++;
+
+            if (display.lifetime > MAX_DISPLAY_LIFETIME) {
+                display.clear();
+                sourceIterator.remove();
+            }
+        }
+
+
         var iterator = CHUNK_CACHE.values().iterator();
-        while (iterator.hasNext()) {
+        while (iterator.hasNext())
+        {
             CachedChunkInfo info = iterator.next();
             if(SatelliteDisplay.hasActiveDisplay(info.chunk)) {
                 info.lifetime = 0; // Reset lifetime if chunk is actively used
