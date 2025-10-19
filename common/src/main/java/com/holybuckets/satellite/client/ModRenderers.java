@@ -38,6 +38,8 @@ public class ModRenderers {
         //Block Entity Renderers
         renderers.registerBlockEntityRenderer( id("satellite_controller_block_entity"),
             ModBlockEntities.satelliteControllerBlockEntity::get, SatelliteControllerRenderer::new );
+        renderers.registerBlockEntityRenderer( id("satellite_block_entity"),
+            ModBlockEntities.satelliteBlockEntity::get, SatelliteRenderer::new );
     }
 
     private static ResourceLocation id(String name) {
