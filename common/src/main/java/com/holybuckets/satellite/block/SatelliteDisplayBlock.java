@@ -18,9 +18,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nullable;
 
 public class SatelliteDisplayBlock extends Block implements EntityBlock {
+    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     
     public SatelliteDisplayBlock() {
         super(Properties.copy(Blocks.IRON_BLOCK));
+        registerDefaultState(this.stateDefinition.any().setValue(POWERED, false));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(POWERED);
     }
 
     @Override
