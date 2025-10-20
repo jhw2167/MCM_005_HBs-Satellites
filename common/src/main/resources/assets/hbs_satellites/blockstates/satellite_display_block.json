@@ -1,12 +1,5 @@
 {
   "variants": {
-    "": {
-      "model": "hbs_satellites:block/satellite_display_block"
-    }
-  }
-}
-{
-  "variants": {
     "powered=false": {
       "model": "hbs_satellites:block/satellite_display_block"
     },
