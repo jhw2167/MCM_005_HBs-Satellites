@@ -182,6 +182,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             this.source.resetOrdinal();
         }
         this.forceUpdate();
+        updateBlockState();
     }
 
 
@@ -379,6 +380,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.setChanged();
         if(this.level == null) return;
         level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+        updateBlockState();
     }
 
     @Override
@@ -391,6 +393,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         CompoundTag tag = super.getUpdateTag();
         this.saveAdditional(tag);
         return tag;
+    }
+
+    private void updateBlockState() {
+        if(this.level == null) return;
+        BlockState state = this.getBlockState();
+        BlockState newState = state.setValue(SatelliteControllerBlock.POWERED, this.isDisplayOn);
+        level.setBlock(this.getBlockPos(), newState, 3);
     }
 
 }
