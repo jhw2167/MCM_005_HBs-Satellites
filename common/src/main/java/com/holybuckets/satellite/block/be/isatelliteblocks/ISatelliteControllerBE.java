@@ -1,7 +1,6 @@
 package com.holybuckets.satellite.block.be.isatelliteblocks;
 
 import com.holybuckets.satellite.core.SatelliteDisplay;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.BlockHitResult;
@@ -10,11 +9,9 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Controller block has a color id set by the player and can link to a satellite
  */
-public interface ISatelliteControllerBlock extends ISatelliteDisplayBlock {
+public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
 
     BlockPos getUiPosition();
-
-    TextureAtlasSprite getDisplayColor();
 
     int getColorId();
 
@@ -25,7 +22,7 @@ public interface ISatelliteControllerBlock extends ISatelliteDisplayBlock {
 
     float ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD = 0.7f;
     float ORDINAL_COORD_BLOCK_HORZ_LEFT_THRESHOLD = 0.3f;
-    float ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD = 0.7f;
+    float ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD = 0.8f;
     float ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD = 0.2f;
     float ORDINAL_COORD_BUFFER_V = 0.25f;
     float ORDINAL_COORD_BUFFER_H = 0.25f;
@@ -93,7 +90,7 @@ public interface ISatelliteControllerBlock extends ISatelliteDisplayBlock {
 
         } else { // Quadrant 4:  Four directional panels (N/S/E/W)
             double upThreshold = ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD - ORDINAL_COORD_BUFFER_V;
-            double downThreshold = ORDINAL_COORD_BUFFER_V;
+            double downThreshold = ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD + ORDINAL_COORD_BUFFER_V;
             double leftThreshold = ORDINAL_COORD_BUFFER_H;
             double rightThreshold = ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD - ORDINAL_COORD_BUFFER_H;
             int input = 0;

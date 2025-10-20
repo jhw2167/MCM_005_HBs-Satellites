@@ -5,12 +5,10 @@ import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.TickType;
 import com.holybuckets.satellite.SatelliteMain;
-import com.holybuckets.satellite.api.ChiselBitsAPI;
-import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
-import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.particle.ModParticles;
@@ -34,7 +32,6 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-//import mod.chiselsandbits.api.item.chiseled;
 
 import java.util.*;
 
@@ -48,9 +45,9 @@ public class SatelliteDisplay {
 
     private static Map<TripleInt, ChunkDisplayInfo> INFO_CACHE = new LinkedHashMap<>();
 
-    Level level;
-    SatelliteBlockEntity satellite;
-    SatelliteControllerBlockEntity controller;
+    protected Level level;
+    protected SatelliteControllerBlockEntity controller;
+    private SatelliteBlockEntity satellite;
     int zOffset;
     int xOffset;
     ChunkPos target;
@@ -58,17 +55,22 @@ public class SatelliteDisplay {
     int maxSection;
     int depth;
     boolean needsUpdate;
-    Map<BlockPos, ISatelliteDisplayBlock> displayBlocks;
+    protected Map<BlockPos, ISatelliteDisplayBE> displayBlocks;
     Set<Entity> displayEntities;
-    private int minX = Integer.MAX_VALUE;
-    private int maxX = Integer.MIN_VALUE;
-    private int minZ = Integer.MAX_VALUE;
-    private int maxZ = Integer.MIN_VALUE;
+    protected int minX = Integer.MAX_VALUE;
+    protected int maxX = Integer.MIN_VALUE;
+    protected int minZ = Integer.MAX_VALUE;
+    protected int maxZ = Integer.MIN_VALUE;
 
-    private static SatelliteConfig CONFIG;
+    protected static SatelliteConfig CONFIG;
     public int lifetime;
     private BlockHitResult cursorPos;
     private BlockHitResult cursorSelection;
+
+    //For Child client
+    protected SatelliteDisplay(Level level,SatelliteControllerBlockEntity controller) {
+        this(level, null, controller);
+    }
 
     public SatelliteDisplay(Level level, SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller)
     {
@@ -104,8 +106,8 @@ public class SatelliteDisplay {
 
     public void adjOrdinal(int dNS, int dEW) {
         if(noSource() || this.satellite == null) return;
-        zOffset -= dNS;
-        xOffset -= dEW;
+        zOffset += dNS;
+        xOffset += dEW;
         ChunkPos satellitePos = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
         this.target = new ChunkPos(satellitePos.x + xOffset, satellitePos.z + zOffset);
         this.needsUpdate = true;
@@ -173,7 +175,7 @@ public class SatelliteDisplay {
             (hitLoc.z - holoBlock.getZ()) * 16
         );
 
-        int yOffset = HBUtil.WorldPos.sectionIndexToYMin(chunkSecOffset.getY(),
+        int yOffset = HBUtil.WorldPos.sectionIndexToY(chunkSecOffset.getY(),
          this.level.getMinBuildHeight() ) + (int) blockOffset.y;
         BlockPos blockTarget = level.getChunk(chunkSecOffset.getX(), chunkSecOffset.getZ())
             .getPos().getBlockAt(
@@ -233,7 +235,7 @@ public class SatelliteDisplay {
 
     public boolean noSource() { return satellite == null; }
 
-    public void add(BlockPos blockPos, ISatelliteDisplayBlock displayBlock) {
+    public void add(BlockPos blockPos, ISatelliteDisplayBE displayBlock) {
         displayBlocks.put(blockPos, displayBlock);
         updateBounds(blockPos);
     }
@@ -278,7 +280,7 @@ public class SatelliteDisplay {
         return true;
     }
 
-    public void addAll(Map<BlockPos, ISatelliteDisplayBlock> blocks) {
+    public void addAll(Map<BlockPos, ISatelliteDisplayBE> blocks) {
         displayBlocks.putAll(blocks);
         for (BlockPos pos : blocks.keySet()) {
             updateBounds(pos);
@@ -626,7 +628,7 @@ public class SatelliteDisplay {
         BlockPos displayBlockPos = pos.below();
         int dDepth = 0;
         while( dDepth++ < MAX_DEPTH ) {
-            if(level.getBlockEntity(displayBlockPos) instanceof ISatelliteDisplayBlock)
+            if(level.getBlockEntity(displayBlockPos) instanceof ISatelliteDisplayBE)
                 break;
             displayBlockPos = displayBlockPos.below();
         }

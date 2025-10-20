@@ -6,7 +6,6 @@ import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
-import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
@@ -218,6 +217,4 @@ public interface ChiselBitsAPI {
         return new Vec3(x, y, z);
     }
 
-    //Rendering
-    void renderUiSphere(Camera camera, PoseStack poseStack);
 }

@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.client;
 
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
+import com.holybuckets.satellite.core.SatelliteManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -10,6 +11,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
@@ -25,7 +27,8 @@ public class SatelliteRenderer implements BlockEntityRenderer<SatelliteBlockEnti
         poseStack.pushPose();
 
         VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
-        TextureAtlasSprite woolSprite = blockEntity.getDisplayColor();
+        ResourceLocation woolLoc = SatelliteManager.getResourceForColorId( blockEntity.getColorId() );
+        TextureAtlasSprite woolSprite = CommonClassClient.getSprite(woolLoc);
 
         Matrix4f matrix = poseStack.last().pose();
         Matrix3f normal = poseStack.last().normal();

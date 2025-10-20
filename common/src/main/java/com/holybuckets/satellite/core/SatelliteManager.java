@@ -18,7 +18,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -38,6 +37,7 @@ public class SatelliteManager {
     private static final int MAX_DISPLAY_LIFETIME = 300; // 300 seconds
 
     private static final List<Block> WOOL_IDS = new ArrayList<>(64);
+
 
     private static class SourceKey {
         SatelliteBlockEntity satellite;
@@ -68,6 +68,13 @@ public class SatelliteManager {
             this.lifetime = 0;
             this.forceLoaded = forceLoaded;
         }
+    }
+
+    //State variables
+    static boolean anyControllerOn;
+    boolean isServerSide;
+    public SatelliteManager() {
+        this.isServerSide = true;
     }
 
     public static void init(EventRegistrar reg) {
@@ -116,6 +123,7 @@ public class SatelliteManager {
     public static SatelliteDisplay generateSource(Level level, SatelliteBlockEntity satellite,
          SatelliteControllerBlockEntity controller)
     {
+        anyControllerOn = true;
         SourceKey key = new SourceKey(satellite, controller);
         SatelliteDisplay satelliteDisplay = DISPLAY_SOURCES.get(key);
         if(satelliteDisplay != null) return satelliteDisplay;
@@ -171,12 +179,14 @@ public class SatelliteManager {
     {
         //Check lifetime of sources
         Iterator<Map.Entry<SourceKey, SatelliteDisplay>> sourceIterator = DISPLAY_SOURCES.entrySet().iterator();
+        anyControllerOn = false;
         while (sourceIterator.hasNext())
         {
             Map.Entry<SourceKey, SatelliteDisplay> entry = sourceIterator.next();
             SatelliteDisplay display = entry.getValue();
             if(display == entry.getKey().controller.getSource()) {
                 display.lifetime = 0; // Reset lifetime if any display is actively used
+                anyControllerOn = true;
                 continue;
             }
             display.lifetime++;
@@ -257,7 +267,6 @@ public class SatelliteManager {
     }
 
     public static boolean isAnyControllerOn() {
-        return DISPLAY_SOURCES.values().stream()
-            .anyMatch(display -> display.controller != null && display.controller.isDisplayOn());
+        return  anyControllerOn;
     }
 }

@@ -1,8 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
-import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.satellite.SatelliteMain;
-import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import net.minecraft.core.BlockPos;
@@ -16,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Deque;
 import java.util.Random;
 
-public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelliteDisplayBlock, BlockEntityTicker<SatelliteDisplayBlockEntity> {
+public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelliteDisplayBE, BlockEntityTicker<SatelliteDisplayBlockEntity> {
 
     protected SatelliteDisplay source;
     protected Deque<ChunkDisplayInfo> displayInfo;
@@ -70,6 +69,16 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     }
 
     @Override
+    public int getHeight() {
+        return this.height;
+    }
+
+    @Override
+    public boolean isDisplayOn() {
+        return this.isDisplayOn;
+    }
+
+    @Override
     public SatelliteDisplay getSource() {
         return this.source;
     }
@@ -118,8 +127,9 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
 
         if(this.level.isClientSide) return;
-        if( source == null) return;
         ticks++;
+        if( source == null) return;
+
 
         if(source.noSource() || !source.contains(this.getBlockPos())) {
             this.clearDisplay();

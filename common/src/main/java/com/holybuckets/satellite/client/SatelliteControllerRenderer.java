@@ -1,26 +1,21 @@
 package com.holybuckets.satellite.client;
 
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
+import com.holybuckets.satellite.core.SatelliteManager;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.world.inventory.InventoryMenu;
 
 public class SatelliteControllerRenderer implements BlockEntityRenderer<SatelliteControllerBlockEntity> {
 
@@ -39,7 +34,9 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
         VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
 
         // Get texture
-        TextureAtlasSprite woolSprite = blockEntity.getDisplayColor();
+        ResourceLocation woolLoc = SatelliteManager.getResourceForColorId( blockEntity.getColorId() );
+        TextureAtlasSprite woolSprite = CommonClassClient.getSprite(woolLoc);
+
 
         Matrix4f matrix = poseStack.last().pose();
         Matrix3f normal = poseStack.last().normal();

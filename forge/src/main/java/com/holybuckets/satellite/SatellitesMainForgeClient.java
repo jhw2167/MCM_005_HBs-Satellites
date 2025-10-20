@@ -1,7 +1,6 @@
 package com.holybuckets.satellite;
 
 import com.holybuckets.satellite.client.CommonClassClient;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 

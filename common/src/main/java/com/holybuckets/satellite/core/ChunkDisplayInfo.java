@@ -2,7 +2,7 @@ package com.holybuckets.satellite.core;
 
 
 import com.holybuckets.satellite.SatelliteMain;
-import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -102,7 +102,7 @@ public class ChunkDisplayInfo {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     BlockState originalBlock = section.getBlockState(x, y, z);
-                    int p = ISatelliteDisplayBlock.getCachePos(x, y, z);
+                    int p = ISatelliteDisplayBE.getCachePos(x, y, z);
                     int temp;
                     if (IGNORE.contains(originalBlock.getBlock())) {
                         temp = 0;

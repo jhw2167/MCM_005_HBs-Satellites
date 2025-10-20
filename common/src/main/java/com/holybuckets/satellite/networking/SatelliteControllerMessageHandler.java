@@ -1,12 +1,6 @@
 package com.holybuckets.satellite.networking;
 
-import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.HBUtil;
-import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
-import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
-import com.holybuckets.satellite.core.SatelliteDisplayUpdate;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class SatelliteControllerMessageHandler {
     public static String CLASS_ID = "016";

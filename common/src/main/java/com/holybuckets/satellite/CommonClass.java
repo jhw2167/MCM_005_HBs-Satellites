@@ -4,16 +4,14 @@ import com.holybuckets.foundation.event.BalmEventRegister;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.ModBlockEntities;
-import com.holybuckets.satellite.client.ModRenderers;
 import com.holybuckets.satellite.config.ModConfig;
-import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.item.ModItems;
 import com.holybuckets.satellite.menu.ModMenus;
 import com.holybuckets.satellite.networking.ModNetworking;
 import com.holybuckets.satellite.particle.ModParticles;
+import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.platform.Services;
 import net.blay09.mods.balm.api.Balm;
-import net.blay09.mods.balm.api.client.BalmClient;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Items;
 
@@ -39,6 +37,7 @@ public class CommonClass {
         //RegisterConfigs
         Balm.getConfig().registerConfig(SatelliteConfig.class);
 
+
         SatelliteMain.INSTANCE = new SatelliteMain();
         EventRegistrar reg = EventRegistrar.getInstance();
         SatelliteMain.init(reg);
@@ -52,7 +51,7 @@ public class CommonClass {
         ModMenus.initialize(Balm.getMenus());
         ModParticles.initialize(Balm.getParticles());
         ModNetworking.initialize();
-        
+
         isInitialized = true;
     }
 
@@ -62,9 +61,5 @@ public class CommonClass {
     public static void sample()
     {
 
-    }
-
-    public static void initClient() {
-        ModRenderers.clientInitialize(BalmClient.getRenderers());
     }
 }

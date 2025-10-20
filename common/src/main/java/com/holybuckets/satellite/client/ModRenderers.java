@@ -7,10 +7,7 @@ import com.holybuckets.satellite.particle.ModParticles;
 import com.holybuckets.satellite.particle.StaticGlowParticle;
 import net.blay09.mods.balm.api.client.rendering.BalmRenderers;
 import net.minecraft.client.particle.EndRodParticle;
-import net.minecraft.client.particle.GlowParticle;
-import net.minecraft.client.particle.BubblePopParticle;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 
 public class ModRenderers {

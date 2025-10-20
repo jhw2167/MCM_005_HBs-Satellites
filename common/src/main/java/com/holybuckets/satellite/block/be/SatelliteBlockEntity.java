@@ -1,10 +1,8 @@
 package com.holybuckets.satellite.block.be;
 
-import com.holybuckets.foundation.HBUtil;
-import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBlockEntity;
-import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.core.SatelliteManager;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -20,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBlockEntity, BlockEntityTicker<SatelliteBlockEntity>
+public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, BlockEntityTicker<SatelliteBlockEntity>
 {
     int colorId;
     LevelChunk currentChunk;
@@ -35,7 +33,7 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBlock
     public void use(Player p, InteractionHand hand, BlockHitResult res)
     {
         int cmd = -1;
-        cmd = ISatelliteControllerBlock.calculateHitCommand(res);
+        cmd = ISatelliteControllerBE.calculateHitCommand(res);
 
         if (cmd == 16)
         {
@@ -56,16 +54,6 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBlock
     @Override
     public int getColorId() {
         return colorId;
-    }
-
-    @Override
-    public TextureAtlasSprite getDisplayColor() {
-        TextureAtlasSprite s = SatelliteManager.getColor(this.colorId);
-        if(s == null) {
-            this.setColorId(0);
-            return SatelliteManager.getColor(0);
-        }
-        return s;
     }
 
     @Override

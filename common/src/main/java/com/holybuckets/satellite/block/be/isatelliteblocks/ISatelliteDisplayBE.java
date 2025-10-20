@@ -1,19 +1,14 @@
 package com.holybuckets.satellite.block.be.isatelliteblocks;
 
-import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.satellite.core.SatelliteDisplay;
-import com.holybuckets.satellite.core.SatelliteDisplayUpdate;
-import com.holybuckets.satellite.networking.SatelliteDisplayMessage;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 
 /**
  * Hologram display blocks understand their chunk display info to display
  * Block entity implements onTick info of setting chisel block above it
  */
-public interface ISatelliteDisplayBlock {
+public interface ISatelliteDisplayBE {
 
     void forceUpdate();
 
@@ -35,6 +30,10 @@ public interface ISatelliteDisplayBlock {
     static Vec3 get3Dpos(int x, int y, int z) {
         return new Vec3(x*CONST, y*CONST, z*CONST);
     }
+
+    boolean isDisplayOn();
+
+    int getHeight();
 
     /*
     static final int DIST_THRESHOLD_SQR = 16*16;

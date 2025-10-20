@@ -6,8 +6,6 @@ import net.blay09.mods.balm.api.block.BalmBlocks;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class ModBlocks {
 
@@ -46,7 +44,4 @@ public class ModBlocks {
         return new ResourceLocation(Constants.MOD_ID, name);
     }
 
-    private static BlockBehaviour.Properties defaultProperties() {
-        return Balm.getBlocks().blockProperties().sound(SoundType.STONE).strength(5f, 2000f);
-    }
 }
