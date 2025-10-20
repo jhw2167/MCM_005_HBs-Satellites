@@ -75,6 +75,8 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         BlockState state = this.getBlockState();
         BlockState newState = state.setValue(SatelliteDisplayBlock.POWERED, this.isDisplayOn);
         level.setBlock(this.getBlockPos(), newState, 3);
+        this.setChanged();
+        level.sendBlockUpdated(this.getBlockPos(), state, newState, 3);
     }
 
     @Override

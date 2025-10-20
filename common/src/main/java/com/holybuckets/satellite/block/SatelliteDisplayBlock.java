@@ -24,7 +24,8 @@ public class SatelliteDisplayBlock extends Block implements EntityBlock {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     
     public SatelliteDisplayBlock() {
-        super(Properties.copy(Blocks.IRON_BLOCK));
+        super(Properties.copy(Blocks.IRON_BLOCK)
+            .lightLevel(state -> state.getValue(POWERED) ? 15 : 0));
         registerDefaultState(this.stateDefinition.any().setValue(POWERED, false));
     }
 
