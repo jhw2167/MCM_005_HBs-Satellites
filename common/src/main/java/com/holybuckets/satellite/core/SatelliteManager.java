@@ -14,9 +14,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.blay09.mods.balm.api.event.server.ServerStoppedEvent;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -105,16 +102,14 @@ public class SatelliteManager {
         return WOOL_IDS.indexOf(b);
     }
 
-    public static TextureAtlasSprite getColor(int colorId) {
+    public static ResourceLocation getResourceForColorId(int colorId) {
         Block wool = getWool(colorId);
         if(wool == null) return null;
-        TextureAtlas textureAtlas = Minecraft.getInstance().getModelManager()
-            .getAtlas(InventoryMenu.BLOCK_ATLAS);
         ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(wool);
         ResourceLocation woolLoc = new ResourceLocation( blockId.getNamespace(),
             "block/" + blockId.getPath() );
 
-        return textureAtlas.getSprite( woolLoc );
+        return woolLoc;
     }
 
 

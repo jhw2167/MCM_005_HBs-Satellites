@@ -1,11 +1,10 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
-import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBlock;
-import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteManager;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -28,7 +27,7 @@ import java.util.*;
 
 import static com.holybuckets.satellite.SatelliteMain.chiselBitsApi;
 
-public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBlock
+public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE
 {
     int colorId;
     BlockPos uiTargetBlockPos;
@@ -84,16 +83,6 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     }
 
     @Override
-    public TextureAtlasSprite getDisplayColor() {
-        TextureAtlasSprite s = SatelliteManager.getColor(this.colorId);
-        if(s == null) {
-            this.setColorId(0);
-            return SatelliteManager.getColor(0);
-        }
-        return s;
-    }
-
-    @Override
     public int getColorId() {
         return colorId;
     }
@@ -124,9 +113,12 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void use(Player p, InteractionHand hand, BlockHitResult res)
     {
         int cmd = -1;
-        cmd = ISatelliteControllerBlock.calculateHitCommand(res);
+        cmd = ISatelliteControllerBE.calculateHitCommand(res);
 
-        if(cmd == 0) this.toggleOnOff(!this.isDisplayOn);
+        if(cmd == 0) {
+            if(isDisplayOn) this.turnOff();
+            else  toggleOnOff(true);
+        }
 
 
         if (cmd == 16)
@@ -155,10 +147,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         } else if( cmd < 5) {   //adjust ordinally
             int dNS=0,dEW=0;
             switch (cmd) {
-                case 1: dNS = -1; break;   //north
-                case 2: dNS = 1; break;  //south
-                case 3: dEW = -1; break;   //east
-                case 4: dEW = 1; break;  //west
+                case 1: dNS = 1; break;   //north
+                case 2: dNS = -1; break;  //south
+                case 3: dEW = 1; break;   //east
+                case 4: dEW = -1; break;  //west
                 default: dNS = 0; dEW = 0; break;
             }
             //this.source.adjOrdinal(dNS, dEW);
@@ -315,7 +307,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         // Find all connected display blocks via flood fill
         Set<BlockPos> visited = new HashSet<>();
-        Map<BlockPos, ISatelliteDisplayBlock> nodes = new HashMap<>();
+        Map<BlockPos, ISatelliteDisplayBE> nodes = new HashMap<>();
         Queue<BlockPos> toCheck = new LinkedList<>();
 
         // Start from controller position
@@ -324,7 +316,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         while (!toCheck.isEmpty()) {
             BlockPos current = toCheck.poll();
-            ISatelliteDisplayBlock temp = (ISatelliteDisplayBlock) level.getBlockEntity(current);
+            ISatelliteDisplayBE temp = (ISatelliteDisplayBE) level.getBlockEntity(current);
             temp.setSource(source, forceDisplayUpdates);
             nodes.put(current, temp);
 
@@ -336,7 +328,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
                 visited.add(neighbor);
 
                 BlockEntity be = level.getBlockEntity(neighbor);
-                if (be instanceof ISatelliteDisplayBlock displayBE) {
+                if (be instanceof ISatelliteDisplayBE displayBE) {
                     toCheck.offer(neighbor);
                 }
             }
