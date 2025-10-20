@@ -60,6 +60,19 @@ Okkk
 
 	- Must remove wireFrame!!
 
+	- Solution: set collisionShape to empty
+
+	- Once its a chiseled block its not MY block anymore
+	2. ChiseledBlock::getShape() - returns shape from voxel manager, could mixin and map with BlockPos
+	3. BlockBehaviour::getShape()
+	4. All applied from Entity::pick() method
+
+	GameRenderer:: shouldRenderBlockOutline
+		if spectator
+		- flag = blockstate.getMenuProvider(this.minecraft.level, blockpos) != null;
+		else
+		- 
+
 10. Install chunk loading for far away satellites			XXX
 ---
 

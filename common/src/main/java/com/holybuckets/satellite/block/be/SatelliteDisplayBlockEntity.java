@@ -32,7 +32,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
     public SatelliteDisplayBlockEntity(BlockEntityType<? extends BlockEntity> beType, BlockPos pos, BlockState state) {
         super(beType, pos, state);
-        this.isDisplayOn = true; //false;
+        this.isDisplayOn = false;
         this.ticks = new Random(this.hashCode()).nextInt(REFRESH_RATE);
         this.height = 0;
         this.holoLift = 0;

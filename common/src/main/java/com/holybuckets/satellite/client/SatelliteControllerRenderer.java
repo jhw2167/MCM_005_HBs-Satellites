@@ -55,10 +55,10 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
 
         Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 
-        float minX = 0.35f;
-        float maxX = 0.65f;
-        float minY = 0.025f;
-        float maxY = 0.175f;
+        float minX = 0.34f;
+        float maxX = 0.66f;
+        float minY = 0.05f;
+        float maxY = 0.20f;
         float offset = 0.01f; // Small offset from face
 
 // Transform based on facing direction

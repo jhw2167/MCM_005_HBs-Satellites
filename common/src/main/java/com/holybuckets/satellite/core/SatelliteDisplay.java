@@ -34,7 +34,6 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.blay09.mods.balm.api.event.UseBlockEvent;
 //import mod.chiselsandbits.api.item.chiseled;
 
 import java.util.*;
@@ -68,7 +67,8 @@ public class SatelliteDisplay {
 
     private static SatelliteConfig CONFIG;
     public int lifetime;
-    private Vec3 cursorPos;
+    private BlockHitResult cursorPos;
+    private BlockHitResult cursorSelection;
 
     public SatelliteDisplay(Level level, SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller)
     {
@@ -156,20 +156,21 @@ public class SatelliteDisplay {
         if(this.controller == null) return;
         //Convert cursorPos to overworld block position using offsets
         //calculate chunkOffset from satellite, then blockOffset from fractional cursorPos
-
-        Vec3i holoBlock = new Vec3i((int)cursorPos.x, (int) cursorPos.y, (int) cursorPos.z);
-        Vec3i controllerOffset = controller.getBlockPos().subtract(holoBlock);
+        this.cursorSelection = cursorPos;
+        BlockPos holoBlock = cursorPos.getBlockPos();
+        Vec3 hitLoc = cursorPos.getLocation();
+        Vec3i controllerOffset = this.getOffset( holoBlock );
         //Calculate chunk offset from satellite position considering controller offset and any ordinal shifts
         Vec3i chunkSecOffset = new Vec3i(
             target.x + controllerOffset.getX(),
-            ( currentSection - depth ) - controllerOffset.getY(),
+            ( currentSection - depth ) + controllerOffset.getY(),
             target.z + controllerOffset.getZ()
         );
 
         Vec3 blockOffset = new Vec3(
-            (cursorPos.x - holoBlock.getX()) * 16,
-            (cursorPos.y - holoBlock.getY()) * 16,
-            (cursorPos.z - holoBlock.getZ()) * 16
+            (hitLoc.x - holoBlock.getX()) * 16,
+            (hitLoc.y - holoBlock.getY()) * 16,
+            (hitLoc.z - holoBlock.getZ()) * 16
         );
 
         int yOffset = HBUtil.WorldPos.sectionIndexToYMin(chunkSecOffset.getY(),
@@ -216,6 +217,8 @@ public class SatelliteDisplay {
                 if(info.isActive) info.resetUpdates();
             });
         }
+        if(controller != null) controller.setUiPosition(null);
+        this.cursorSelection = null;
         this.needsUpdate = false;
     }
 
@@ -522,47 +525,19 @@ public class SatelliteDisplay {
     public void renderUI(ServerPlayer p, BlockHitResult hitResult)
     {
         //Render flame particle effect at cursor
-        cursorPos = hitResult.getLocation();
-        BlockPos blockPos = hitResult.getBlockPos();
+        cursorPos = hitResult;
+        if(cursorSelection != null)
+        {
+            Vec3 hitLoc = cursorSelection.getLocation();
+            ((ServerLevel) level).sendParticles(
+                ModParticles.hoverOrange,                     // Particle type
+                hitLoc.x, hitLoc.y + RENDER_SCALE, hitLoc.z,
+                1,                                // Particle count
+                0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
+                0.0                               // Speed
+            );
+        }
 
-        int color = ChiselBitsAPI.DEMARCATOR(p);
-        /*
-        ((ServerLevel) level).sendParticles(
-            ModParticles.hoverOrange,                     // Particle type
-            cursorPos.x, cursorPos.y-RENDER_SCALE, cursorPos.z,
-            1,                                // Particle count
-            0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
-            0.0                               // Speed
-        );
-        */
-
-
-        BlockPos cntrlPos = controller.getBlockPos();
-        BlockPos blockOffset = blockPos.subtract(cntrlPos);
-        BlockPos displayInfoPos = cntrlPos.offset(
-            blockOffset.getX(), 0, blockOffset.getZ() );
-        TripleInt infoKey = new TripleInt(
-        blockOffset.getX()+target.x,
-        blockOffset.getY()+(this.currentSection-depth),
-        blockOffset.getZ()+target.z
-        );
-
-        ChunkDisplayInfo info = INFO_CACHE.get(infoKey);
-        Vec3 internalTarget = ChiselBitsAPI.clamp(cursorPos, displayInfoPos);
-
-        //internalTarget will always be relative to x,y,z: 0 -> 1 axis
-        // but we need to convert to distant block offsets in the appropriate axis
-        TripleInt chunkBlockOffset = new TripleInt(
-            (int) internalTarget.x * 16,      //0.7235 into the block means 16*0.7235 = 11 blocks displayed from the chunkPos
-            (int) internalTarget.y * 16,
-            (int) internalTarget.z * 16
-        );
-        if( info == null) return;
-
-        BlockPos startPos = new HBUtil.WorldPos(chunkBlockOffset,
-         info.levelSectionIndex, info.chunk).getWorldPos();
-
-        //ChiselBitsAPI.highlightLocalArea(level, cursorPos, displayInfoPos, color );
 
     }
 
@@ -638,7 +613,6 @@ public class SatelliteDisplay {
         PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ModParticles.basePing);
         PARTICLE_TYPE_MAP.put(EntityType.SLIME, ParticleTypes.ITEM_SLIME);
     }
-
     private static void onBlockUsed(UseBlockEvent useBlockEvent)
     {
 
@@ -652,7 +626,7 @@ public class SatelliteDisplay {
         BlockPos displayBlockPos = pos.below();
         int dDepth = 0;
         while( dDepth++ < MAX_DEPTH ) {
-            if(level.getBlockState(displayBlockPos).is(ModBlocks.satelliteDisplayBlock) )
+            if(level.getBlockEntity(displayBlockPos) instanceof ISatelliteDisplayBlock)
                 break;
             displayBlockPos = displayBlockPos.below();
         }

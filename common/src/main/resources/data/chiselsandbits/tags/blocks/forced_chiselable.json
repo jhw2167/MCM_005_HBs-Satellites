@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "hbs_satellites:holo_base_block",
+    "hbs_satellites:holo_block",
     "hbs_satellites:holo_air_block"
   ]
 }

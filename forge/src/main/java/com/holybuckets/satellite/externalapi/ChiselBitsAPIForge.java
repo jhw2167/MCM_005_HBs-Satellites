@@ -8,6 +8,7 @@ import com.holybuckets.satellite.block.HoloBlock;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBlock;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import mod.chiselsandbits.api.block.entity.IMultiStateBlockEntity;
@@ -235,9 +236,13 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
     @Override
     public boolean isViewingHoloBit(Level level, BlockHitResult hitResult, Vec3 offset) {
 
-        Vec3 target = hitResult.getLocation().add( offset );
-        BlockPos newPos = new BlockPos( (int) target.x, (int) target.y, (int) target.z );
-        return isViewingHoloBlock(level, newPos, target);
+        Vec3 target = hitResult.getLocation().add(offset);
+        BlockPos blockPos = new BlockPos(
+            (int) Math.floor(target.x),
+            (int) Math.floor(target.y),
+            (int) Math.floor(target.z)
+        );
+        return isViewingHoloBlock(level, blockPos, target);
     }
 
     @Override
@@ -274,7 +279,7 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
             return;
         }
 
-        BlockHitResult hitResult = (BlockHitResult) player.pick(REACH_DIST_BLOCKS, 0.5f, true);
+        BlockHitResult hitResult = (BlockHitResult) player.pick(REACH_DIST_BLOCKS*2, 0.5f, true);
         Level level = camera.getEntity().level();
         if (hitResult.getType() != HitResult.Type.BLOCK) return;
         if( !isViewingHoloBlock(level, hitResult) ) return;
@@ -284,6 +289,13 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
 
         VertexConsumer builder = bufferSource.getBuffer(RenderType.lines());
         Vec3 cameraPos = camera.getPosition();
+
+        // Attempts to make lines more visible
+        RenderSystem.disableDepthTest();
+        RenderSystem.disableCull();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.lineWidth(2.0f);
 
         poseStack.pushPose();
 
@@ -304,6 +316,7 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
         Vec3 center = new Vec3(snappedX, snappedY, snappedZ);
 
         // Iterate through all bit positions in radius
+        LineBuilder BUILDER = new LineBuilder(builder, poseStack);
         for (int x = -radius; x <= radius; x++) {
             for (int y = -radius; y <= radius; y++) {
                 for (int z = -radius; z <= radius; z++) {
@@ -313,10 +326,10 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
                         double bitX = center.x + (x * bitSize);
                         double bitY = center.y + (y * bitSize);
                         double bitZ = center.z + (z * bitSize);
-                        if( !isViewingHoloBit(level, hitResult, new Vec3(x * bitSize, y * bitSize, z * bitSize) ))
-                            continue;
-                        LineBuilder BUILDER = new LineBuilder(builder, poseStack, bitX, bitY, bitZ, bitSize);
-                        BUILDER.drawCube();
+                        if( !isViewingHoloBit(level, hitResult, new Vec3(x * bitSize, y * bitSize, z * bitSize) ))continue;
+                        if(x==0d && y==0d && z==0d) BUILDER.setColor(LINE_COLOR_WHITE);
+                        else                        BUILDER.setColor(LINE_COLOR);
+                        BUILDER.drawCube(bitX, bitY, bitZ, bitSize);
 
                     }
                 }
@@ -324,41 +337,49 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
         }
 
         poseStack.popPose();
-
         bufferSource.endBatch(RenderType.lines());
-
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableCull();
+        RenderSystem.disableBlend();
+        RenderSystem.lineWidth(1.0f);
     }
 
     private static final float[] LINE_COLOR = {1.0f, .60f, 0.0f, 1.0f}; // Green RGBA
+    private static final float[] LINE_COLOR_WHITE = {1.0f, 1.0f, 1.0f, 1.0f}; // Green RGBA
 
     private static class LineBuilder {
         private final VertexConsumer builder;
         private final Matrix4f matrix;
         private final Matrix3f normal;
-        private final double minX, minY, minZ, maxX, maxY, maxZ;
+        private float[] color;
 
-        public LineBuilder(VertexConsumer builder, PoseStack poseStack,
-                           double minX, double minY, double minZ, double size) {
+        public LineBuilder(VertexConsumer builder, PoseStack poseStack) {
             this.builder = builder;
             this.matrix = poseStack.last().pose();
             this.normal = poseStack.last().normal();
-            this.minX = minX; this.minY = minY; this.minZ = minZ;
-            this.maxX = minX + size; this.maxY = minY + size; this.maxZ = minZ + size;
+        }
+
+        void setColor(float[] color) {
+            this.color = color;
         }
 
         public void addLine(double x1, double y1, double z1, double x2, double y2, double z2) {
             builder.vertex(matrix, (float) x1, (float) y1, (float) z1)
-                .color(LINE_COLOR[0], LINE_COLOR[1], LINE_COLOR[2], LINE_COLOR[3])
+                .color(color[0], color[1], color[2], color[3])
                 .normal(normal, 1, 0, 0)
                 .endVertex();
 
             builder.vertex(matrix, (float) x2, (float) y2, (float) z2)
-                .color(LINE_COLOR[0], LINE_COLOR[1], LINE_COLOR[2], LINE_COLOR[3])
+                .color(color[0], color[1], color[2], color[3])
                 .normal(normal, 1, 0, 0)
                 .endVertex();
         }
 
-        public void drawCube() {
+        public void drawCube(double minX, double minY, double minZ, double size)
+        {
+            double maxX, maxY, maxZ;
+            maxX = minX + size; maxY = minY + size; maxZ = minZ + size;
+
             // Bottom face (4 edges)
             addLine(minX, minY, minZ, maxX, minY, minZ);
             addLine(maxX, minY, minZ, maxX, minY, maxZ);
