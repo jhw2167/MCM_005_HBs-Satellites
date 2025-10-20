@@ -84,6 +84,7 @@ public class SatelliteDisplayClient extends SatelliteDisplay {
 
     public void clear() {
         displayBlocks.clear();
+        holoBlocks.clear();
         minX = Integer.MAX_VALUE;
         maxX = Integer.MIN_VALUE;
         minZ = Integer.MAX_VALUE;

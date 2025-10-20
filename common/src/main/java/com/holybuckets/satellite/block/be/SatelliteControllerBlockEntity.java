@@ -210,6 +210,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
                 if(source != null) this.source.clear();
                 this.source = null;
             }
+            return;
         }
         //1. Recover Satellite if lost between chunk loads
         if(this.linkedSatellite == null && this.satelliteTargetPos != null) {
@@ -315,10 +316,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
     public void propagateToNeighbors()
     {
-        if (source == null) return;
-
-        Level level = getLevel();
-        if (level == null || level.isClientSide()) return;
+        if (source == null || level == null) return;
 
         // Find all connected display blocks via flood fill
         Set<BlockPos> visited = new HashSet<>();

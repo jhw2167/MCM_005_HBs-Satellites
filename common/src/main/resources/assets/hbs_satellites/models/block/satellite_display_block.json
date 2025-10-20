@@ -1,12 +1,12 @@
 {
   "parent": "block/cube",
   "textures": {
-    "particle": "hbs_satellites:block/satellite_display_block",
-    "down": "hbs_satellites:block/satellite_display_block",
-    "up": "hbs_satellites:block/satellite_display_block_top",
-    "north": "hbs_satellites:block/satellite_display_block",
-    "east": "hbs_satellites:block/satellite_display_block",
-    "south": "hbs_satellites:block/satellite_display_block",
-    "west": "hbs_satellites:block/satellite_display_block"
+    "particle": "minecraft:block/iron_block",
+    "down": "hbs_satellites:block/display_bottom",
+    "up": "hbs_satellites:block/display_top_on",
+    "north": "hbs_satellites:block/display_side_on",
+    "east": "hbs_satellites:block/display_side_on",
+    "south": "hbs_satellites:block/display_side_on",
+    "west": "hbs_satellites:block/display_side_on"
   }
 }

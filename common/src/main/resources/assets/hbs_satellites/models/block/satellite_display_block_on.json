@@ -1,7 +1,7 @@
 {
   "parent": "block/cube",
   "textures": {
-    "particle": "minecraft:block/lapis_block",
+    "particle": "minecraft:block/iron_block",
     "down": "hbs_satellites:block/display_bottom_on",
     "up": "hbs_satellites:block/display_top_on", 
     "north": "hbs_satellites:block/display_side_on",

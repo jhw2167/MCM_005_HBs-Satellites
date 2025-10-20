@@ -136,9 +136,8 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
-
-        if(this.level.isClientSide) return;
         ticks++;
+        if(this.level.isClientSide) return;
         if( source == null) return;
 
 

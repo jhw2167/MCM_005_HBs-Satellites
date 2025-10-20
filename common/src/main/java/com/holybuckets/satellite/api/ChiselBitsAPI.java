@@ -93,12 +93,18 @@ public interface ChiselBitsAPI {
                     DARK.add(block);
                 }
 
-                //** END ADD DARK BLOCKS
+                //add all wood logs
+                if (state.is(BlockTags.LOGS)) {
+                    DARK.add(block);
+                }
 
+                //** END ADD DARK BLOCKS
 
             });
 
         //2. Add all leaf blocks, seweed, shruberry, grasss, flowers, etc
+        //Ignore vine
+        IGNORE.add(Blocks.VINE);
 
     }
 
