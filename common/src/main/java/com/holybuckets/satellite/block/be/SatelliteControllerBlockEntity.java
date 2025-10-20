@@ -346,6 +346,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putInt("colorId", colorId);
+        tag.putBoolean("isDisplayOn", isDisplayOn);
         if(uiTargetBlockPos != null) {  //saved to send to client for rendering
             String pos = HBUtil.BlockUtil.positionToString(uiTargetBlockPos);
             tag.putString("uiTargetBlockPos", pos);
@@ -360,6 +361,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void load(CompoundTag tag) {
         super.load(tag);
         colorId = tag.getInt("colorId");
+        isDisplayOn = tag.getBoolean("isDisplayOn");
 
         if(tag.contains("uiTargetBlockPos")) {
             String targetPosStr = tag.getString("uiTargetBlockPos");

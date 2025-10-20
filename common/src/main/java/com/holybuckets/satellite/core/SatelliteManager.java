@@ -255,4 +255,9 @@ public class SatelliteManager {
     public static void remove(int colorId) {
         SATELLITES.remove(colorId);
     }
+
+    public static boolean isAnyControllerOn() {
+        return DISPLAY_SOURCES.values().stream()
+            .anyMatch(display -> display.controller != null && display.controller.isDisplayOn());
+    }
 }
