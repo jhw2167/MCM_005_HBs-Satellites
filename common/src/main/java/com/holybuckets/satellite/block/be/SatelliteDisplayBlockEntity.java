@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.satellite.SatelliteMain;
+import com.holybuckets.satellite.block.SatelliteDisplayBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.holybuckets.satellite.core.SatelliteDisplay;
