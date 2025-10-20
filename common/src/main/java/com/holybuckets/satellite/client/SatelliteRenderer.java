@@ -38,10 +38,12 @@ public class SatelliteRenderer implements BlockEntityRenderer<SatelliteBlockEnti
         float u1 = woolSprite.getU1();
         float v1 = woolSprite.getV1();
 
-        float minX = 0.35f;
-        float maxX = 0.65f;
-        float minY = 0.025f;
-        float maxY = 0.175f;
+        // For a 6x6 square centered in 32x32:
+        // Center at 13-18 pixels in both dimensions
+        float minX = 13f/32f;  // 13/32 ≈ 0.406
+        float maxX = 19f/32f;  // 19/32 ≈ 0.594
+        float minY = 13f/32f;
+        float maxY = 19f/32f;
         float offset = 0.01f;
 
         int light = LightTexture.FULL_BRIGHT;
