@@ -28,7 +28,9 @@ public class SatelliteControllerBlock extends Block implements EntityBlock {
 
     public SatelliteControllerBlock() {
         super(Properties.copy(Blocks.IRON_BLOCK)
-            .lightLevel(state -> 12 ));
+            .lightLevel(state -> 12)
+            .destroyTime(0.6f)  // Makes it break faster
+            .explosionResistance(6f));
         registerDefaultState(this.stateDefinition.any()
             .setValue(FACING, Direction.NORTH).setValue(POWERED, false));
     }

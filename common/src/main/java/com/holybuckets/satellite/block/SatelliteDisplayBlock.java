@@ -25,7 +25,9 @@ public class SatelliteDisplayBlock extends Block implements EntityBlock {
     
     public SatelliteDisplayBlock() {
         super(Properties.copy(Blocks.IRON_BLOCK)
-            .lightLevel(state -> state.getValue(POWERED) ? 15 : 0));
+            .lightLevel(state -> state.getValue(POWERED) ? 15 : 0)
+            .destroyTime(0.6f)  // Makes it break faster
+            .explosionResistance(6f));
         registerDefaultState(this.stateDefinition.any().setValue(POWERED, false));
     }
 

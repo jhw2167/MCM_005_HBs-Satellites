@@ -24,9 +24,11 @@ public class SatelliteBlock extends Block implements EntityBlock {
     
     public SatelliteBlock() {
         super(Properties.copy(Blocks.IRON_BLOCK)
-            .lightLevel(state -> 12 )
-            .noOcclusion()
-            .isViewBlocking((state, level, pos) -> false));
+            .lightLevel(state -> 12)
+            .noOcclusion() 
+            .isViewBlocking((state, level, pos) -> false)
+            .destroyTime(0.6f)  // Makes it break faster
+            .explosionResistance(6f));
     }
 
     @Override
