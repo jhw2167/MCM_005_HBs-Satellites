@@ -56,7 +56,7 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
         float maxX = 0.66f;
         float minY = 0.05f;
         float maxY = 0.20f;
-        float offset = 0.01f; // Small offset from face
+        float offset = 0.05f; // Small offset from face
 
 // Transform based on facing direction
         switch (facing) {
