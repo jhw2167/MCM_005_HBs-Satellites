@@ -63,13 +63,13 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
             case NORTH -> {
                 // Face toward negative Z
                 builder.vertex(matrix, minX, minY, -offset)
-                    .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, maxX, minY, -offset)
                     .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+                builder.vertex(matrix, maxX, minY, -offset)
+                    .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
                 builder.vertex(matrix, maxX, maxY, -offset)
-                    .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, minX, maxY, -offset)
                     .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+                builder.vertex(matrix, minX, maxY, -offset)
+                    .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
             }
             case SOUTH -> {
                 // Face toward positive Z
@@ -96,13 +96,13 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
             case EAST -> {
                 // Face toward positive X
                 builder.vertex(matrix, 1 + offset, minY, minX)
-                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                builder.vertex(matrix, 1 + offset, minY, maxX)
                     .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+                builder.vertex(matrix, 1 + offset, minY, maxX)
+                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
                 builder.vertex(matrix, 1 + offset, maxY, maxX)
-                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                builder.vertex(matrix, 1 + offset, maxY, minX)
                     .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+                builder.vertex(matrix, 1 + offset, maxY, minX)
+                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
             }
         }
 
