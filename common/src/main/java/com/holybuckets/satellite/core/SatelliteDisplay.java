@@ -4,6 +4,7 @@ import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.TickType;
+import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
@@ -141,15 +142,15 @@ public class SatelliteDisplay {
 
     public void adjCurrentSection(int delta) {
         int temp = this.currentSection + delta;
-        if( temp < 0 ||  temp >= maxSection-depth ) return;
+        if( temp < 0 ||  temp >= maxSection ) return;
         this.currentSection = temp;
         this.needsUpdate = true;
     }
 
     public void adjDisplayDepth(int dDepth) {
-        int temp = this.depth + dDepth;
-        if(temp < 1 || temp > 4) return;
         this.depth += dDepth;
+        if(depth == 0) depth = MAX_DEPTH;
+        if(depth > MAX_DEPTH) depth = 1;
         this.needsUpdate = true;
     }
 
@@ -619,11 +620,13 @@ public class SatelliteDisplay {
     {
 
         Level level = useBlockEvent.getLevel();
-        if(level == null || !(level instanceof ServerLevel)) return;
+        if(level == null || level.isClientSide) return;
+        if(!SatelliteMain.chiselBitsApi.isChiseledBlock(level, useBlockEvent.getHitResult().getBlockPos() )) return;
 
-        BlockHitResult res = useBlockEvent.getHitResult();
+        double reach = SatelliteControllerBlockEntity.REACH_DIST_BLOCKS;
+        BlockHitResult res = CommonClass.getAnyHitResult(level, useBlockEvent.getPlayer(), reach );
+        if( res == null ) return;
         BlockPos pos = res.getBlockPos();
-        if( !SatelliteMain.chiselBitsApi.isViewingHoloBlock(level, res) ) return;
 
         BlockPos displayBlockPos = pos.below();
         int dDepth = 0;

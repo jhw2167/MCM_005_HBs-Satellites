@@ -56,20 +56,20 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
         float maxX = 0.66f;
         float minY = 0.05f;
         float maxY = 0.20f;
-        float offset = 0.05f; // Small offset from face
+        float offset = 0.01f; // Small offset from face
 
 // Transform based on facing direction
         switch (facing) {
             case NORTH -> {
-                // Face toward negative Z
-                builder.vertex(matrix, minX, minY, -offset)
-                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+                // Face toward negative Z - Flip U coordinates
                 builder.vertex(matrix, maxX, minY, -offset)
                     .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, maxX, maxY, -offset)
-                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+                builder.vertex(matrix, minX, minY, -offset)
+                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
                 builder.vertex(matrix, minX, maxY, -offset)
                     .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+                builder.vertex(matrix, maxX, maxY, -offset)
+                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
             }
             case SOUTH -> {
                 // Face toward positive Z

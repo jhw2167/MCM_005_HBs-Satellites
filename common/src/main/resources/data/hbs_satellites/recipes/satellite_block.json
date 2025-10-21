@@ -1,19 +1,28 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "IWI",
-    "WEW",
-    "IWI"
+    "SCS",
+    "IOI",
+    "GEG"
   ],
   "key": {
+    "S": {
+      "item": "minecraft:daylight_detector"
+    },
+    "C": {
+      "item": "minecraft:calibrated_sculk_sensor"
+    },
     "I": {
       "item": "minecraft:iron_ingot"
     },
-    "W": {
-      "item": "minecraft:white_wool"
+    "O": {
+      "item": "minecraft:observer"
     },
     "E": {
       "item": "minecraft:ender_eye"
+    },
+    "G": {
+      "item": "minecraft:glass"
     }
   },
   "result": {

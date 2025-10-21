@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.foundation.console.Messager;
 import com.holybuckets.satellite.block.SatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
@@ -81,7 +82,14 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.uiTargetBlockPos = blockTarget;
         markUpdated();
         if(level == null || blockTarget == null) return;
-        level.setBlock(blockTarget, Blocks.IRON_BLOCK.defaultBlockState(), 3);
+
+        //message local players
+        List<ServerPlayer> players = HBUtil.PlayerUtil
+            .getAllPlayersInBlockRange(getBlockPos(), PLAYER_RANGE );
+        for(ServerPlayer player : players) {
+            Messager.getInstance().sendChat(player,
+            "Targeted: " + HBUtil.BlockUtil.positionToString(blockTarget));
+        }
     }
 
     @Override
@@ -112,6 +120,16 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.turnOff();
     }
 
+    private void turnOff() {
+        this.clearDisplay();
+        if(this.source != null) {
+            this.source.clear();
+            this.source.resetChunkSection();
+            this.source.resetOrdinal();
+        }
+        this.forceUpdate();
+    }
+
     public void use(Player p, InteractionHand hand, BlockHitResult res)
     {
         int cmd = ISatelliteControllerBE.calculateHitCommand(res);
@@ -119,8 +137,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.commands.hasUpdate = true;
 
         if(cmd == 0) {
-            if(isDisplayOn) this.turnOff();
-            else  toggleOnOff(true);
+            this.toggleOnOff(!this.isDisplayOn);
         }
 
 
@@ -177,19 +194,9 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     @Override
     public void toggleOnOff(boolean toggle) {
         this.isDisplayOn = toggle;
+        if(!isDisplayOn) turnOff();
         this.markUpdated();
-    }
-
-    public void turnOff() {
-        this.toggleOnOff(false);
-        this.clearDisplay();
-        if(this.source != null) {
-            this.source.clear();
-            this.source.resetChunkSection();
-            this.source.resetOrdinal();
-        }
-        this.forceUpdate();
-        updateBlockState();
+        this.updateBlockState();
     }
 
 
@@ -269,7 +276,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
     private static final int PATH_REFRESH_TICKS = 200;
     private static final int ENTITY_REFRESH_TICKS = 10;
-    private void renderDisplay() {
+    protected void renderDisplay() {
         if(ticks % PATH_REFRESH_TICKS == 0 ){
             propagateToNeighbors();
             if(true || forceDisplayUpdates) {
@@ -277,13 +284,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
                 this.forceDisplayUpdates = false;
             }
         }
-
+        super.renderDisplay();
         if(this.source != null && ticks % ENTITY_REFRESH_TICKS == 0)
             this.source.renderEntities(this.getBlockPos());
     }
 
     private static int PLAYER_UI_REFRESH_TICKS = 4;
-    public static double REACH_DIST_BLOCKS = 0.583f*5;
+    public static double REACH_DIST_BLOCKS = 0.583f*3;
     private void renderPlayerUI()
     {
         //Get all players within 64 blocks
@@ -391,9 +398,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     private void markUpdated() {
         this.setChanged();
         if(this.level == null) return;
-        BlockState b1 = this.getBlockState();
-        updateBlockState();
-        level.sendBlockUpdated(this.getBlockPos(), b1, this.getBlockState(), 3);
+        level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
     }
 
     @Override
@@ -411,7 +416,6 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     private void updateBlockState() {
         if(this.level == null) return;
         BlockState state = this.getBlockState();
-
         BlockState newState = state.setValue(SatelliteControllerBlock.POWERED, this.isDisplayOn);
         level.setBlock(this.getBlockPos(), newState, 3);
     }

@@ -151,21 +151,28 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
     private static final int REFRESH_RATE = 60;
     private static final int PLAYER_REFRESH_RATE = 10;
-    private void renderDisplay() {
+    protected void renderDisplay() {
 
         if(source.needsClear() ) {
             this.clearAboveArea(this.height);
             height = this.source.getDepth();
         }
 
-        if( ticks % REFRESH_RATE==0) {
-            this.displayInfo.forEach( info -> info.refreshBits(false) );
-            buildDisplay();
-        } else if( this.hasPlayer && ticks % PLAYER_REFRESH_RATE == 0) {
-            this.displayInfo.forEach( info -> info.refreshBits(true) );
-            buildDisplay();
-        }
+        if(displayInfo == null || displayInfo.isEmpty()) return;
+        boolean stdRefresh = ticks % REFRESH_RATE==0;
+        boolean playerRefresh = this.hasPlayer && ticks % PLAYER_REFRESH_RATE==0;
 
+        if(playerRefresh && stdRefresh) {
+            this.displayInfo.forEach( info -> info.refreshBits(true) );
+            this.clearAboveArea(this.height);
+        } else if(playerRefresh) {
+            this.displayInfo.forEach( info -> info.refreshBits(true) );
+        } else if (stdRefresh) {
+            this.displayInfo.forEach( info -> info.refreshBits(false) );
+        } else {
+            return;
+        }
+        this.buildDisplay();
     }
 
     //** ENITIY OVERRIDES
@@ -183,6 +190,13 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         this.height = tag.getInt("height");
         this.holoLift = tag.getInt("holoLift");
         //if(height > 0) clearAboveArea(height);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        CompoundTag tag = super.getUpdateTag();
+        this.saveAdditional(tag);
+        return tag;
     }
 
 

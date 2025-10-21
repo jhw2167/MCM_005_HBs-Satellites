@@ -49,12 +49,12 @@ public class SatelliteDisplayBlock extends Block implements EntityBlock {
 
     @Override
     public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player p) {
-        super.playerWillDestroy(level, pos, state, p);
         BlockEntity be = level.getBlockEntity(pos);
         if(be instanceof SatelliteDisplayBlockEntity) {
             SatelliteDisplayBlockEntity displayBE = (SatelliteDisplayBlockEntity) be;
             displayBE.onDestroyed();
         }
+        super.playerWillDestroy(level, pos, state, p);
     }
 
     @Nullable

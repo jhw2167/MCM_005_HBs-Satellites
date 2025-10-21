@@ -1,5 +1,6 @@
 package com.holybuckets.satellite.client;
 
+import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
 import com.holybuckets.satellite.client.screen.ModScreens;
@@ -30,6 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
+import static com.holybuckets.satellite.CommonClass.isViewingHoloBit;
 import static com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity.REACH_DIST_BLOCKS;
 
 
@@ -70,42 +72,20 @@ public class CommonClassClient {
         return textureAtlas.getSprite( rl );
     }
 
-    public static boolean isViewingHoloBlock(Level level, BlockHitResult hitResult) {
-        return SatelliteMain.chiselBitsApi.isViewingHoloBlock(level, hitResult);
-    }
-
-    public static boolean isViewingHoloBit(Level level, BlockHitResult hitResult, Vec3 bitOffset) {
-        return SatelliteMain.chiselBitsApi.isViewingHoloBit(level, hitResult, bitOffset);
-    }
-
 
     //Render
 
     //Rendering
-    private static double VW_RANGE = 1 * 0.0625d;
     public static void renderUiSphere(Camera camera, PoseStack poseStack)
     {
         if (!(camera.getEntity() instanceof Player player)) {
             return;
         }
 
-        //if( !SatelliteManager.isAnyControllerOn()) return; pending implementation
-
-        BlockHitResult hitResult = (BlockHitResult) player.pick(REACH_DIST_BLOCKS, 0.5f, true);
-
         Level level = camera.getEntity().level();
-        if (hitResult.getType() != HitResult.Type.BLOCK) return;
-        BlockHitResult hitResult2 = (BlockHitResult) player.pick(REACH_DIST_BLOCKS*2, 0.5f, true);
-        BlockHitResult bufferedResult = new BlockHitResult(
-            hitResult.getLocation().add(0, -VW_RANGE, 0),
-            hitResult.getDirection(),
-            hitResult.getBlockPos(),
-            hitResult.isInside()
-        );
-        if( isViewingHoloBlock(level, hitResult) ) {}
-        else if( isViewingHoloBlock(level, hitResult2) ) { hitResult = hitResult2; }
-        else if( isViewingHoloBlock(level, bufferedResult) ) { hitResult = bufferedResult; }
-        else return;
+        //if( !SatelliteManager.isAnyControllerOn()) return; pending implementation
+        BlockHitResult hitResult = CommonClass.getAnyHitResult(level, player, REACH_DIST_BLOCKS*2);
+        if( hitResult == null ) return;
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance()
             .renderBuffers().bufferSource();
@@ -150,7 +130,7 @@ public class CommonClassClient {
                         double bitY = center.y + (y * bitSize);
                         double bitZ = center.z + (z * bitSize);
                         if( !isViewingHoloBit(level, hitResult, new Vec3(x * bitSize, y * bitSize, z * bitSize) ))continue;
-                        if(x==0d && y==0d && z==0d) BUILDER.setColor(LINE_COLOR_WHITE);
+                        if(x==0d && y==0d && z==0d) BUILDER.setColor(LINE_COLOR_RED);
                         else                        BUILDER.setColor(LINE_COLOR);
                         BUILDER.drawCube(bitX, bitY, bitZ, bitSize);
 
@@ -167,8 +147,10 @@ public class CommonClassClient {
         RenderSystem.lineWidth(1.0f);
     }
 
-    private static final float[] LINE_COLOR = {1.0f, .60f, 0.0f, 1.0f}; // Green RGBA
+
+    private static final float[] LINE_COLOR = {1.0f, .70f, 0.0f, 1.0f}; // Green RGBA
     private static final float[] LINE_COLOR_WHITE = {1.0f, 1.0f, 1.0f, 1.0f}; // Green RGBA
+    private static final float[] LINE_COLOR_RED = {1.0f, 0.0f, 0.0f, 1.0f}; // Red RGBA
 
     private static class LineBuilder {
         private final VertexConsumer builder;
@@ -222,6 +204,8 @@ public class CommonClassClient {
             addLine(minX, minY, maxZ, minX, maxY, maxZ);
         }
     }
+
+
 
 
 }

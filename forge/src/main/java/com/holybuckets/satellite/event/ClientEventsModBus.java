@@ -18,7 +18,8 @@ public class ClientEventsModBus {
         event.enqueueWork(() -> {
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.holoBaseBlock, RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.holoDarkBlock, RenderType.translucent());
-            ItemBlockRenderTypes.setRenderLayer(ModBlocks.holoAirBlock, RenderType.cutout()); // Make it invisible
+            //ItemBlockRenderTypes.setRenderLayer(ModBlocks.holoAirBlock, RenderType.translucent() ); // Make it invisible
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.satelliteBlock, RenderType.cutout());
 
         });
     }

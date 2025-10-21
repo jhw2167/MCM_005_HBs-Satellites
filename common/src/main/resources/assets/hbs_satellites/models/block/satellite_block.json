@@ -3,13 +3,13 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [64, 64],
 	"textures": {
-		"0": "satellite",
-		"particle": "satellite"
+		"0": "hbs_satellites:block/satellite",
+		"particle": "minecraft:block/iron_block"
 	},
 	"elements": [
 		{
-			"from": [0, -16, 0],
-			"to": [16, 0, 16],
+			"from": [0, 0, 0],
+			"to": [16, 16, 16],
 			"rotation": {"angle": 0, "axis": "y", "origin": [0, -16, 0]},
 			"faces": {
 				"north": {"uv": [0, 0, 8, 8], "texture": "#0"},

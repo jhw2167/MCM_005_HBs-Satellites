@@ -48,15 +48,25 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
         Direction blockFacing = res.getDirection();
         if(blockFacing == Direction.UP || blockFacing == Direction.DOWN) return cmd;
 
-        // Get relative coordinates within the block (0.0 to 1.0)
-        double xz = blockCoord.x;
+// Get relative coordinates within the block (0.0 to 1.0)
+        double xz;
         double y = blockCoord.y;
-        double z = blockCoord.z;
 
-        //block always exists in xy or yz plane, x and z are mutually exclusive
-        if (blockFacing == Direction.EAST || blockFacing == Direction.WEST) {
-            xz = z;
+// Map coordinates correctly based on facing direction
+        if (blockFacing == Direction.NORTH) {
+            // For north face: use (1.0 - x) so left is 0 and right is 1
+            xz = 1.0 - blockCoord.x;
+        } else if (blockFacing == Direction.SOUTH) {
+            // For south face: x directly maps (left to right = 0 to 1)
+            xz = blockCoord.x;
+        } else if (blockFacing == Direction.WEST) {
+            // For west face: use (1.0 - z) so left is 0 and right is 1
+            xz = blockCoord.z;
+        } else { // EAST
+            // For east face: z directly maps (left to right = 0 to 1)
+            xz = 1.0 - blockCoord.z;
         }
+
         // Determine which quadrant was hit
         boolean isRightColumn = (xz > ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD);
         boolean isTopSection = y > ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD;
@@ -119,13 +129,13 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
                 else if(input == 3) cmd = 3; //West moves East
                 else if(input == 4) cmd = 4; //East moves West
             } else if( blockFacing == Direction.EAST ) {
-                if(input == 1) cmd = 4; //Up arrow moves West
-                else if(input == 2) cmd = 3; //Down arrow moves East
+                if(input == 1) cmd = 3; //Up arrow moves West
+                else if(input == 2) cmd = 4; //Down arrow moves East
                 else if(input == 3) cmd = 1; //West moves North
                 else if(input == 4) cmd = 2; //East moves South
             } else if( blockFacing == Direction.WEST ) {
-                if(input == 1) cmd = 3; //Up arrow moves East
-                else if(input == 2) cmd = 4; //Down arrow moves West
+                if(input == 1) cmd = 4; //Up arrow moves East
+                else if(input == 2) cmd = 3; //Down arrow moves West
                 else if(input == 3) cmd = 2; //West moves South
                 else if(input == 4) cmd = 1; //East moves North
             }

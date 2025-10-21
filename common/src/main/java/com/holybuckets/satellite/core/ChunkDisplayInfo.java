@@ -95,7 +95,7 @@ public class ChunkDisplayInfo {
 
     static Set<Integer> updateBits(int[] holoBits, ChunkDisplayInfo info, boolean init) {
         LevelChunk chunk = info.chunk;
-        LevelChunkSection section = chunk.getSections()[info.levelSectionIndex];
+            LevelChunkSection section = chunk.getSections()[info.levelSectionIndex];
         //Set<Integer> changed = new HashSet<>(64);
         for (int y = 0; y < 16; y++) {
             //info.hasUpdates[y] = false;

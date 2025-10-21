@@ -155,49 +155,14 @@ public interface ChiselBitsAPI {
 
     public void offset(ChunkDisplayInfo info, int[] bits, List<int[][][]> adj, TripleInt offset, BlockPos pos);
 
-    public void highlightArea(Level level, BlockPos pos, Vec3[] area, int[] colors);
 
+    boolean isChiseledBlock(Level level, BlockPos pos);
 
     boolean isViewingHoloBit(Level level, BlockHitResult hitResult, Vec3 offset);
 
     boolean isViewingHoloBlock(Level level, BlockPos pos, Vec3 loc);
 
     public boolean isViewingHoloBlock(Level level, BlockHitResult hitResult);
-
-    double _16TH = 0.0625;
-    int CUBE_SELECTED_RADIUS = 2;
-
-    /**
-     * Goal is to integrate with Satellite display and ChunkInfo to set the selected hitPos
-     * area a distinct color from the rest of the display
-     * 1. Must obtain the Coresponding SatelliteDisplayBlock, ControllerBlock, and ChunkDisplayInfo
-     * 2. Map hitResult to some internal chiseled block in holoBits[]
-     * 3. Change that internal block to a distinct color (e.g. yellow stained glass)
-     * @param level
-     * @param center
-     */
-    static void highlightLocalArea(Level level, Vec3 target, BlockPos center, int color)
-    {
-        //find all points in a CUBE_SELECTED_RADIUS cube around target
-        Vec3 internalTarget = clamp(target, center );
-        final int volume = (int) Math.pow(CUBE_SELECTED_RADIUS*2+1, 3);
-        int[] colors = new int[volume];
-        Vec3[] area = new Vec3[volume];
-        for(int x = -CUBE_SELECTED_RADIUS; x <= CUBE_SELECTED_RADIUS; x++) {
-            for(int y = -CUBE_SELECTED_RADIUS; y <= CUBE_SELECTED_RADIUS; y++) {
-                for(int z = -CUBE_SELECTED_RADIUS; z <= CUBE_SELECTED_RADIUS; z++) {
-                    int index = (x+CUBE_SELECTED_RADIUS)* (CUBE_SELECTED_RADIUS*2+1) * (CUBE_SELECTED_RADIUS*2+1)
-                        + (y+CUBE_SELECTED_RADIUS)*(CUBE_SELECTED_RADIUS*2+1)
-                        + (z+CUBE_SELECTED_RADIUS);
-                    area[index] = internalTarget.add(x*_16TH, y*_16TH, z*_16TH);
-                    colors[index] = color+DEMARCATOR_START_IDX;
-                }
-            }
-        }
-        //END FOR
-        SatelliteMain.chiselBitsApi.highlightArea(level, center, area, colors);
-
-    }
 
     static final double EPSILON = 0.0001;
     static Vec3 clamp(Vec3 hitLoc, BlockPos pos) {

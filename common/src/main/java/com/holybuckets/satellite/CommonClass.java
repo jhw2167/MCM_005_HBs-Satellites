@@ -13,7 +13,12 @@ import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.platform.Services;
 import net.blay09.mods.balm.api.Balm;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 
 public class CommonClass {
@@ -61,5 +66,35 @@ public class CommonClass {
     public static void sample()
     {
 
+    }
+
+
+    //** Utility
+
+    public static boolean isViewingHoloBlock(Level level, BlockHitResult hitResult) {
+        return SatelliteMain.chiselBitsApi.isViewingHoloBlock(level, hitResult);
+    }
+
+    public static boolean isViewingHoloBit(Level level, BlockHitResult hitResult, Vec3 bitOffset) {
+        return SatelliteMain.chiselBitsApi.isViewingHoloBit(level, hitResult, bitOffset);
+    }
+
+    private static double VW_RANGE = 2 * 0.0625d;
+    public static BlockHitResult getAnyHitResult(Level level, Player player, double startReach)
+    {
+        BlockHitResult hitResult1 = (BlockHitResult) player.pick(startReach, 0.5f, true);
+        if (hitResult1.getType() != HitResult.Type.BLOCK) return null;
+        BlockHitResult hitResult2 = (BlockHitResult) player.pick(startReach*2, 0.5f, true);
+        BlockHitResult bufferedResult = new BlockHitResult(
+            hitResult1.getLocation().add(0, -VW_RANGE, 0),
+            hitResult1.getDirection(),
+            hitResult1.getBlockPos(),
+            hitResult1.isInside()
+        );
+        if( isViewingHoloBlock(level, hitResult1) ) {}
+        else if( isViewingHoloBlock(level, hitResult2) ) { hitResult1 = hitResult2; }
+        else if( isViewingHoloBlock(level, bufferedResult) ) { hitResult1 = bufferedResult; }
+        else return null;
+        return hitResult1;
     }
 }

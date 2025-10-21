@@ -1,19 +1,25 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "IRI",
-    "RLR",
-    "IRI"
+    " C ",
+    "IPI",
+    "RDR"
   ],
   "key": {
+    "C": {
+      "item": "minecraft:calibrated_sculk_sensor"
+    },
     "I": {
       "item": "minecraft:iron_ingot"
     },
-    "R": {
-      "item": "minecraft:redstone"
+    "P": {
+      "item": "minecraft:glass_pane"
     },
-    "L": {
-      "item": "minecraft:lapis_block"
+    "R": {
+      "item": "minecraft:comparator"
+    },
+    "D": {
+      "item": "hbs_satellites:satellite_display_block"
     }
   },
   "result": {

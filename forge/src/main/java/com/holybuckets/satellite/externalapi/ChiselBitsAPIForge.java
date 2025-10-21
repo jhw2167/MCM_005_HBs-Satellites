@@ -101,6 +101,10 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
                     if(yLevelHasUpdates != null && !yLevelHasUpdates[y]) continue;
                     for(int x = 0; x < 16; x++) {
                         for(int z = 0; z < 16; z++) {
+                            if(bits[ISatelliteDisplayBE.getCachePos(x,y,z)] == 0 ) {
+                                mutator.clearInAreaTarget( ISatelliteDisplayBE.get3Dpos(x,y,z) );
+                                continue;
+                            }
                             mutator.overrideInAreaTarget(
                                 HOLO_BLOCKS[ bits[ISatelliteDisplayBE.getCachePos(x,y,z)] ],
                                 ISatelliteDisplayBE.get3Dpos(x,y,z)
@@ -159,65 +163,13 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
     }
 
 
-    /**
-     *
-     * @param level
-     * @param center
-     * @param area
-     * @param colors
-     */
+
     @Override
-    public void highlightArea(Level level, BlockPos center, Vec3[] area, int[] colors)
-    {
-
-        //Generates positions in multiple different chiseled blocks
-        // to do later maybe
-        //ChiselAdaptingWorldMutator mutator = new ChiselAdaptingWorldMutator(level, pos);
-        ChiselAdaptingWorldMutator[][][] mutatorArr = new ChiselAdaptingWorldMutator[3][3][3];
-        //generator a mutator entry for each block around the center, if its a holo block
-        for(int y = -1; y <= 1; y++) {
-            for(int x = -1; x <= 1; x++) {
-                for(int z = -1; z <= 1; z++) {
-                    BlockPos pos = center.offset(x,y,z);
-                    BlockEntity be = level.getBlockEntity(pos);
-                    if(be != null && be instanceof IMultiStateBlockEntity) {
-                        mutatorArr[y+1][z+1][z+1] = new ChiselAdaptingWorldMutator(level, pos);
-                    }
-                }
-            }
-        }
-
-        final HBUtil.TripleInt centerIdx = new HBUtil.TripleInt(1,1,1);
-        HBUtil.TripleInt idx = new HBUtil.TripleInt(1,1,1);
-        try {
-            for(int i = 0; i < area.length; i++)
-            {
-                idx.x = centerIdx.x;
-                idx.y = centerIdx.y;
-                idx.z = centerIdx.z;
-                int dx=0, dy=0, dz=0;
-
-
-                if(area[i].x < 0) {idx.x = 0; dx=1;}
-                else if(area[i].x >= 1) {idx.x = 2; dx=-1;}
-                if(area[i].y < 0) {idx.y = 0; dy=1;}
-                else if(area[i].y >= 1) {idx.y = 2; dy=-1;}
-                if(area[i].z < 0) {idx.z = 0; dz=1;}
-                else if(area[i].z >= 1) {idx.z = 2; dz=-1;}
-
-                ChiselAdaptingWorldMutator mutator = mutatorArr[idx.y][idx.x][idx.z];
-                if(mutator == null) continue;
-                Vec3 areaPrime = area[i].add(dx,dy,dz);
-
-                if(!( mutator.getInAreaTarget( areaPrime )).isPresent()) continue;
-                BlockState curr = mutator.getInAreaTarget( areaPrime ).get().getBlockInformation().getBlockState();
-                if(curr == null || curr.getBlock() == AIR || curr.getBlock() == ModBlocks.holoAirBlock) continue;
-                mutator.overrideInAreaTarget( HOLO_BLOCKS[ colors[i] ],  areaPrime );
-            }
-        } catch (Exception e) {
-            LoggerProject.logError ("100003","Error placing chiseled block at " + center + ": " + e.getMessage());
-            e.printStackTrace();
-        }
+    public boolean isChiseledBlock(Level level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if(!(state.getBlock() instanceof ChiseledBlock)) return false;
+        BlockEntity be = level.getBlockEntity(pos);
+        return (be instanceof IMultiStateBlockEntity);
     }
 
     @Override

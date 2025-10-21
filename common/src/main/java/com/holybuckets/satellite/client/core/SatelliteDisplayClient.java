@@ -1,6 +1,8 @@
 package com.holybuckets.satellite.client.core;
 
 import com.holybuckets.foundation.client.ClientEventRegistrar;
+import com.holybuckets.satellite.CommonClass;
+import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.client.CommonClassClient;
@@ -107,8 +109,9 @@ public class SatelliteDisplayClient extends SatelliteDisplay {
             return;
         }
 
-        BlockHitResult hitResult = (BlockHitResult) player.pick(REACH_DIST_BLOCKS, 0.5f, true);
         Level level = camera.getEntity().level();
+        if(!SatelliteMain.chiselBitsApi.isChiseledBlock(level, event.getHitResult().getBlockPos())) return;
+        BlockHitResult hitResult = event.getHitResult();
         if (hitResult.getType() != HitResult.Type.BLOCK) return;
         for(SatelliteDisplayClient disp : DISPLAYS) {
             if(disp.holoBlocks.contains((hitResult.getBlockPos()))) {
