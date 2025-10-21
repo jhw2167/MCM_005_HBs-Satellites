@@ -26,7 +26,7 @@ public class SatelliteConfig {
 
     @NestedType(String.class)
     @Comment("Entity types produce green ping on the satellite display")
-    public List<String> friendlyEntityTypes = Arrays.asList();
+    public Set<String> friendlyEntityTypes = Set.of("minecraft:villager", "minecraft:allay");
 
     @Comment("Registers all mobs defined as hostile as red ping")
     public boolean addAllHostileMobsAsRedPing = true;
@@ -37,7 +37,7 @@ public class SatelliteConfig {
 
     @NestedType(String.class)
     @Comment("Entity types produce a white ping")
-    public Set<String> neutralEntityTypes = Set.of("minecraft:villager", "minecraft:iron_golem");
+    public Set<String> neutralEntityTypes = Set.of("minecraft:iron_golem");
 
     @NestedType(String.class)
     @Comment("Entity types only produce a white ping when grouped in large quantities")

@@ -23,11 +23,13 @@ public class SatelliteRenderer implements BlockEntityRenderer<SatelliteBlockEnti
     @Override
     public void render(SatelliteBlockEntity blockEntity, float partialTick, PoseStack poseStack,
                       MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        
+
+        int colorId = blockEntity.getColorId();
+        if( colorId < 0 ) return;
         poseStack.pushPose();
 
         VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
-        ResourceLocation woolLoc = SatelliteManager.getResourceForColorId( blockEntity.getColorId() );
+        ResourceLocation woolLoc = SatelliteManager.getResourceForColorId( colorId );
         TextureAtlasSprite woolSprite = CommonClassClient.getSprite(woolLoc);
 
         Matrix4f matrix = poseStack.last().pose();

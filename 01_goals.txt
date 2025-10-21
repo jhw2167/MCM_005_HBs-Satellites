@@ -156,6 +156,8 @@ Okkk
 20. Satellite Update cards
 ---
 
+1136.500000, 100.000000, -2559.500000
+5000.500000, 100.000000, 50.500000
 
 20. Satellite Update cards
 ---

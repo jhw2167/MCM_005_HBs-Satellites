@@ -56,6 +56,7 @@ public class SatelliteDisplay {
     int maxSection;
     int depth;
     boolean needsUpdate;
+    boolean needsEntityUpdate;
     protected Map<BlockPos, ISatelliteDisplayBE> displayBlocks;
     Set<Entity> displayEntities;
     protected int minX = Integer.MAX_VALUE;
@@ -142,7 +143,7 @@ public class SatelliteDisplay {
 
     public void adjCurrentSection(int delta) {
         int temp = this.currentSection + delta;
-        if( temp < 0 ||  temp >= maxSection ) return;
+        if( temp < depth ||  temp >= maxSection ) return;
         this.currentSection = temp;
         this.needsUpdate = true;
     }
@@ -213,16 +214,15 @@ public class SatelliteDisplay {
     }
 
     public boolean needsClear() { return needsUpdate; }
+    public void setNeedsUpdate(boolean b) { this.needsUpdate = b; }
 
     public void resetDisplayUpdates() {
-        if(needsUpdate) {
-            INFO_CACHE.values().forEach( info -> {
-                if(info.isActive) info.resetUpdates();
-            });
-        }
+        INFO_CACHE.values().forEach( info -> {
+            if(info.isActive) info.resetUpdates();
+        });
+        needsUpdate = true;
         if(controller != null) controller.setUiPosition(null);
         this.cursorSelection = null;
-        this.needsUpdate = false;
     }
 
     //** DISPLAY METHODS
@@ -234,7 +234,10 @@ public class SatelliteDisplay {
         return false;
     }
 
-    public boolean noSource() { return satellite == null; }
+    public boolean noSource() {
+        if( satellite == null ) return true;
+        return !controller.isDisplayOn();
+    }
 
     public void add(BlockPos blockPos, ISatelliteDisplayBE displayBlock) {
         displayBlocks.put(blockPos, displayBlock);
@@ -357,6 +360,7 @@ public class SatelliteDisplay {
 
         if(this.needsUpdate)
         {
+            this.needsEntityUpdate = true;
             displayEntities.clear();
             //for(ISatelliteDisplayBlock displayBlock : displayBlocks.values())
             {
@@ -371,6 +375,7 @@ public class SatelliteDisplay {
 
                 LevelChunk startChunk = SatelliteManager.getChunk((ServerLevel) level, xChunkStart, zChunkStart);
                 LevelChunk endChunk = SatelliteManager.getChunk((ServerLevel) level, xChunkEnd, zChunkEnd);
+                if(startChunk == null || endChunk == null) return;
 
                 int xStart, xEnd, zStart, zEnd;
 
@@ -433,7 +438,7 @@ public class SatelliteDisplay {
 
             }
 
-
+            this.needsEntityUpdate = false;
         }
 
         displayEntities.addAll(HBUtil.PlayerUtil.getAllPlayers());
@@ -452,6 +457,7 @@ public class SatelliteDisplay {
 
             if( ModConfig.getHerdEntities().contains(e.getType()) ) {
                 ChunkDisplayInfo info = INFO_CACHE.get(new TripleInt(e.chunkPosition().x, currentSection, e.chunkPosition().z ));
+                if(info == null) return false;
                 return info.acceptLocalEntity(e);
             }
             return true;
@@ -471,7 +477,7 @@ public class SatelliteDisplay {
     public void renderEntities(BlockPos cntrlPos)
     {
         if(cntrlPos == null || noSource() || this.target == null) return;
-
+        if(this.needsEntityUpdate) collectEntities();
         //Obtain an iterator to the entity list
         Iterator<Entity> iterator = displayEntities.iterator();
         while (iterator.hasNext())

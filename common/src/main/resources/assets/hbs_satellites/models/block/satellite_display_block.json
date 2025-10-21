@@ -3,10 +3,10 @@
   "textures": {
     "particle": "minecraft:block/iron_block",
     "down": "hbs_satellites:block/display_bottom",
-    "up": "hbs_satellites:block/display_top_on",
-    "north": "hbs_satellites:block/display_side_on",
-    "east": "hbs_satellites:block/display_side_on",
-    "south": "hbs_satellites:block/display_side_on",
-    "west": "hbs_satellites:block/display_side_on"
+    "up": "hbs_satellites:block/display_top",
+    "north": "hbs_satellites:block/display_side",
+    "east": "hbs_satellites:block/display_side",
+    "south": "hbs_satellites:block/display_side",
+    "west": "hbs_satellites:block/display_side"
   }
 }

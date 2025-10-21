@@ -27,8 +27,9 @@ public class SatelliteControllerBlock extends Block implements EntityBlock {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
     public SatelliteControllerBlock() {
-        super(Properties.copy(Blocks.IRON_BLOCK)
-            .lightLevel(state -> 12)
+        super(Properties.of()
+            .lightLevel(state -> state.getValue(POWERED) ? 8 : 0)
+            .sound(SoundType.METAL)
             .destroyTime(0.6f)  // Makes it break faster
             .explosionResistance(6f));
         registerDefaultState(this.stateDefinition.any()

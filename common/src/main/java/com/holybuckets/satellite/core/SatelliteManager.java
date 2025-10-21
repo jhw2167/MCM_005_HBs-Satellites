@@ -97,6 +97,13 @@ public class SatelliteManager {
         be.setLevelChunk( getChunk(be.getLevel(), be.getBlockPos()) );
     }
 
+    public static void remove(int colorId) {
+        if(colorId < 0) return;
+        SATELLITES.remove(colorId);
+    }
+
+    public static int totalSatellites() { return SATELLITES.size(); }
+
     public static int totalIds() {
         return WOOL_IDS.size();
     }
@@ -261,10 +268,6 @@ public class SatelliteManager {
         }
     }
 
-
-    public static void remove(int colorId) {
-        SATELLITES.remove(colorId);
-    }
 
     public static boolean isAnyControllerOn() {
         return  anyControllerOn;

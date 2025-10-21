@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
 public class SatelliteBlock extends Block implements EntityBlock {
     
     public SatelliteBlock() {
-        super(Properties.copy(Blocks.IRON_BLOCK)
+        super(Properties.of()
             .lightLevel(state -> 12)
             .noOcclusion() 
             .isViewBlocking((state, level, pos) -> false)

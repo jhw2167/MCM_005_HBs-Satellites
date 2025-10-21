@@ -27,14 +27,12 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
     public SatelliteBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.satelliteBlockEntity.get(), pos, state);
         //this.setColorId( (int) (Math.random() * HEXCODE_MAX));
-        this.setColorId(0);
+        this.colorId = -1;
     }
 
     public void use(Player p, InteractionHand hand, BlockHitResult res)
     {
-        int cmd = -1;
-        cmd = ISatelliteControllerBE.calculateHitCommand(res);
-
+        int cmd = 16;
         if (cmd == 16)
         {
             //If player is holding wool in their hand, set tot that color

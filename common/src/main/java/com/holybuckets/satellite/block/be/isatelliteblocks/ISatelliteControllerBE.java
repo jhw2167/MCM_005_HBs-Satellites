@@ -17,8 +17,6 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
 
     void setColorId(int colorId);
 
-    void setSource(SatelliteDisplay display);
-
 
     float ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD = 0.7f;
     float ORDINAL_COORD_BLOCK_HORZ_LEFT_THRESHOLD = 0.3f;

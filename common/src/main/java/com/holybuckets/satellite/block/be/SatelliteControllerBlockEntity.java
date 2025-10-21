@@ -105,15 +105,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
 
     @Override
-    public void setSource(SatelliteDisplay source)
+    public void setSource(SatelliteDisplay source, boolean forceDisplayUpdates)
     {
         this.source = source;
-        this.forceUpdate();
-        if(this.linkedSatellite != null) {
-            this.satelliteTargetPos = this.linkedSatellite.getBlockPos();
-        } else {
-            this.satelliteTargetPos = null;
-        }
+        satelliteTargetPos = (linkedSatellite != null) ? linkedSatellite.getBlockPos() : null;
+        if(forceDisplayUpdates) forceUpdate();
+        if(source == null || source.noSource()) return;
+        this.displayInfo = source.initDisplayInfo(this);
     }
 
     public void onDestroyed() {
@@ -192,8 +190,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     }
 
     @Override
-    public void toggleOnOff(boolean toggle) {
-        this.isDisplayOn = toggle;
+    public void toggleOnOff(boolean toggle)
+    {
+        if(isDisplayOn == toggle) return;
+        isDisplayOn = toggle;
         if(!isDisplayOn) turnOff();
         this.markUpdated();
         this.updateBlockState();
@@ -203,6 +203,41 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     @Override
     public BlockEntityType<?> getType() {
         return ModBlockEntities.satelliteControllerBlockEntity.get();
+    }
+
+
+    private static final int UI_REFRESH_TICKS = 10;
+    private void processCommands()
+    {
+        if(ticks % UI_REFRESH_TICKS != 0) return;
+        if(!this.commands.hasUpdate) return;
+
+        if(this.commands.dIdSet > -1) {
+            this.setColorId(this.commands.dIdSet);
+            this.commands.dIdSet = -1;
+        } else if(this.commands.dIdAdj != 0) {
+            int newId = (this.getColorId() + this.commands.dIdAdj) % SatelliteManager.totalIds();
+            this.setColorId(newId);
+            this.commands.dIdAdj = 0;
+        }
+
+        if(!this.isDisplayOn || this.source == null || this.source.noSource()) {
+            this.commands.reset();
+            return;
+        }
+
+        this.source.adjCurrentSection(this.commands.dSection);
+        this.commands.dSection = 0;
+
+        this.source.adjOrdinal(this.commands.dNS, this.commands.dEW);
+        this.commands.dNS = 0;
+        this.commands.dEW = 0;
+
+        this.source.adjDisplayDepth(this.commands.dDepth);
+        this.commands.dDepth = 0;
+
+        this.commands.hasUpdate = false;
+        this.forceUpdate();
     }
 
     @Override
@@ -228,65 +263,36 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             this.linkedSatellite = SatelliteManager.get(this.colorId);
             SatelliteDisplay source = SatelliteManager.generateSource(this.level,
                 this.linkedSatellite, this);
-            setSource(source);
+            setSource(source, true);
         }
 
 
         processCommands();
-        if(this.source != null && this.isDisplayOn ) {
-            renderDisplay();
-            renderPlayerUI();
-        }
+        renderDisplay();
 
-    }
-
-    private static final int UI_REFRESH_TICKS = 10;
-    private void processCommands()
-    {
-        if(ticks % UI_REFRESH_TICKS != 0) return;
-        if(!this.commands.hasUpdate) return;
-
-        if(this.commands.dIdSet > -1) {
-            this.setColorId(this.commands.dIdSet);
-            this.commands.dIdSet = -1;
-        } else if(this.commands.dIdAdj != 0) {
-            int newId = (this.getColorId() + this.commands.dIdAdj) % SatelliteManager.totalIds();
-            this.setColorId(newId);
-            this.commands.dIdAdj = 0;
-        }
-
-        if(this.source == null || this.source.noSource() || !this.isDisplayOn) {
-            this.commands.reset();
-            return;
-        }
-
-        this.source.adjCurrentSection(this.commands.dSection);
-        this.commands.dSection = 0;
-
-        this.source.adjOrdinal(this.commands.dNS, this.commands.dEW);
-        this.commands.dNS = 0;
-        this.commands.dEW = 0;
-
-        this.source.adjDisplayDepth(this.commands.dDepth);
-        this.commands.dDepth = 0;
-
-        this.commands.hasUpdate = false;
-        this.forceUpdate();
     }
 
     private static final int PATH_REFRESH_TICKS = 200;
     private static final int ENTITY_REFRESH_TICKS = 10;
-    protected void renderDisplay() {
-        if(ticks % PATH_REFRESH_TICKS == 0 ){
+    protected void renderDisplay()
+    {
+
+        if( (isDisplayOn && ticks%PATH_REFRESH_TICKS==0) )
+        {
             propagateToNeighbors();
-            if(true || forceDisplayUpdates) {
-                source.resetDisplayUpdates();
+            if(forceDisplayUpdates) {
+                if(source != null) source.resetDisplayUpdates();
                 this.forceDisplayUpdates = false;
+            } else {
+                if(source != null) source.setNeedsUpdate(false);
             }
         }
         super.renderDisplay();
+
         if(this.source != null && ticks % ENTITY_REFRESH_TICKS == 0)
             this.source.renderEntities(this.getBlockPos());
+
+        this.renderPlayerUI();
     }
 
     private static int PLAYER_UI_REFRESH_TICKS = 4;
@@ -294,6 +300,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     private void renderPlayerUI()
     {
         //Get all players within 64 blocks
+        if( !isDisplayOn || source==null || source.noSource() ) return;
         if(ticks % PLAYER_UI_REFRESH_TICKS != 0) return;
 
         List<ServerPlayer> players = HBUtil.PlayerUtil

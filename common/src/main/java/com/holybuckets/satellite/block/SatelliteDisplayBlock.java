@@ -10,6 +10,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -24,8 +25,9 @@ public class SatelliteDisplayBlock extends Block implements EntityBlock {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     
     public SatelliteDisplayBlock() {
-        super(Properties.copy(Blocks.IRON_BLOCK)
-            .lightLevel(state -> state.getValue(POWERED) ? 15 : 0)
+        super(Properties.of()
+            .lightLevel(state -> state.getValue(POWERED) ? 8 : 0)
+            .sound(SoundType.METAL)
             .destroyTime(0.6f)  // Makes it break faster
             .explosionResistance(6f));
         registerDefaultState(this.stateDefinition.any().setValue(POWERED, false));

@@ -66,8 +66,10 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
     @Override
     public void toggleOnOff(boolean toggle) {
-        this.isDisplayOn = toggle;
-        updateBlockState();
+        if(toggle != this.isDisplayOn) {
+            this.isDisplayOn = toggle;
+            updateBlockState();
+        }
     }
 
     private void updateBlockState() {
@@ -100,7 +102,10 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         if(this.source == source && !forceUpdate) return; //same source
 
         this.source = source;
-        if(this.source == null || source.noSource() ) return;
+        if(this.source == null || source.noSource() ) {
+            toggleOnOff(false); return;
+        }
+        this.toggleOnOff(true);
         this.displayInfo = source.initDisplayInfo(this);
 
         this.forceUpdate();
@@ -151,7 +156,9 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
     private static final int REFRESH_RATE = 60;
     private static final int PLAYER_REFRESH_RATE = 10;
-    protected void renderDisplay() {
+    protected void renderDisplay()
+    {
+        if(source == null || source.noSource()) return;
 
         if(source.needsClear() ) {
             this.clearAboveArea(this.height);
