@@ -78,7 +78,7 @@ A Minecraft mod that brings futuristic satellite surveillance to your world! Mon
 
 ## 📝 License
 
-This project is licensed under [License Name] - see the LICENSE file for details.
+This project is licensed under GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
 
