@@ -89,7 +89,7 @@ Okkk
 	- Need to add this functionality to satelliteBlockEntity
 
 
-12. Add crafting recipes for all items
+12. Add crafting recipes for all items					XXX
 ---
 
 
@@ -102,12 +102,14 @@ Okkk
 	- Create a holoblock air copy instance so it still registers as holo and wireframe is voided
 
 
-14. Get nicer blocks and lighting affects for hologram itself
+14. Fix Plethora of bugs
 ---
 
+	- When reloaded after game restart and set to yellow wool, display only showed 1 section and could not move up or down or change height
+	- Long ticks in between entity ticks
+	- Add substitute clear block for small patches and large clear for major changes
+	- 
 
-16. Refactor satellite depth so it cannot be cheesed by placing blocks high in the sky
----
 
 
 20. Satellite Update cards
@@ -156,8 +158,12 @@ Okkk
 20. Satellite Update cards
 ---
 
-1136.500000, 100.000000, -2559.500000
-5000.500000, 100.000000, 50.500000
+
+	- Satellite Controller pictures
+	- Recipe Pictures
+	- Side/Side diorama pictures
+	- UI video
+
 
 20. Satellite Update cards
 ---

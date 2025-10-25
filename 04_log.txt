@@ -1,0 +1,564 @@
+commit 406c094f1078e4f14483f4f380b7e7fc175728c8
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Tue Oct 21 05:17:21 2025 -0500
+
+    Made submission
+
+commit 687a849df794657c3b7e79306916cdd5baca583a
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Mon Oct 20 23:12:30 2025 -0500
+
+     - Minor bugfixes to controllers and renderers and satellite displays
+    - updated renderDisplayMethod in SatelliteDisplayEntity to check if displaySource was nullbefore attempting to parse and refresh player chunk fully
+
+commit 87c53475c70543fa48aac08bdafba3caab08fe49
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 20 20:58:34 2025 -0500
+
+    fix: Correct UV mapping for North and East faces of satellite controller block
+
+commit f9854dab9c7a98fda049fc8ae887dda644bf92f5
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 20 20:39:44 2025 -0500
+
+    fix: Correct UV mapping for north, west, and bottom faces in satellite renderers
+
+commit 5c344c2da9a4023e1d736c48b816b74db25daa7d
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Mon Oct 20 20:39:42 2025 -0500
+
+    refactor: Adjust rendering offset for satellite controller block face
+
+commit 80eea111a5361b0a719ae0ef909daf6ca1ddcf16
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 20 20:15:33 2025 -0500
+
+    fix: Reduce block break time and ensure proper item drops
+
+commit 8a5b2156af2fc67b2c2c336fb0c1cd446ce4792e
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Mon Oct 20 20:15:31 2025 -0500
+
+    feat: Add light level and render shape to SatelliteBlock
+
+commit ceef791388b438541da9cca3690a0bf846ba9885
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 20 19:51:17 2025 -0500
+
+    feat: Add loot tables and crafting recipes for satellite blocks
+
+commit bfa95f373321fe1a53083fa3cd688157d9f17c60
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 20 15:38:07 2025 -0500
+
+    fix: Correct UV mapping for all faces in SatelliteRenderer
+
+commit 1300562eb4c4e2f479f138a128b98025a7b61907
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 20 14:27:20 2025 -0500
+
+    refactor: Update SatelliteRenderer to render 6x6 pixel centered wool texture
+
+commit 0bd8cccf82da2a59207de22b37422bf63c9161ba
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Mon Oct 20 13:18:15 2025 -0500
+
+    - Working out minor issue with satellite client display
+    - added light levels to controllerBlock and displayBlock entities
+    - added new textures and custom display block entities
+
+commit b7c4af913326aba26fccee2d658aa74609cb7e8a
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 20 12:39:33 2025 -0500
+
+    feat: Add light emission and improve block state updates for satellite blocks
+
+commit 73300d9f13459d1ab13187a6ca82b7dcf44b7123
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Mon Oct 20 12:39:31 2025 -0500
+
+    feat: Add block state properties to SatelliteDisplayBlock and related entity
+
+commit cc11e7554dc295745b473bfc5254aa80e32e1ca0
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 20 12:28:24 2025 -0500
+
+    fix: Resolve duplicate JSON in satellite_display_block blockstate file
+
+commit 82c9e7b00276306358a91f172ef7f4808dd07dac
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 20 12:28:14 2025 -0500
+
+    feat: Add powered state for SatelliteDisplayBlock with _on textures
+
+commit 799eb6ece659b0febdf510c63d0af95fd62c50b6
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Mon Oct 20 03:19:26 2025 -0500
+
+     Added SatelliteDisplayClient
+    - Refactored project to be deployable on dedicated servers
+    - Refactored holobits algorithm to locate a broader range of holoBits in the area, in case we are looking at air bit
+
+commit e9ec8b8ed45eac334f47dce38359d07607a161a5
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 20 00:47:09 2025 -0500
+
+    feat: Add dynamic textures for satellite controller block on/off states
+
+commit 2267e16698a911731820a10a77125c23008aecf1
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 20 00:44:17 2025 -0500
+
+    feat: Add isDisplayOn tracking and method to check controller state
+
+commit abe4ff9288408a9a4e0ca1a73fbcb154e7667f0d
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Mon Oct 20 00:44:13 2025 -0500
+
+    refactor: Update satellite block entity interfaces and color handling logic
+
+commit 883f2f3b800e60c7ca00e512b3cf0a8e53d7523a
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Sun Oct 19 22:53:53 2025 -0500
+
+    feat: Add SatelliteDisplayClient for client-side satellite display management
+
+commit 992a0b9d51cd61d5374cf2394d47915edac38cfb
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Sun Oct 19 21:54:25 2025 -0500
+
+    Fixed bug with isViewingHoloBit method, used floor correctly on offset to account for negatives
+    - fixed bug with renderSphereUi so rendering is not performed on air blocks or bits
+
+commit 82f65650c5df9dc47030e8ceb5727a5917ced69d
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Sun Oct 19 18:11:24 2025 -0500
+
+    - Added client Event for post world GUI rendering to ForgeClientEvents
+    - seperate Forge event bus and mod event bus events
+    - added complex processing logic to ChiselbitsAPI for rendering gridlines UI
+    - Updated isviewingholobit logic
+    - made changes to renderes so the wool color is fully lit up
+
+commit 3b872d00e9397233c419a15daed5cf433ab1da2a
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Sun Oct 19 04:11:05 2025 -0500
+
+    I was not registering some events
+
+commit 8f629f2d3c8b083f91980c160b332e12d8fc6b8a
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Sun Oct 19 04:00:44 2025 -0500
+
+    updates sent to server to change block color
+    - BlockUsed event is failing, unsure why
+
+commit 608f00334ab3d5e52377d94bab8fa447cc150477
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Sat Oct 18 21:34:02 2025 -0500
+
+    feat: Add SatelliteRenderer with color strip on all sides
+
+commit f840dab34f0fa2e9b5d53fd7c98af94568267316
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Sat Oct 18 20:34:57 2025 -0500
+
+    - ADded support for changing color id on controller
+    - Added support for colorId on Satellite
+    - Added SatelliteControllerRenderer for dynamic color rendering
+    - Added ModRenders to support SatelliteControllerRenderer
+    - ADded ability to use Satellite bock to change id
+    - Added utility getWoolColor and id methods to SatelliteManager
+
+commit 3c1ce7b77a2fa10602ba284a92e3f96efcaae41c
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Sat Oct 18 15:01:01 2025 -0500
+
+    feat: Add SatelliteControllerRenderer for dynamic block rendering
+
+commit dfe5b1dfdd08680451e25ffabc26c5dcb751092d
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Sat Oct 18 14:59:50 2025 -0500
+
+     - Repaired bug where out of range chunks would trigger exception in forceChunkUnload
+    - chunk loads unloads now accept chunkpos instead of string
+    - added wool color ids to SatelliteManager
+    - updated color section method from controller entity
+    - updated user interface positions in ISatelliteControllerBlock
+
+commit 38ba5f646b5de9ad21669be0670aafb9ae2edc7f
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Fri Oct 17 02:25:50 2025 -0500
+
+    - Entity support is fluid for hostile mobs
+
+commit 7f572d09d3463b0a3d0dd6f5701afbebd16c548b
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Fri Oct 17 01:15:23 2025 -0500
+
+    feat: Add particle JSON files for red, blue, and orange pings
+
+commit 356e375c62d8eeb50dc2677a019b143f62bc0713
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Fri Oct 17 01:11:19 2025 -0500
+
+    feat: Add red, blue, green, and orange ping particle types
+
+commit a7c6080f1490d19511632da4c79863a15c924f1e
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Fri Oct 17 01:09:42 2025 -0500
+
+    - working in runtime modConfig object to hold registry entities
+    - patched collectEntities algorithm to operate over all chunks in the satellite area
+    - updated collectEntities to consider negative axis
+    - updated collectEntities to load chunks from satelliteManager and skip chunks that were not loaded correctly
+
+commit 421be9b9adab792c36a556779cbd144215cfe301
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Fri Oct 17 00:07:37 2025 -0500
+
+    feat: Add ModConfig with entity type conversion and set management
+
+commit 76e12bae8e4dd58d7cc5fc889fda775bfc0eb888
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Fri Oct 17 00:07:35 2025 -0500
+
+    feat: Add empty ModConfig class for configuration management
+
+commit 09f3ca8cd9a1af8276a1543de40b1f0135dd7ff3
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Thu Oct 16 23:11:40 2025 -0500
+
+    feat: Add destroy speed, wool sound, and no collision to holo base block
+
+commit 805999b9861c48b3ec7b525f9969e3150f1dbe0e
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Thu Oct 9 15:22:47 2025 -0500
+
+     -Added new hover effect for hovering over Satellite Display
+    - Reintroduced entity parsing and provided finer support
+    - Added satellite config and initialized on serverStarting
+
+commit 1635a80dab423ff7579c94f39cbd4a24268e1716
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Thu Oct 9 14:13:35 2025 -0500
+
+    feat: Add hover_orange particle effect using Flame texture
+
+commit 285a14ffecc468c5c7590328ac58e2f29a7d07ba
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Thu Oct 9 14:13:34 2025 -0500
+
+    feat: Add base ping particle rendering in ModRenderers
+
+commit 02456008a806ca08eacaa8cc59661fc38abad869
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Thu Oct 9 13:55:29 2025 -0500
+
+    feat: Add SatelliteConfig with configurable display, entity, and particle settings
+
+commit ccab7ad0eae89e6a2a5d9d4f18ebaa99182e877c
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Oct 8 13:09:33 2025 -0500
+
+    feat: Add BasePing particle type with customizable properties
+
+commit c3e20cd6790c8136554df5d8fe58e219f10376f9
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Oct 8 12:59:10 2025 -0500
+
+    feat: Add ModParticles with HOLO_SPARK and HOLO_TRACE particle types
+
+commit b2b42784546548a477bca6bae614504cba1467fd
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Oct 8 02:37:01 2025 -0500
+
+     - added isHitWithinDisplay method to Satellite display to detect when player targets holo bits
+    - added isViewingHoloBlock method to ChiselBits API to determine if a holo block is being viewed by wireframe noop or player UI util
+    - next step is to change glass pane color for blocks targeted within holo display
+
+commit 74fbc662bc2b60d3b1f17e87231b1d52a6bac9d6
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Oct 8 01:12:07 2025 -0500
+
+    feat: Add player selection for satellite controller block entity
+
+commit a676b06329d7b6bcd3c95e9c137bc0bd5722b9c0
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Oct 8 01:12:05 2025 -0500
+
+    feat: Add player UI rendering and increase path refresh interval
+
+commit 35ad1f26b053d7e02187a599f6a50435eaa45b12
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Tue Oct 7 12:43:02 2025 -0500
+
+    feat: Refactor HoloBaseBlock with configurable properties and add HoloAir block
+
+commit f16b258e313c39e8b1cab5bb9296f28f71428c3b
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Tue Oct 7 00:55:43 2025 -0500
+
+    - Hacking forge event to remove wireframe from holo blocks
+    - Added new textures and holo light and dark block
+    - having trouble removing wireframe from the topmost level
+
+commit cc8a1015a06334f0ae122d344e0d0edd878b191a
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 6 23:14:14 2025 -0500
+
+    feat: Subscribe to block highlight event in Forge mod bus
+
+commit 81098cdbd23eb5d05856d66bd6faec3dae707ce5
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 6 22:09:46 2025 -0500
+
+    feat: Add HoloDarkBlock with translucent rendering and dark texture
+
+commit 92a679f2cbb172ba180204ffe972bfed57af0c79
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Mon Oct 6 22:09:44 2025 -0500
+
+    feat: Add translucent render type for holoBaseBlock in client initialization
+
+commit 0ad641e06b1fc6d5a121db3aa1957e5ec062c5ab
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 6 20:49:39 2025 -0500
+
+    feat: Add HoloBaseBlock with glass-like semi-transparent properties
+
+commit 8d84b09e9418b43568485bf31c75aeface8e12be
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 6 20:42:41 2025 -0500
+
+    feat: Add Holoblock Base block with registration, model, and language support
+
+commit 3befb349156cb443feeb2c72442befb896152d41
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Mon Oct 6 20:40:39 2025 -0500
+
+    Added holo base block variant
+
+commit 966037f9913db6fc9ba0b9bc0df72e028f87d2e6
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Mon Oct 6 20:36:56 2025 -0500
+
+    feat: Add forced chiselable tag for satellite display block
+
+commit 11bc3784989ab804baa0c11d6990693c948ea2cb
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Mon Oct 6 17:38:52 2025 -0500
+
+    - Removed default set needsUpdates to false which permits chunks to update much more quickly
+    - moved determination of hasPlayer above chunk lifetime determination to ensure calculation is made
+
+commit e185a642a3e98e0d4a8d36321fabda0c92f67fc4
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Mon Oct 6 17:15:13 2025 -0500
+
+    - Having difficulties filling some chunks with the satellite display blocks, may be related to the particular chunk and section the player is standing in
+
+commit 00fb8ca8be9002b59569fbce3185acd4c6c515e7
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Thu Oct 2 02:39:22 2025 -0500
+
+    - Refined suport for entities adding blacklist and locating logic
+    - removed and commented many message handling statements
+    - adjusted refresh rates in attempt to reduce lag
+    - adjusted player UI such that satellite penetrates down into the world instead of just addng depth, added supporting methods to satellite display
+    - updated satellite display methods for particle and mob and entity loading
+
+commit da0293965dc2991ade0b1ca81c45fc227b2aa05e
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Oct 1 15:33:07 2025 -0500
+
+    feat: Add height tracking and clearing for satellite display block
+
+commit 5510d1dd47a34cdba89c8cf222a3cea73de5177b
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Oct 1 15:33:06 2025 -0500
+
+    refactor: Reduce display refresh rate from 20 to 10 ticks
+
+commit 750724bc6759366c4050de7bbf20d3f1f29e561f
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Oct 1 14:43:28 2025 -0500
+
+    feat: Add min/max x and z coordinate tracking for display blocks
+
+commit 170c885d3b0aeeb39e2383e66e6514a500bb739e
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Oct 1 14:43:27 2025 -0500
+
+    refactor: Improve entity filtering and particle type selection in SatelliteDisplay
+
+commit f7197e44f08515fbcdf00188302e2d9cfeb42dd2
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Oct 1 02:12:47 2025 -0500
+
+    - Added dedicated function for filtering entities on selection in satellite
+
+commit 100210f4a54344e4ca3027ffd3ae8e8c357c71fc
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Oct 1 01:39:10 2025 -0500
+
+    - Added support for displaying entities like players on the satellite terrain display
+    - Added some art specs for hologram and controller face
+    - Fixed bug where chunks did not forceload sucessfully because ChunkPos did not recognise equals overrides
+    - added collectEntities method to satellite display so multiple entities get added to the satellite
+    - improved efficacy of tick rate refresh method marginally
+
+commit da82f37ac8d42fd34c6a904599fe8406d716c218
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Oct 1 00:56:51 2025 -0500
+
+    refactor: Migrate SatelliteManager to use FastUtil's Long2ObjectMap with ChunkUtil.getChunkPos1DMap
+
+commit 002e92507fe02b5888f1f93aca9568021f3cbd4d
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Oct 1 00:56:50 2025 -0500
+
+    refactor: Optimize chunk caching with LongObjectHashMap and simplified iteration
+
+commit 62b9432d039c4ce4326411e31ab59f9cd0205d87
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Thu Sep 25 01:40:28 2025 -0500
+
+    - Implemented chunkDisplay caching system
+    Implemented levelChunk caching system in Satellite Manager
+    - Added support for SatelliteController remembering blockPos of their satellite
+    - Added support for retrieveing satellite after world reload
+
+commit 894257cb2ef63ace181c2752575bffe1abed84a1
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Sep 24 18:50:14 2025 -0500
+
+    feat: Implement chunk caching system with force loading and lifetime management
+
+commit f82ad2944109bf3ecc8e87860221945a6fc33d4c
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Sep 24 18:50:12 2025 -0500
+
+    refactor: Increase satellite map capacity and add SatelliteDisplay initialization
+
+commit 8c825a7f49a1c454e9366e5dab58411f8c348fcd
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Sep 24 18:19:32 2025 -0500
+
+    refactor: Add lifetime reset to ChunkDisplayInfo methods
+
+commit 9ea6a7eec03036eb367ecd08dc86b60e403a4f54
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Sep 24 18:19:30 2025 -0500
+
+    feat: Add isActive flag and resetUpdates method to ChunkDisplayInfo
+
+commit d897a34856214a2e2194f6f379499e7dc3d91c19
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Sep 24 18:19:04 2025 -0500
+
+    feat: Add lifetime tracking to SatelliteDisplay with tick method
+
+commit 87c3ecf9047fa32579c8769ffbb6a46a699488a0
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Sep 24 18:19:02 2025 -0500
+
+    refactor: Improve chunk display info caching and activation logic
+
+commit 8abd125a54bc2ac4a91e6801f34fe3fc083adeba
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Sep 24 14:07:02 2025 -0500
+
+    MVP looks good
+
+commit 0117673369a1da0d5d1830e48bf5546f26c1d432
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Sep 24 02:09:13 2025 -0500
+
+    - chiselbitsAPIForge implementation reverted to batching ALL bit changes at once. Addd argument to track the changes at each internal yLevel, skipping completely blank rows entirely
+    - Propogated argument changes to DisplayBlockEntity
+    - DisplayBlockEntity checks if all hasUpdates are empty before attempting to build a new display
+    - added a ChunkDisplayInfo cache to Satellite display
+    - Added logic for pulling from cache
+    - Added logic for refreshing bits in chunkDisplayInfo
+    - Added support for PlayerWillDestroy method so display and controller blocks clear their holos when destroyed
+    - Altered height property to depth property, lets players see further underground
+
+commit e953f947c75eae44948955595625f7e21957dc91
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Tue Sep 23 01:02:29 2025 -0500
+
+    - refined IGNORE set to include all non block blocks
+    - overrode destroy method in SatelliteController and Display blocks
+    - overrode blockhit method for satellite controller
+    - added logic in ISatelliteController to deduce player input from hitting a certain side of the block
+    - cleaned up onTick methods for display and controller
+    - used autocloseable batch loop for blockChisel changes
+
+commit bf11f53c3ee5f0c247f876b25cfbe8cb78c2397e
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Sat Sep 20 00:03:25 2025 -0500
+
+    - Using chisel bits world mutator APi may be productive, but can't figure out how to use it properly yet
+
+commit 9e04307a5d466c4e2a30728e938f237dfbfd4ff1
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Fri Sep 19 16:07:38 2025 -0500
+
+    feat: Add height field to SatelliteDisplayMessage and related codecs
+
+commit 37472e7b3e77d71947a9958c38b904ae8193d099
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Fri Sep 19 16:06:09 2025 -0500
+
+    -Added Satellite controller and display messages
+    - Changed Chiselbits API to take level instead of ChunkDisplayInfo
+    - adjusted SatelliteDisplay and Controller objects to handle client server side specifc updates
+
+commit dfd0d0144ba5bab6ffe3a9509ab36cc61e19642b
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Sep 17 18:59:55 2025 -0500
+
+    feat: Add SatelliteDisplayBlock with block entity and holographic display functionality
+
+commit 0ddac948c1ecbd1ec37e069e6ecbba680fc70ce2
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Sep 17 18:55:08 2025 -0500
+
+    feat: Update satellite block textures to use bottom texture consistently
+
+commit 1404594d41358a6b613fbf02b4639e3e73205348
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Sep 17 18:53:18 2025 -0500
+
+    - Added basic satellite and controller blocks
+
+commit c259916aaa716b8d4e68287ef0de11ba3a2882d7
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Sep 17 18:18:10 2025 -0500
+
+    feat: Add Satellite Controller Block with directional facing and textures
+
+commit b6aceeffbcee3420eed44610e819426efeb1edea
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Sep 17 18:07:31 2025 -0500
+
+    feat: Add Satellite Block with block entity and associated resources
+
+commit 8fe2f5ffc18290ea1e26fd2a867ba371723bc819
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Sep 17 17:11:52 2025 -0500
+
+    Added chisel and bits dependency for forge
+
+commit e8dc7c3288fc22b781a2241a4b2f9527eb256f53
+Author: jhw2167 (aider) <jhw2167@columbia.edu>
+Date:   Wed Sep 17 16:43:39 2025 -0500
+
+    feat: Add Chisels and Bits as a mandatory dependency
+
+commit b983303aa27ca2fdcce84a906ffcab52fa3c583d
+Author: jhw2167 <jhw2167@columbia.edu>
+Date:   Wed Sep 17 13:25:10 2025 -0500
+
+    inital commit compiles basically

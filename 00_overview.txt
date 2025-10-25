@@ -1,8 +1,69 @@
 Overview
 ---
 
-HB's Satellites - Monitor distant chunks in real time
+HB’s Satellites - Forge 1.20.1 - and more versions soon!
+Overview
 
-Short read:
+	HB’s Satellites is a Minecraft mod that allows you to view distant terrain in a futuristic 3D style. The Satellite block may be placed anywhere in the world and streams a live feed to the Controller and Display blocks. The controller block can be used to adjust the viewing area, viewing depth, or height of the display. The terrain is laid out in a beautiful 3D semi-holographic diorama, so the player can explore and monitor vast stretches of land remotely. Hostile and friendly entities will appear as pings on the satellite as well, these are customizable in the config file. I am extremely excited at the mod compatibility opportunities with established mods and even others in the Modjam!
+This mod is ONLY for Forge 1.20.1 at the moment, but I will bring it to future versions and Fabric at some point as well. There are tons of integrations I could do with this mod and I hope to explore some of them soon.
 
-Adds a satellite block to be placed in the sky set the chunk area you want to view then the controller and display blocks will generate a miniature version the terrain in that area allowing you to monitor or explore distant parts of the world!
+***It is kinda of BUGGY at the moment as I had to get my submission in for the modjam, but things will be cleaned up over the next few weeks as we move to getting feature complete
+
+*** Dedicated server support not yet added
+
+
+Why You Might Want This Mod
+You want to monitor a distant areas for resources or enemies
+You want to scout an attack on an enemies base or spy on your friends
+You want to scope out ores, distant structures, launch an aerial or ballistic attack on your enemies (features coming soon!)
+
+
+
+Main Features
+Satellite block can be placed anywhere in the world and will forceload the chunks around it
+Controller block links to the Satellite block by matching the wool color. You can right click the colored portion with a wool block to set it directly.
+
+
+Add as many display blocks as you like to view all around the satellite! Then you can use the controller to navigate around or go deeper down to the caves
+
+The area on the hologram will light up as you hover over it. Right click a block and it will tell you the target block position you selected!
+
+
+
+
+Compatibility
+
+
+This mod is built off of and depends on Chisel and bits 1.4.148. Other planned compatibilities will be things like
+Orbital Railgun
+ Create Big cannons
+Maybe a map mod like journeyMap so you can load your maps from the satellite
+
+Configuration Options
+ Fully customizable settings include:
+You can add to the existing list of hostile, friendly or herd entity types by using their registry name
+The values affecting the hologram refresh rate are not configurable yet
+
+Planned Features:
+Ore Scanning
+Advanced target selection
+Satellite updates chunks even while its moving itself
+Additional colors and enhanced hologram visuals
+Better UI for interacting with controller
+Increased refresh rate and performance
+Better multiplayer support when multiple satellites are used
+Bugs:
+-
+Example configurations are included in the GitHub repository.
+
+Video Captions
+
+(Title) HB’s Satellites for 1.20.1 Forge
+
+Find an area you want to scout with your Satellite
+Place the Satellite high in the sky
+Build the Satellite Controller and surround with display blocks
+Reveal a live terrain view at the satellite viewing area
+Ordinal Direction and Depth can be adjusted
+
+
