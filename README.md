@@ -4,7 +4,7 @@ A Minecraft mod that brings futuristic satellite surveillance to your world! Mon
 
 ![Satellite Overview](images/satellite_overview.gif)
 
-## 🛰️ Features
+## Features
 
 ### Satellite System
 - **Satellite Block**: Place anywhere in the world to establish surveillance
@@ -18,14 +18,14 @@ A Minecraft mod that brings futuristic satellite surveillance to your world! Mon
 - Real-time terrain visualization
 - Entity tracking with color-coded pings
   - Green: Friendly entities
-  - Orange: Neutral entities
+  - White: Neutral entities
   - Red: Hostile entities
 - Underground scanning capabilities
 - Adjustable viewing depth and range
 
 ![Radar Pings](images/radar_pings.gif)
 
-## 📋 Getting Started
+## Getting Started
 
 1. Craft and place your Satellite Block high in the sky
 2. Set up your Controller Block at your base
@@ -38,27 +38,26 @@ A Minecraft mod that brings futuristic satellite surveillance to your world! Mon
 
 ![Holographic Display](images/holo_display.gif)
 
-## ⚙️ Configuration
+## Configuration
 
-- Customize entity tracking categories
-- Adjust satellite range limits
-- Configure scanning depth restrictions
+- Customize entity tracking colors into friendly, neutral, and hostile
+- Adjust satellite range and operating restrictions
 - Set refresh rates for displays
 
-## 💡 Tips & Tricks
+## Tips & Tricks
 
 - Place satellites high up for better coverage
 - Use multiple displays for comprehensive views
 - Right-click blocks in the hologram to get their exact coordinates
 - Hover over areas to highlight them in the display
 
-## 🔧 Technical Requirements
+## Technical Requirements
 
 - Minecraft Forge 1.20.1
 - Dependencies:
   - Chisel and Bits 1.4.148+
 
-## 🚧 Planned Features
+## Planned Features
 
 - Ore scanning capabilities
 - Advanced target selection
@@ -70,16 +69,17 @@ A Minecraft mod that brings futuristic satellite surveillance to your world! Mon
   - Orbital Railgun
   - JourneyMap
 
-## ⚠️ Known Issues
+## Known Issues
 
-- Currently optimized for single-player use
-- Dedicated server support coming soon
-- Display refresh rates may vary based on system performance
+- Many configs options do not impact the game yet; the ping system DOES work
+- When the player rejoins the world, the satellite controller does not load the proper chunks for the satellite it was linked too
+- Entity Pings do not refresh readily; and disapear often for unknown reasons
+- The Satellite does not display wool color on all sides
+- Satellites will not work in non-overworld dimensions
+- The holo UI - hovers orange on player hover applies intermittenly, needs to be more consistent
+- Right Clicking to export a block position shows the position twice; 
 
-## 📝 License
+## License
 
 This project is licensed under GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
