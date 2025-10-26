@@ -29,14 +29,15 @@ import java.util.*;
 public class SatelliteManager {
 
     /** Maps colorId to satellite block entity */
-    public static final IntObjectHashMap<SatelliteBlockEntity> SATELLITES = new IntObjectHashMap<>(24);
-    public static final Map<SourceKey, SatelliteDisplay> DISPLAY_SOURCES = new HashMap<>();
+    private final IntObjectHashMap<SatelliteBlockEntity> satellites = new IntObjectHashMap<>(24);
+    private final Map<SourceKey, SatelliteDisplay> displaySources = new HashMap<>();
 
-    private static final Long2ObjectMap<CachedChunkInfo> CHUNK_CACHE = new Long2ObjectOpenHashMap<>(128);
+    private final Long2ObjectMap<CachedChunkInfo> chunkCache = new Long2ObjectOpenHashMap<>(128);
     private static final int MAX_CHUNK_LIFETIME = 300; // 300 seconds
     private static final int MAX_DISPLAY_LIFETIME = 300; // 300 seconds
 
-    private static final List<Block> WOOL_IDS = new ArrayList<>(64);
+    private final List<Block> woolIds = new ArrayList<>(64);
+    private final Level level;
 
 
     private static class SourceKey {
@@ -71,10 +72,13 @@ public class SatelliteManager {
     }
 
     //State variables
-    static boolean anyControllerOn;
-    boolean isServerSide;
-    public SatelliteManager() {
-        this.isServerSide = true;
+    private boolean anyControllerOn;
+    private final boolean isServerSide;
+    
+    public SatelliteManager(Level level) {
+        this.level = level;
+        this.isServerSide = !level.isClientSide();
+        initWoolIds();
     }
 
     public static void init(EventRegistrar reg) {
@@ -87,33 +91,33 @@ public class SatelliteManager {
     }
 
 
-    public static SatelliteBlockEntity get(int colorId) {
-        return SATELLITES.get(colorId);
+    public SatelliteBlockEntity get(int colorId) {
+        return satellites.get(colorId);
     }
 
-    public static void put(int colorId, SatelliteBlockEntity be) {
+    public void put(int colorId, SatelliteBlockEntity be) {
         if(be == null) return;
-        SATELLITES.putIfAbsent(colorId, be);
-        be.setLevelChunk( getChunk(be.getLevel(), be.getBlockPos()) );
+        satellites.putIfAbsent(colorId, be);
+        be.setLevelChunk(getChunk(be.getLevel(), be.getBlockPos()));
     }
 
-    public static void remove(int colorId) {
+    public void remove(int colorId) {
         if(colorId < 0) return;
-        SATELLITES.remove(colorId);
+        satellites.remove(colorId);
     }
 
-    public static int totalSatellites() { return SATELLITES.size(); }
+    public int totalSatellites() { return satellites.size(); }
 
-    public static int totalIds() {
-        return WOOL_IDS.size();
+    public int totalIds() {
+        return woolIds.size();
     }
 
-    public static Block getWool(int id) {
-        return new ArrayList<>(WOOL_IDS).get(id % WOOL_IDS.size());
+    public Block getWool(int id) {
+        return new ArrayList<>(woolIds).get(id % woolIds.size());
     }
 
-    public static int getColorId(Block b) {
-        return WOOL_IDS.indexOf(b);
+    public int getColorId(Block b) {
+        return woolIds.indexOf(b);
     }
 
     public static ResourceLocation getResourceForColorId(int colorId) {
@@ -143,43 +147,36 @@ public class SatelliteManager {
 
 
     //** Events
-    private static void onServerStarting(ServerStartingEvent event)
-    {
-        SATELLITES.clear();
-        CHUNK_CACHE.clear();
-
-        //Load all Wool Ids
-        WOOL_IDS.clear();
-        {
-            WOOL_IDS.add(Blocks.RED_WOOL);
-            WOOL_IDS.add(Blocks.ORANGE_WOOL);
-            WOOL_IDS.add(Blocks.YELLOW_WOOL);
-            WOOL_IDS.add(Blocks.LIME_WOOL);
-            WOOL_IDS.add(Blocks.GREEN_WOOL);
-            WOOL_IDS.add(Blocks.CYAN_WOOL);
-            WOOL_IDS.add(Blocks.LIGHT_BLUE_WOOL);
-            WOOL_IDS.add(Blocks.BLUE_WOOL);
-            WOOL_IDS.add(Blocks.PURPLE_WOOL);
-            WOOL_IDS.add(Blocks.MAGENTA_WOOL);
-            WOOL_IDS.add(Blocks.PINK_WOOL);
-            WOOL_IDS.add(Blocks.WHITE_WOOL);
-            WOOL_IDS.add(Blocks.LIGHT_GRAY_WOOL);
-            WOOL_IDS.add(Blocks.GRAY_WOOL);
-            WOOL_IDS.add(Blocks.BROWN_WOOL);
-            WOOL_IDS.add(Blocks.BLACK_WOOL);
-        }
+    private void initWoolIds() {
+        woolIds.clear();
+        woolIds.add(Blocks.RED_WOOL);
+        woolIds.add(Blocks.ORANGE_WOOL);
+        woolIds.add(Blocks.YELLOW_WOOL);
+        woolIds.add(Blocks.LIME_WOOL);
+        woolIds.add(Blocks.GREEN_WOOL);
+        woolIds.add(Blocks.CYAN_WOOL);
+        woolIds.add(Blocks.LIGHT_BLUE_WOOL);
+        woolIds.add(Blocks.BLUE_WOOL);
+        woolIds.add(Blocks.PURPLE_WOOL);
+        woolIds.add(Blocks.MAGENTA_WOOL);
+        woolIds.add(Blocks.PINK_WOOL);
+        woolIds.add(Blocks.WHITE_WOOL);
+        woolIds.add(Blocks.LIGHT_GRAY_WOOL);
+        woolIds.add(Blocks.GRAY_WOOL);
+        woolIds.add(Blocks.BROWN_WOOL);
+        woolIds.add(Blocks.BLACK_WOOL);
     }
 
-    private static void onServerStopped(ServerStoppedEvent event) {
-        SATELLITES.clear();
+    public void shutdown() {
+        satellites.clear();
         // Unforce load all chunks before clearing cache
-        CHUNK_CACHE.forEach((pos, info) -> {
+        chunkCache.forEach((pos, info) -> {
             if (info.forceLoaded) {
                 HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(),
                     info.chunk.getPos(), Constants.MOD_ID);
             }
         });
-        CHUNK_CACHE.clear();
+        chunkCache.clear();
     }
 
     private static void onServerTick(ServerTickEvent event)

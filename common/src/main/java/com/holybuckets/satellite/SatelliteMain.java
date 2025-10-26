@@ -14,8 +14,8 @@ import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
  * This class will init all major Manager instances and events for the mod
  */
 public class SatelliteMain {
-    public static SatelliteManager MANAGER;
-    private static boolean DEV_MODE = false;;
+    private static final Map<Level, SatelliteManager> MANAGERS = new HashMap<>();
+    private static boolean DEV_MODE = false;
     public static SatelliteMain INSTANCE;
     public static ChiselBitsAPI chiselBitsApi;
     public static SatelliteConfig CONFIG;
@@ -28,7 +28,6 @@ public class SatelliteMain {
             .withForge("com.holybuckets.satellite.externalapi.ChiselBitsAPIForge")
             .build();
 
-        MANAGER = new SatelliteManager();
         //LoggerProject.logInit( "001000", this.getClass().getName() );
     }
 
@@ -68,6 +67,16 @@ public class SatelliteMain {
         //this.DEV_MODE = CONFIG.devMode;
         this.DEV_MODE = false;
         loadConfig();
+    }
+
+    private void onServerStopped(ServerStoppedEvent e) {
+        MANAGERS.values().forEach(SatelliteManager::shutdown);
+        MANAGERS.clear();
+    }
+
+    public static SatelliteManager getManager(Level level) {
+        if (level.isClientSide()) return null;
+        return MANAGERS.computeIfAbsent(level, SatelliteManager::new);
     }
 
 
