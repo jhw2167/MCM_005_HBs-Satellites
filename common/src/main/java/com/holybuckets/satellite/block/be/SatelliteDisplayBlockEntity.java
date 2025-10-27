@@ -70,6 +70,9 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
             this.isDisplayOn = toggle;
             updateBlockState();
         }
+        if(!this.isDisplayOn) {
+            this.clearDisplay();
+        }
     }
 
     private void updateBlockState() {
@@ -122,7 +125,12 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
                 if(b) {proceedWithUpdates = true; break;}
             }
             if(proceedWithUpdates) {
-                SatelliteMain.chiselBitsApi.build(this.level, info.holoBits, pos, info.hasUpdates);
+                BlockState before = level.getBlockState(pos);
+                BlockEntity be = SatelliteMain.chiselBitsApi.build(
+                    this.level, info.holoBits, pos, info.hasUpdates);
+                if( be != null ) {
+                    level.sendBlockUpdated(pos, before, be.getBlockState(), 11 );
+                }
             }
         }
 

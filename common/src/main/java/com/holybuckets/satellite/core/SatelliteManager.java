@@ -13,8 +13,6 @@ import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
-import net.blay09.mods.balm.api.event.server.ServerStoppedEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -41,6 +39,7 @@ public class SatelliteManager {
     private static final List<Block> woolIds = new ArrayList<>(64);
     private final Level level;
 
+    private static SatelliteManager CLIENT_MANAGER;
 
     private static class SourceKey {
         SatelliteBlockEntity satellite;
@@ -92,6 +91,11 @@ public class SatelliteManager {
 
 
     public static SatelliteManager get(Level level) {
+        if(level.isClientSide) {
+            if(CLIENT_MANAGER == null)
+                CLIENT_MANAGER = new SatelliteManager(level);
+            return CLIENT_MANAGER;
+        }
         return SatelliteMain.getManager(level);
     }
 
@@ -220,8 +224,12 @@ public class SatelliteManager {
 
 
     //** Events
-    public static void onServerStart(ServerStartingEvent event) {
+    public static void onWorldStart() {
         initWoolIds();
+    }
+
+    public static void onWorldStop() {
+        CLIENT_MANAGER = null;
     }
 
     public static void initWoolIds() {

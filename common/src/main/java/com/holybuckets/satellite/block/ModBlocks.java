@@ -14,6 +14,7 @@ public class ModBlocks {
     public static Block satelliteControllerBlock;
     public static Block satelliteDisplayBlock;
     public static Block holoBaseBlock;
+    public static Block holoLightBlock;
     public static Block holoDarkBlock;
     public static Block holoAirBlock;
     //public static Block[] scopedSharestones = new SharestoneBlock[DyeColor.values().length];
@@ -21,6 +22,7 @@ public class ModBlocks {
     public static void initialize(BalmBlocks blocks) {
         //blocks.register(() -> templateBlock = new EmptyBlock(defaultProperties()), () -> itemBlock(templateBlock), id("template_block"));
         blocks.register(() -> holoBaseBlock = new HoloBlock(HoloBaseBlock.HOLO_BASE_PROPERTIES), () -> itemBlock(holoBaseBlock), id("holo_base_block"));
+        blocks.register(() -> holoLightBlock = new HoloBlock(HoloBaseBlock.HOLO_BASE_PROPERTIES), () -> itemBlock(holoBaseBlock), id("holo_light_block"));
         blocks.register(() -> holoDarkBlock = new HoloBlock(HoloBaseBlock.HOLO_BASE_PROPERTIES), () -> itemBlock(holoDarkBlock), id("holo_dark_block"));
         blocks.register(() -> holoAirBlock = new HoloBaseBlock(HoloBaseBlock.HOLO_AIR_PROPERTIES), () -> itemBlock(holoAirBlock), id("holo_air_block"));
         blocks.register(() -> satelliteBlock = new SatelliteBlock(), () -> itemBlock(satelliteBlock), id("satellite_block"));

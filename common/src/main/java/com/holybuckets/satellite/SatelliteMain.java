@@ -80,15 +80,16 @@ public class SatelliteMain {
         //this.DEV_MODE = CONFIG.devMode;
         this.DEV_MODE = false;
         loadConfig();
-        SatelliteManager.initWoolIds();
+        SatelliteManager.onWorldStart();
 
         //Set Configs Entity blocks
-        SatelliteControllerBlockEntity.PATH_REFRESH_TICKS = CONFIG.refreshRates.controllerPathRefreshRate;
-        SatelliteControllerBlockEntity.UI_REFRESH_TICKS = CONFIG.refreshRates.controllerUIRefreshRate;
-        SatelliteControllerBlockEntity.ENTITY_REFRESH_TICKS = CONFIG.refreshRates.entityRefreshRate;
+        SatelliteControllerBlockEntity.PLAYER_RANGE = CONFIG.displayConfig.playerRange;
+        SatelliteControllerBlockEntity.PATH_REFRESH_TICKS = CONFIG.displayConfig.controllerPathRefreshRate;
+        SatelliteControllerBlockEntity.UI_REFRESH_TICKS = CONFIG.displayConfig.controllerUIRefreshRate;
+        SatelliteControllerBlockEntity.ENTITY_REFRESH_TICKS = CONFIG.displayConfig.entityRefreshRate;
 
-        SatelliteDisplayBlockEntity.REFRESH_RATE = CONFIG.refreshRates.displayRefreshRate;
-        SatelliteDisplayBlockEntity.PLAYER_REFRESH_RATE = CONFIG.refreshRates.displayPlayerRefreshRate;
+        SatelliteDisplayBlockEntity.REFRESH_RATE = CONFIG.displayConfig.displayRefreshRate;
+        SatelliteDisplayBlockEntity.PLAYER_REFRESH_RATE = CONFIG.displayConfig.displayPlayerRefreshRate;
     }
 
     private void onLoadLevel(LevelLoadingEvent event) {
@@ -100,6 +101,7 @@ public class SatelliteMain {
     private void onServerStopped(ServerStoppedEvent e) {
         MANAGERS.values().forEach(SatelliteManager::shutdown);
         MANAGERS.clear();
+        SatelliteManager.onWorldStop();
     }
 
     public static SatelliteManager getManager(Level level) {

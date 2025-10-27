@@ -149,7 +149,7 @@ public class ChunkDisplayInfo {
             info.target = e;
             return false;
         }
-        return info.others.size() >= SatelliteMain.CONFIG.minHerdCountThreshold;
+        return info.others.size() >= SatelliteMain.CONFIG.entityPings.minHerdCountThreshold;
     }
 
     public void clearEntities() {

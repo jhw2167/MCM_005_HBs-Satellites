@@ -51,17 +51,17 @@ public class SatelliteRenderer implements BlockEntityRenderer<SatelliteBlockEnti
         int light = LightTexture.FULL_BRIGHT;
         int overlay = OverlayTexture.NO_OVERLAY;
 
-        // North face
-        builder.vertex(matrix, minX, minY, -offset)
-            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-        builder.vertex(matrix, maxX, minY, -offset)
-            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-        builder.vertex(matrix, maxX, maxY, -offset)
-            .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+// North face - FIXED: Inverted vertex order
         builder.vertex(matrix, minX, maxY, -offset)
             .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+        builder.vertex(matrix, maxX, maxY, -offset)
+            .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+        builder.vertex(matrix, maxX, minY, -offset)
+            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+        builder.vertex(matrix, minX, minY, -offset)
+            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
 
-        // South face
+// South face
         builder.vertex(matrix, minX, minY, 1 + offset)
             .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
         builder.vertex(matrix, maxX, minY, 1 + offset)
@@ -71,7 +71,7 @@ public class SatelliteRenderer implements BlockEntityRenderer<SatelliteBlockEnti
         builder.vertex(matrix, minX, maxY, 1 + offset)
             .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
 
-        // West face
+// West face
         builder.vertex(matrix, -offset, minY, minX)
             .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
         builder.vertex(matrix, -offset, minY, maxX)
@@ -81,36 +81,35 @@ public class SatelliteRenderer implements BlockEntityRenderer<SatelliteBlockEnti
         builder.vertex(matrix, -offset, maxY, minX)
             .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
 
-        // East face
-        builder.vertex(matrix, 1 + offset, minY, minX)
-            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-        builder.vertex(matrix, 1 + offset, minY, maxX)
-            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-        builder.vertex(matrix, 1 + offset, maxY, maxX)
-            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+// East face - FIXED: Inverted vertex order
         builder.vertex(matrix, 1 + offset, maxY, minX)
             .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+        builder.vertex(matrix, 1 + offset, maxY, maxX)
+            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+        builder.vertex(matrix, 1 + offset, minY, maxX)
+            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+        builder.vertex(matrix, 1 + offset, minY, minX)
+            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
 
-        // Top face
-        builder.vertex(matrix, minX, 1 + offset, minY)
-            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 1, 0).endVertex();
-        builder.vertex(matrix, maxX, 1 + offset, minY)
-            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 1, 0).endVertex();
-        builder.vertex(matrix, maxX, 1 + offset, maxY)
-            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 1, 0).endVertex();
-        builder.vertex(matrix, minX, 1 + offset, maxY)
+// Top face - FIXED: Inverted vertex order
+        builder.vertex(matrix, minX, 1 + offset, maxX)
             .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 1, 0).endVertex();
+        builder.vertex(matrix, maxX, 1 + offset, maxX)
+            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 1, 0).endVertex();
+        builder.vertex(matrix, maxX, 1 + offset, minX)
+            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 1, 0).endVertex();
+        builder.vertex(matrix, minX, 1 + offset, minX)
+            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 1, 0).endVertex();
 
-        // Bottom face
-        builder.vertex(matrix, minX, -offset, minY)
-            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, -1, 0).endVertex();
-        builder.vertex(matrix, maxX, -offset, minY)
-            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, -1, 0).endVertex();
-        builder.vertex(matrix, maxX, -offset, maxY)
-            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, -1, 0).endVertex();
-        builder.vertex(matrix, minX, -offset, maxY)
+// Bottom face
+        builder.vertex(matrix, minX, -offset, minX)
             .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, -1, 0).endVertex();
-
+        builder.vertex(matrix, maxX, -offset, minX)
+            .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, -1, 0).endVertex();
+        builder.vertex(matrix, maxX, -offset, maxX)
+            .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, -1, 0).endVertex();
+        builder.vertex(matrix, minX, -offset, maxX)
+            .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, -1, 0).endVertex();
         poseStack.popPose();
     }
 }

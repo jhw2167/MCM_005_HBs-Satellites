@@ -23,6 +23,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -155,14 +156,15 @@ public class SatelliteDisplay {
         this.needsUpdate = true;
     }
 
-    private void setPosition()
+    private void setPosition(BlockHitResult res)
     {
         if(this.controller == null) return;
         //Convert cursorPos to overworld block position using offsets
         //calculate chunkOffset from satellite, then blockOffset from fractional cursorPos
-        this.cursorSelection = cursorPos;
-        BlockPos holoBlock = cursorPos.getBlockPos();
-        Vec3 hitLoc = cursorPos.getLocation();
+        if(this.cursorPos == null) return;
+        this.cursorSelection = res;
+        BlockPos holoBlock = cursorSelection.getBlockPos();
+        Vec3 hitLoc = cursorSelection.getLocation();
         Vec3i controllerOffset = this.getOffset( holoBlock );
         //Calculate chunk offset from satellite position considering controller offset and any ordinal shifts
         Vec3i chunkSecOffset = new Vec3i(
@@ -628,10 +630,13 @@ public class SatelliteDisplay {
 
         Level level = useBlockEvent.getLevel();
         if(level == null || level.isClientSide) return;
+        if( useBlockEvent.getHand() != InteractionHand.MAIN_HAND ) return;
+        if( !useBlockEvent.getPlayer().getItemInHand(InteractionHand.MAIN_HAND).isEmpty() ) return;
         if(!SatelliteMain.chiselBitsApi.isChiseledBlock(level, useBlockEvent.getHitResult().getBlockPos() )) return;
 
+        BlockHitResult res = (BlockHitResult) useBlockEvent.getHitResult();
         double reach = SatelliteControllerBlockEntity.REACH_DIST_BLOCKS;
-        BlockHitResult res = CommonClass.getAnyHitResult(level, useBlockEvent.getPlayer(), reach );
+        //BlockHitResult res = CommonClass.getAnyHitResult(level, useBlockEvent.getPlayer(), reach );
         if( res == null ) return;
         BlockPos pos = res.getBlockPos();
 
@@ -645,7 +650,7 @@ public class SatelliteDisplay {
 
         if( level.getBlockEntity(displayBlockPos) instanceof SatelliteDisplayBlockEntity displayBlockEntity ) {
             SatelliteDisplay source = displayBlockEntity.getSource();
-            if(source != null) { source.setPosition(); }
+            if(source != null) { source.setPosition( res ); }
         }
 
     }

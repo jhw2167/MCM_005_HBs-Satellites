@@ -5,15 +5,17 @@ import net.blay09.mods.balm.api.config.reflection.Comment;
 import net.blay09.mods.balm.api.config.reflection.Config;
 import net.blay09.mods.balm.api.config.reflection.NestedType;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 @Config(Constants.MOD_ID)
 public class SatelliteConfig {
 
 
-    public static class DisplayRefreshRateConfig {
+    public static class SatelliteDisplayConfig {
+        //add playerRange
+        @Comment("If there is no player within this range from the satellite controller, the controller turns off")
+        public int playerRange = 64;
+
         @Comment("Display refresh rate in ticks")
         public int displayRefreshRate = 60;
 
@@ -27,7 +29,7 @@ public class SatelliteConfig {
         public int controllerPathRefreshRate = 200;
 
         @Comment("Refresh rate for command processing in ticks")
-        public int controllerUIRefreshRate = 10;
+        public int controllerUIRefreshRate = 20;
     }
 
     public static class EntityPingConfig {
@@ -54,7 +56,7 @@ public class SatelliteConfig {
         public int minHerdCountThreshold = 5;
     }
 
-    public DisplayRefreshRateConfig refreshRates = new DisplayRefreshRateConfig();
+    public SatelliteDisplayConfig displayConfig = new SatelliteDisplayConfig();
     public EntityPingConfig entityPings = new EntityPingConfig();
 
 

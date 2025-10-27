@@ -108,7 +108,10 @@ public interface ChiselBitsAPI {
 
     }
 
-    static Block HOLO_EMPTY() { return ModBlocks.holoAirBlock; }
+    static Block HOLO_EMPTY() {
+        //return ModBlocks.holoAirBlock;
+        return Blocks.AIR;
+    }
     static Block HOLO_LIGHT() { return Blocks.WHITE_STAINED_GLASS; }
     static Block HOLO_BASE() {
         return ModBlocks.holoBaseBlock;

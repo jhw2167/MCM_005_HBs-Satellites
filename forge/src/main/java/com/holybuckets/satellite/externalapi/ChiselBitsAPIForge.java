@@ -23,8 +23,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.minecraft.world.level.block.Blocks.AIR;
 
@@ -96,7 +99,9 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
         if(!aboveIsAir && !aboveIsChiseled) { return null; }
 
         ChiselAdaptingWorldMutator mutator = new ChiselAdaptingWorldMutator(level, pos);
-        try(IBatchMutation m = mutator.batch() ) {
+        try(IBatchMutation m = mutator.batch() )
+        {
+            AtomicInteger i = new AtomicInteger(0);
                 for(int y = 0; y < 16; y++) {
                     if(yLevelHasUpdates != null && !yLevelHasUpdates[y]) continue;
                     for(int x = 0; x < 16; x++) {

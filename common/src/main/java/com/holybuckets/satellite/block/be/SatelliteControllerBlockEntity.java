@@ -40,7 +40,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     boolean forceDisplayUpdates;
     final Commands commands;
 
-    private static final int PLAYER_RANGE = 64;
+    public static int PLAYER_RANGE = 64;
 
     private static class Commands {
         boolean hasUpdate;
@@ -241,10 +241,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.forceUpdate();
     }
 
+    private static final int START_BUFFER = 40;
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteBlockEntity)
     {
         super.tick(level, blockPos, blockState, satelliteBlockEntity);
+        if(manager == null) manager = SatelliteManager.get(level);
+
         if (this.level.isClientSide) {
             if(this.isDisplayOn) {
                 if(source == null) this.source = new SatelliteDisplayClient(level, this);
@@ -255,7 +258,11 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             }
             return;
         }
-        if(manager == null) manager = SatelliteManager.get(level);
+
+
+        if(ticks < START_BUFFER) { return; }
+        else if(ticks == START_BUFFER) { this.propagateToNeighbors(); this.turnOff(); }
+        else {}
 
         //1. Recover Satellite if lost between chunk loads
         if(this.linkedSatellite == null && this.satelliteTargetPos != null) {
@@ -332,7 +339,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
     public void propagateToNeighbors()
     {
-        if (source == null || level == null) return;
+        if (level == null) return;
 
         // Find all connected display blocks via flood fill
         Set<BlockPos> visited = new HashSet<>();
@@ -363,6 +370,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             }
         }
 
+        if(source == null) return;
         source.clear();
         source.addAll(nodes);
 

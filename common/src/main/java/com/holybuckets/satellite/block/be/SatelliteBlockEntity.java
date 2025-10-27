@@ -73,8 +73,8 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
 
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteBlockEntity satelliteBlockEntity) {
-        if (this.level.isClientSide) return;
         if(manager == null) manager = manager.get(level);
+        if (this.level.isClientSide) return;
         manager.put(this.colorId, this);
     }
 

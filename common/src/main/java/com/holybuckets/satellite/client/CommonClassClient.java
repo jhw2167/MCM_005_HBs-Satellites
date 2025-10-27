@@ -5,16 +5,14 @@ import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
 import com.holybuckets.satellite.client.screen.ModScreens;
 import com.holybuckets.satellite.core.SatelliteManager;
-import com.holybuckets.satellite.item.ModItems;
-import com.holybuckets.foundation.client.ClientBalmEventRegister;
 import com.holybuckets.foundation.client.ClientEventRegistrar;
-import com.holybuckets.satellite.particle.ModParticles;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.blay09.mods.balm.api.client.BalmClient;
 import net.blay09.mods.balm.api.event.EventPriority;
 import net.blay09.mods.balm.api.event.client.ConnectedToServerEvent;
+import net.blay09.mods.balm.api.event.client.DisconnectedFromServerEvent;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -26,7 +24,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -40,9 +37,10 @@ public class CommonClassClient {
     public static void initClient() {
         ClientEventRegistrar registrar = ClientEventRegistrar.getInstance();
         registrar.registerOnConnectedToServer(CommonClassClient::onConnectedToServer, EventPriority.Highest);
+        registrar.registerOnDisconnectedFromServer(CommonClassClient::onDisconnectedFromServer, EventPriority.Lowest);
         SatelliteDisplayClient.init(registrar);
 
-        ClientBalmEventRegister.registerEvents();
+        //ClientBalmEventRegister.registerEvents();
 
 
         ModRenderers.clientInitialize(BalmClient.getRenderers());
@@ -61,7 +59,11 @@ public class CommonClassClient {
     //** EVents
     private static void onConnectedToServer(ConnectedToServerEvent event) {
         SatelliteMain.loadConfig();
-        SatelliteManager.initWoolIds();
+        SatelliteManager.onWorldStart();
+    }
+
+    private static void onDisconnectedFromServer(DisconnectedFromServerEvent event){
+        SatelliteManager.onWorldStop();
     }
 
     //** Utility
