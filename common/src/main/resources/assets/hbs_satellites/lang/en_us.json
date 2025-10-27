@@ -12,3 +12,6 @@
   "block.hbs_satellites.satellite_display_block": "Satellite Display",
   "block.hbs_satellites.satellite_display_block.desc": "Displays holographic information from satellites"
 }
+{
+  "block.hbs_satellites.holo_light_block": "Holographic Light Block"
+}
