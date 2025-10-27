@@ -28,11 +28,12 @@
     ],
     "depends": {
         "fabricloader": ">=0.14",
-        "fabric": "*",
+        "fabric": "*", 
         "minecraft": "${minecraft_version}",
         "java": ">=17",
         "balm-fabric": ">=${balm_version}",
-        "hbs_foundation": ">=${foundation_version}"
+        "hbs_foundation": ">=${foundation_version}",
+        "chiselsandbits": "*"
     },
     "suggests": {
         "another-mod": "*"
