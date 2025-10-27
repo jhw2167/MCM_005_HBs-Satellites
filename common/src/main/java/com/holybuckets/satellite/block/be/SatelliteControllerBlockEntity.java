@@ -33,6 +33,7 @@ import static com.holybuckets.satellite.SatelliteMain.chiselBitsApi;
 public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE
 {
     int colorId;
+    SatelliteManager manager;
     BlockPos uiTargetBlockPos;
     BlockPos satelliteTargetPos;
     SatelliteBlockEntity linkedSatellite;
@@ -144,7 +145,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             //If player is holding wool in their hand, set to that color
             if( p.getItemInHand(hand).getItem() instanceof BlockItem bi ) {
                 Block b = bi.getBlock();
-                commands.dIdSet = SatelliteManager.getColorId(b);
+                commands.dIdSet = manager.getColorId(b);
             }
 
             if(commands.dIdSet < 0) {
@@ -206,7 +207,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     }
 
 
-    private static final int UI_REFRESH_TICKS = 10;
+    public static int UI_REFRESH_TICKS = 10;
     private void processCommands()
     {
         if(ticks % UI_REFRESH_TICKS != 0) return;
@@ -254,15 +255,16 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             }
             return;
         }
+        if(manager == null) manager = SatelliteManager.get(level);
+
         //1. Recover Satellite if lost between chunk loads
         if(this.linkedSatellite == null && this.satelliteTargetPos != null) {
             recoverSatellite();
         }
 
-        if(this.linkedSatellite != SatelliteManager.get(this.colorId)) {
-            this.linkedSatellite = SatelliteManager.get(this.colorId);
-            SatelliteDisplay source = SatelliteManager.generateSource(this.level,
-                this.linkedSatellite, this);
+        if(this.linkedSatellite != manager.get(this.colorId)) {
+            this.linkedSatellite = manager.get(this.colorId);
+            SatelliteDisplay source = manager.generateSource(this.linkedSatellite, this);
             setSource(source, true);
         }
 
@@ -272,8 +274,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
     }
 
-    private static final int PATH_REFRESH_TICKS = 200;
-    private static final int ENTITY_REFRESH_TICKS = 10;
+    public static int PATH_REFRESH_TICKS = 200;
+    public static int ENTITY_REFRESH_TICKS = 10;
     protected void renderDisplay()
     {
 
@@ -317,11 +319,11 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     private void recoverSatellite()
     {
         if(this.satelliteTargetPos == null) return;
-        LevelChunk distantChunk = SatelliteManager.getChunk(level, this.satelliteTargetPos);
+        LevelChunk distantChunk = manager.getChunk(level, this.satelliteTargetPos);
         if(distantChunk != null) {
             BlockEntity be = distantChunk.getBlockEntity(this.satelliteTargetPos);
             if(be instanceof SatelliteBlockEntity) {
-                SatelliteManager.put(this.colorId, (SatelliteBlockEntity) be);
+                manager.put(this.colorId, (SatelliteBlockEntity) be);
             } else {
                 this.satelliteTargetPos = null;
             }

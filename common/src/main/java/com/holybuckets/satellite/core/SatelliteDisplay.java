@@ -337,8 +337,8 @@ public class SatelliteDisplay {
             info.isActive = true;
             return info;
         }
-
-        LevelChunk chunk = SatelliteManager.getChunk((ServerLevel) level, chunkSelection.x, chunkSelection.z);
+        SatelliteManager manager = SatelliteManager.get(level);
+        LevelChunk chunk = manager.getChunk((ServerLevel) level, chunkSelection.x, chunkSelection.z);
         if(chunk == null) return null;
         if(chunk.getSections().length <= section) return null;
 
@@ -373,8 +373,9 @@ public class SatelliteDisplay {
                 int zChunkStart = (maxZ - cntrlPos.getZ()) + target.z;
                 int zChunkEnd = (minZ - cntrlPos.getZ()) + target.z;
 
-                LevelChunk startChunk = SatelliteManager.getChunk((ServerLevel) level, xChunkStart, zChunkStart);
-                LevelChunk endChunk = SatelliteManager.getChunk((ServerLevel) level, xChunkEnd, zChunkEnd);
+                SatelliteManager manager = SatelliteManager.get(level);
+                LevelChunk startChunk = manager.getChunk((ServerLevel) level, xChunkStart, zChunkStart);
+                LevelChunk endChunk = manager.getChunk((ServerLevel) level, xChunkEnd, zChunkEnd);
                 if(startChunk == null || endChunk == null) return;
 
                 int xStart, xEnd, zStart, zEnd;
@@ -384,7 +385,7 @@ public class SatelliteDisplay {
                     xStart = startChunk.getPos().getMinBlockX();
                     xEnd = endChunk.getPos().getMaxBlockX();
                 } else {
-                    LevelChunk extendedChunk = SatelliteManager.getChunk((ServerLevel) level, xChunkEnd - 1, zChunkStart);
+                    LevelChunk extendedChunk = manager.getChunk((ServerLevel) level, xChunkEnd - 1, zChunkStart);
                     if(extendedChunk == null) return;
                     xStart = extendedChunk.getPos().getMinBlockX();
                     xEnd = startChunk.getPos().getMaxBlockX();
@@ -396,7 +397,7 @@ public class SatelliteDisplay {
                     zEnd = endChunk.getPos().getMaxBlockZ();
                 } else {
 
-                    LevelChunk extendedChunk = SatelliteManager.getChunk((ServerLevel) level, xChunkStart, zChunkEnd - 1);
+                    LevelChunk extendedChunk = manager.getChunk((ServerLevel) level, xChunkStart, zChunkEnd - 1);
                     if(extendedChunk == null) return;
                     zStart = extendedChunk.getPos().getMinBlockZ();
                     zEnd = startChunk.getPos().getMaxBlockZ();
@@ -414,7 +415,7 @@ public class SatelliteDisplay {
                 BlockPos dispOffset = getOffset(displayBlock.getBlockPos());
                 int xChunk = target.x + dispOffset.getX();
                 int zChunk = target.z + dispOffset.getZ();
-                LevelChunk chunk = SatelliteManager.getChunk((ServerLevel) level, xChunk, zChunk);
+                LevelChunk chunk = manager.getChunk((ServerLevel) level, xChunk, zChunk);
 
                   */
 
@@ -587,7 +588,7 @@ public class SatelliteDisplay {
             info.tick();
             if(info.lifetime > MAX_LIFETIME) {
                 iterator.remove();
-                SatelliteManager.flagChunkForUnload(info.chunk.getPos());
+                SatelliteManager.flagChunkForUnload(info.chunk.getLevel(), info.chunk.getPos());
                 continue;
             }
 

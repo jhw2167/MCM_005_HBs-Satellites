@@ -154,8 +154,8 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
     }
 
-    private static final int REFRESH_RATE = 60;
-    private static final int PLAYER_REFRESH_RATE = 10;
+    public static int REFRESH_RATE = 60;
+    public static int PLAYER_REFRESH_RATE = 10;
     protected void renderDisplay()
     {
         if(source == null || source.noSource()) return;

@@ -21,6 +21,7 @@ import net.minecraft.world.phys.BlockHitResult;
 public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, BlockEntityTicker<SatelliteBlockEntity>
 {
     int colorId;
+    SatelliteManager manager;
     LevelChunk currentChunk;
     private static final int HEXCODE_MAX = 0xFFFFFF;
 
@@ -38,7 +39,7 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
             //If player is holding wool in their hand, set tot that color
             if( p.getItemInHand(hand).getItem() instanceof BlockItem bi ) {
                 Block b = bi.getBlock();
-                int color = SatelliteManager.getColorId(b);
+                int color = manager.getColorId(b);
                 if(color >= 0) {
                     this.setColorId( color );
                 }
@@ -56,13 +57,13 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
 
     @Override
     public void setColorId(int colorId) {
-        SatelliteManager.remove(this.colorId);
+        manager.remove(this.colorId);
         this.colorId = colorId;
         this.markUpdated();
     }
 
     public void onDestroyed() {
-        SatelliteManager.remove(this.colorId);
+        manager.remove(this.colorId);
     }
 
     @Override
@@ -73,7 +74,8 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteBlockEntity satelliteBlockEntity) {
         if (this.level.isClientSide) return;
-        SatelliteManager.put(this.colorId, this);
+        if(manager == null) manager = manager.get(level);
+        manager.put(this.colorId, this);
     }
 
     public void setLevelChunk(LevelChunk chunk) {

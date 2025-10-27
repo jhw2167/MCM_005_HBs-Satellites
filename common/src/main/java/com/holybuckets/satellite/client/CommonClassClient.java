@@ -60,8 +60,8 @@ public class CommonClassClient {
 
     //** EVents
     private static void onConnectedToServer(ConnectedToServerEvent event) {
-        SatelliteMain.MANAGER = new SatelliteManager();
         SatelliteMain.loadConfig();
+        SatelliteManager.initWoolIds();
     }
 
     //** Utility

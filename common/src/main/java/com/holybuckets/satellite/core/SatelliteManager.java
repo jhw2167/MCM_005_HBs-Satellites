@@ -7,6 +7,7 @@ import com.holybuckets.foundation.event.custom.TickType;
 import com.holybuckets.foundation.model.ManagedChunk;
 import com.holybuckets.foundation.model.ManagedChunkUtility;
 import com.holybuckets.satellite.Constants;
+import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import io.netty.util.collection.IntObjectHashMap;
@@ -27,7 +28,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import java.util.*;
 
 public class SatelliteManager {
-
+    
     /** Maps colorId to satellite block entity */
     private final IntObjectHashMap<SatelliteBlockEntity> satellites = new IntObjectHashMap<>(24);
     private final Map<SourceKey, SatelliteDisplay> displaySources = new HashMap<>();
@@ -35,8 +36,9 @@ public class SatelliteManager {
     private final Long2ObjectMap<CachedChunkInfo> chunkCache = new Long2ObjectOpenHashMap<>(128);
     private static final int MAX_CHUNK_LIFETIME = 300; // 300 seconds
     private static final int MAX_DISPLAY_LIFETIME = 300; // 300 seconds
+    private static boolean anyControllerOn;
 
-    private final List<Block> woolIds = new ArrayList<>(64);
+    private static final List<Block> woolIds = new ArrayList<>(64);
     private final Level level;
 
 
@@ -71,25 +73,27 @@ public class SatelliteManager {
         }
     }
 
+
     //State variables
-    private boolean anyControllerOn;
     private final boolean isServerSide;
     
     public SatelliteManager(Level level) {
         this.level = level;
         this.isServerSide = !level.isClientSide();
-        initWoolIds();
     }
 
     public static void init(EventRegistrar reg) {
-        reg.registerOnBeforeServerStarted(SatelliteManager::onServerStarting);
-        reg.registerOnServerStopped(SatelliteManager::onServerStopped);
+
         reg.registerOnServerTick(TickType.ON_20_TICKS, SatelliteManager::onServerTick);
 
         //SatelliteDisplay
         SatelliteDisplay.init(reg);
     }
 
+
+    public static SatelliteManager get(Level level) {
+        return SatelliteMain.getManager(level);
+    }
 
     public SatelliteBlockEntity get(int colorId) {
         return satellites.get(colorId);
@@ -106,17 +110,44 @@ public class SatelliteManager {
         satellites.remove(colorId);
     }
 
+    public SatelliteDisplay generateSource(SatelliteBlockEntity satellite,
+                                           SatelliteControllerBlockEntity controller)
+    {
+        anyControllerOn = true;
+        SourceKey key = new SourceKey(satellite, controller);
+        SatelliteDisplay satelliteDisplay = displaySources.get(key);
+        if(satelliteDisplay != null) return satelliteDisplay;
+
+        satelliteDisplay = new SatelliteDisplay(level, satellite, controller);
+        satelliteDisplay.add(controller.getBlockPos(), controller);
+        displaySources.put(key, satelliteDisplay);
+        return satelliteDisplay;
+    }
+
+    public SatelliteDisplay getSource(SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller) {
+        return displaySources.get(new SourceKey(satellite, controller));
+    }
+
+    public void putSource(SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller,
+         SatelliteDisplay source) {
+        displaySources.put(new SourceKey(satellite, controller), source);
+    }
+
+    public void removeSource(SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller) {
+        displaySources.remove(new SourceKey(satellite, controller));
+    }
+
     public int totalSatellites() { return satellites.size(); }
 
-    public int totalIds() {
+    public static int totalIds() {
         return woolIds.size();
     }
 
-    public Block getWool(int id) {
+    public static Block getWool(int id) {
         return new ArrayList<>(woolIds).get(id % woolIds.size());
     }
 
-    public int getColorId(Block b) {
+    public static int getColorId(Block b) {
         return woolIds.indexOf(b);
     }
 
@@ -131,23 +162,69 @@ public class SatelliteManager {
     }
 
 
-    public static SatelliteDisplay generateSource(Level level, SatelliteBlockEntity satellite,
-         SatelliteControllerBlockEntity controller)
-    {
-        anyControllerOn = true;
-        SourceKey key = new SourceKey(satellite, controller);
-        SatelliteDisplay satelliteDisplay = DISPLAY_SOURCES.get(key);
-        if(satelliteDisplay != null) return satelliteDisplay;
+    public static LevelChunk getChunk(Level level, BlockPos pos) {
+        return getChunk((ServerLevel) level, HBUtil.ChunkUtil.getChunkPos(pos));
+    }
 
-        satelliteDisplay = new SatelliteDisplay(level, satellite, controller);
-        satelliteDisplay.add(controller.getBlockPos(), controller);
-        DISPLAY_SOURCES.put(key, satelliteDisplay);
-        return satelliteDisplay;
+    public static LevelChunk getChunk(ServerLevel level, int chunkX, int chunkZ) {
+        return getChunk(level, new ChunkPos(chunkX, chunkZ));
+    }
+
+    public static LevelChunk getChunk(ServerLevel level, ChunkPos pos)
+    {
+        if(level == null) return null;
+        SatelliteManager manager = SatelliteMain.getManager(level);
+        if(manager == null) return null;
+        var chunkCache = manager.chunkCache;
+
+        long posKey = HBUtil.ChunkUtil.getChunkPos1DMap(pos);
+        CachedChunkInfo cachedInfo = chunkCache.get(posKey);
+        if (cachedInfo != null) {
+            cachedInfo.lifetime = 0;
+            return cachedInfo.chunk;
+        }
+
+        // Try to get active chunk first
+        String chunkId = HBUtil.ChunkUtil.getId(pos);
+        ManagedChunk chunk = ManagedChunkUtility.getManagedChunk(level, chunkId);
+        if (chunk != null) {
+            chunkCache.put(posKey, new CachedChunkInfo(chunk.getLevelChunk(), false));
+            return chunk.getLevelChunk();
+        }
+
+        // Try force loading
+        HBUtil.ChunkUtil.forceLoadChunk(level, pos, Constants.MOD_ID);
+        if (chunk != null) {
+            LevelChunk levelChunk = chunk.getLevelChunk();
+            chunkCache.put(posKey, new CachedChunkInfo(levelChunk, true));
+            return levelChunk;
+        }
+
+        return null;
+    }
+
+    public static void flagChunkForUnload(Level level, ChunkPos pos) {
+
+        if(level == null) return;
+        SatelliteManager manager = SatelliteMain.getManager(level);
+        if(manager == null) return;
+        var chunkCache = manager.chunkCache;
+
+        long posKey = HBUtil.ChunkUtil.getChunkPos1DMap(pos);
+        CachedChunkInfo info = chunkCache.get(posKey);
+        if (info != null) {
+            info.lifetime = MAX_CHUNK_LIFETIME; // This will trigger unload on next tick
+        }
     }
 
 
+
     //** Events
-    private void initWoolIds() {
+    public static void onServerStart(ServerStartingEvent event) {
+        initWoolIds();
+    }
+
+    public static void initWoolIds() {
         woolIds.clear();
         woolIds.add(Blocks.RED_WOOL);
         woolIds.add(Blocks.ORANGE_WOOL);
@@ -167,6 +244,65 @@ public class SatelliteManager {
         woolIds.add(Blocks.BLACK_WOOL);
     }
 
+    private static void onServerTick(ServerTickEvent event)
+    {
+        //Check lifetime of sources
+        Collection<SatelliteManager> managers = SatelliteMain.getAllManagers();
+        for (SatelliteManager manager : managers) {
+            manager.watchDisplaySourcesCache();
+        }
+
+        for (SatelliteManager manager : managers) {
+            manager.watchChunkCache();
+        }
+
+
+    }
+
+        private void watchChunkCache() {
+
+            var iterator = chunkCache.values().iterator();
+            while (iterator.hasNext())
+            {
+                CachedChunkInfo info = iterator.next();
+                if(SatelliteDisplay.hasActiveDisplay(info.chunk)) {
+                    info.lifetime = 0; // Reset lifetime if chunk is actively used
+                    continue;
+                }
+                info.lifetime++;
+
+                if (info.lifetime > MAX_CHUNK_LIFETIME) {
+                    if (info.forceLoaded) {
+                        HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(),
+                            info.chunk.getPos(), Constants.MOD_ID);
+                    }
+                    iterator.remove();
+                }
+            }
+        }
+
+        private void watchDisplaySourcesCache() {
+
+            Iterator<Map.Entry<SourceKey, SatelliteDisplay>> sourceIterator = displaySources.entrySet().iterator();
+            anyControllerOn = false;
+            while (sourceIterator.hasNext())
+            {
+                Map.Entry<SourceKey, SatelliteDisplay> entry = sourceIterator.next();
+                SatelliteDisplay display = entry.getValue();
+                if(display == entry.getKey().controller.getSource()) {
+                    display.lifetime = 0; // Reset lifetime if any display is actively used
+                    anyControllerOn = true;
+                    continue;
+                }
+                display.lifetime++;
+
+                if (display.lifetime > MAX_DISPLAY_LIFETIME) {
+                    display.clear();
+                    sourceIterator.remove();
+                }
+            }
+        }
+
     public void shutdown() {
         satellites.clear();
         // Unforce load all chunks before clearing cache
@@ -178,93 +314,6 @@ public class SatelliteManager {
         });
         chunkCache.clear();
     }
-
-    private static void onServerTick(ServerTickEvent event)
-    {
-        //Check lifetime of sources
-        Iterator<Map.Entry<SourceKey, SatelliteDisplay>> sourceIterator = DISPLAY_SOURCES.entrySet().iterator();
-        anyControllerOn = false;
-        while (sourceIterator.hasNext())
-        {
-            Map.Entry<SourceKey, SatelliteDisplay> entry = sourceIterator.next();
-            SatelliteDisplay display = entry.getValue();
-            if(display == entry.getKey().controller.getSource()) {
-                display.lifetime = 0; // Reset lifetime if any display is actively used
-                anyControllerOn = true;
-                continue;
-            }
-            display.lifetime++;
-
-            if (display.lifetime > MAX_DISPLAY_LIFETIME) {
-                display.clear();
-                sourceIterator.remove();
-            }
-        }
-
-
-        var iterator = CHUNK_CACHE.values().iterator();
-        while (iterator.hasNext())
-        {
-            CachedChunkInfo info = iterator.next();
-            if(SatelliteDisplay.hasActiveDisplay(info.chunk)) {
-                info.lifetime = 0; // Reset lifetime if chunk is actively used
-                continue;
-            }
-            info.lifetime++;
-            
-            if (info.lifetime > MAX_CHUNK_LIFETIME) {
-                if (info.forceLoaded) {
-                    HBUtil.ChunkUtil.unforceLoadChunk((ServerLevel)info.chunk.getLevel(),
-                     info.chunk.getPos(), Constants.MOD_ID);
-                }
-                iterator.remove();
-            }
-        }
-    }
-
-    public static LevelChunk getChunk(Level level, BlockPos pos) {
-        return getChunk((ServerLevel) level, HBUtil.ChunkUtil.getChunkPos(pos));
-    }
-
-    public static LevelChunk getChunk(ServerLevel level, int chunkX, int chunkZ) {
-        return getChunk(level, new ChunkPos(chunkX, chunkZ));
-    }
-
-    public static LevelChunk getChunk(ServerLevel level, ChunkPos pos) {
-        long posKey = HBUtil.ChunkUtil.getChunkPos1DMap(pos);
-        CachedChunkInfo cachedInfo = CHUNK_CACHE.get(posKey);
-        if (cachedInfo != null) {
-            cachedInfo.lifetime = 0;
-            return cachedInfo.chunk;
-        }
-
-        // Try to get active chunk first
-        String chunkId = HBUtil.ChunkUtil.getId(pos);
-        ManagedChunk chunk = ManagedChunkUtility.getManagedChunk(level, chunkId);
-        if (chunk != null) {
-            CHUNK_CACHE.put(posKey, new CachedChunkInfo(chunk.getLevelChunk(), false));
-            return chunk.getLevelChunk();
-        }
-
-        // Try force loading
-        HBUtil.ChunkUtil.forceLoadChunk(level, pos, Constants.MOD_ID);
-        if (chunk != null) {
-            LevelChunk levelChunk = chunk.getLevelChunk();
-            CHUNK_CACHE.put(posKey, new CachedChunkInfo(levelChunk, true));
-            return levelChunk;
-        }
-
-        return null;
-    }
-
-    public static void flagChunkForUnload(ChunkPos pos) {
-        long posKey = HBUtil.ChunkUtil.getChunkPos1DMap(pos);
-        CachedChunkInfo info = CHUNK_CACHE.get(posKey);
-        if (info != null) {
-            info.lifetime = MAX_CHUNK_LIFETIME; // This will trigger unload on next tick
-        }
-    }
-
 
     public static boolean isAnyControllerOn() {
         return  anyControllerOn;

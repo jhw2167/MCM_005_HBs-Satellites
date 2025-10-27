@@ -19,10 +19,13 @@ public class SatelliteConfig {
     public int displayPlayerRefreshRate = 10;
 
     @Comment("Entity refresh rate in ticks")
-    public int entityRefreshRate = 5;
+    public int entityRefreshRate = 10;
 
     @Comment("Controller path refresh rate in ticks")
     public int controllerPathRefreshRate = 200;
+
+    @Comment("Refresh rate for command processing in ticks")
+    public int controllerUIRefreshRate = 10;
 
     @NestedType(String.class)
     @Comment("Entity types produce green ping on the satellite display")
