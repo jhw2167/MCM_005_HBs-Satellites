@@ -83,12 +83,12 @@ public class SatelliteMain {
         SatelliteManager.initWoolIds();
 
         //Set Configs Entity blocks
-        SatelliteControllerBlockEntity.PATH_REFRESH_TICKS = CONFIG.controllerPathRefreshRate;
-        SatelliteControllerBlockEntity.UI_REFRESH_TICKS = CONFIG.controllerUIRefreshRate;
-        SatelliteControllerBlockEntity.ENTITY_REFRESH_TICKS = CONFIG.entityRefreshRate;
+        SatelliteControllerBlockEntity.PATH_REFRESH_TICKS = CONFIG.refreshRates.controllerPathRefreshRate;
+        SatelliteControllerBlockEntity.UI_REFRESH_TICKS = CONFIG.refreshRates.controllerUIRefreshRate;
+        SatelliteControllerBlockEntity.ENTITY_REFRESH_TICKS = CONFIG.refreshRates.entityRefreshRate;
 
-        SatelliteDisplayBlockEntity.REFRESH_RATE = CONFIG.displayRefreshRate;
-        SatelliteDisplayBlockEntity.PLAYER_REFRESH_RATE = CONFIG.displayPlayerRefreshRate;
+        SatelliteDisplayBlockEntity.REFRESH_RATE = CONFIG.refreshRates.displayRefreshRate;
+        SatelliteDisplayBlockEntity.PLAYER_REFRESH_RATE = CONFIG.refreshRates.displayPlayerRefreshRate;
     }
 
     private void onLoadLevel(LevelLoadingEvent event) {

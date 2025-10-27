@@ -35,20 +35,20 @@ public class ModConfig {
         SatelliteConfig config = SatelliteMain.CONFIG;
         
         // Convert friendly entities
-        for (String entityId : config.friendlyEntityTypes) {
+        for (String entityId : config.entityPings.friendlyEntityTypes) {
             addEntity(entityId, registry, friendlyEntities);
         }
 
         // Convert hostile entities
-        for (String entityId : config.hostileEntityTypes) {
+        for (String entityId : config.entityPings.hostileEntityTypes) {
             addEntity(entityId, registry, hostileEntities);
         }
         // Convert neutral entities
-        for (String entityId : config.neutralEntityTypes) {
+        for (String entityId : config.entityPings.neutralEntityTypes) {
             addEntity(entityId, registry, neutralEntities);
         }
         // Convert herd entities
-        for (String entityId : config.herdEntityTypes) {
+        for (String entityId : config.entityPings.herdEntityTypes) {
             addEntity(entityId, registry, herdEntities);
         }
     }

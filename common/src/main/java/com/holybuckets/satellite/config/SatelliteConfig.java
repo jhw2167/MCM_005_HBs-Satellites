@@ -13,42 +13,49 @@ import java.util.Set;
 public class SatelliteConfig {
 
 
-    @Comment("Display refresh rate in ticks")
-    public int displayRefreshRate = 60;
+    public static class DisplayRefreshRateConfig {
+        @Comment("Display refresh rate in ticks")
+        public int displayRefreshRate = 60;
 
-    @Comment("Display refresh rate for chunks currently inhabited by a player in ticks")
-    public int displayPlayerRefreshRate = 10;
+        @Comment("Display refresh rate for chunks currently inhabited by a player in ticks")
+        public int displayPlayerRefreshRate = 10;
 
-    @Comment("Entity refresh rate in ticks")
-    public int entityRefreshRate = 10;
+        @Comment("Entity refresh rate in ticks")
+        public int entityRefreshRate = 10;
 
-    @Comment("Controller path refresh rate in ticks")
-    public int controllerPathRefreshRate = 200;
+        @Comment("Controller path refresh rate in ticks")
+        public int controllerPathRefreshRate = 200;
 
-    @Comment("Refresh rate for command processing in ticks")
-    public int controllerUIRefreshRate = 10;
+        @Comment("Refresh rate for command processing in ticks")
+        public int controllerUIRefreshRate = 10;
+    }
 
-    @NestedType(String.class)
-    @Comment("Entity types produce green ping on the satellite display")
-    public Set<String> friendlyEntityTypes = Set.of("minecraft:villager", "minecraft:allay");
+    public static class EntityPingConfig {
+        @NestedType(String.class)
+        @Comment("Entity types produce green ping on the satellite display")
+        public Set<String> friendlyEntityTypes = Set.of("minecraft:villager", "minecraft:allay");
 
-    @Comment("Registers all mobs defined as hostile as red ping")
-    public boolean addAllHostileMobsAsRedPing = true;
+        @Comment("Registers all mobs defined as hostile as red ping")
+        public boolean addAllHostileMobsAsRedPing = true;
 
-    @NestedType(String.class)
-    @Comment("Entity types produce red ping on the satellite display")
-    public Set<String> hostileEntityTypes = Set.of("minecraft:zombie", "minecraft:zombie_villager", "minecraft:skeleton", "minecraft:creeper", "minecraft:spider", "minecraft:enderman", "minecraft:wither_skeleton", "minecraft:husk", "minecraft:stray", "minecraft:drowned", "minecraft:phantom", "minecraft:evoker", "minecraft:vindicator", "minecraft:ravager", "minecraft:pillager", "minecraft:witch", "minecraft:blaze", "minecraft:magma_cube", "minecraft:ghast", "minecraft:endermite", "minecraft:silverfish", "minecraft:cave_spider");
+        @NestedType(String.class)
+        @Comment("Entity types produce red ping on the satellite display") 
+        public Set<String> hostileEntityTypes = Set.of("minecraft:zombie", "minecraft:zombie_villager", "minecraft:skeleton", "minecraft:creeper", "minecraft:spider", "minecraft:enderman", "minecraft:wither_skeleton", "minecraft:husk", "minecraft:stray", "minecraft:drowned", "minecraft:phantom", "minecraft:evoker", "minecraft:vindicator", "minecraft:ravager", "minecraft:pillager", "minecraft:witch", "minecraft:blaze", "minecraft:magma_cube", "minecraft:ghast", "minecraft:endermite", "minecraft:silverfish", "minecraft:cave_spider");
 
-    @NestedType(String.class)
-    @Comment("Entity types produce a white ping")
-    public Set<String> neutralEntityTypes = Set.of("minecraft:iron_golem");
+        @NestedType(String.class)
+        @Comment("Entity types produce a white ping")
+        public Set<String> neutralEntityTypes = Set.of("minecraft:iron_golem");
 
-    @NestedType(String.class)
-    @Comment("Entity types only produce a white ping when grouped in large quantities")
-    public Set<String> herdEntityTypes = Set.of( "minecraft:cow", "minecraft:sheep", "minecraft:chicken", "minecraft:pig", "minecraft:horse", "minecraft:donkey", "minecraft:llama", "minecraft:wolf", "minecraft:cat");
+        @NestedType(String.class)
+        @Comment("Entity types only produce a white ping when grouped in large quantities")
+        public Set<String> herdEntityTypes = Set.of("minecraft:cow", "minecraft:sheep", "minecraft:chicken", "minecraft:pig", "minecraft:horse", "minecraft:donkey", "minecraft:llama", "minecraft:wolf", "minecraft:cat");
 
-    @Comment("Minimum count of entities to be considered a herd")
-    public int minHerdCountThreshold = 5;
+        @Comment("Minimum count of entities to be considered a herd")
+        public int minHerdCountThreshold = 5;
+    }
+
+    public DisplayRefreshRateConfig refreshRates = new DisplayRefreshRateConfig();
+    public EntityPingConfig entityPings = new EntityPingConfig();
 
 
 }
