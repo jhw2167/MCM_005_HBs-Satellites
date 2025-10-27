@@ -12,6 +12,7 @@ import java.util.Set;
 @Config(Constants.MOD_ID)
 public class SatelliteConfig {
 
+
     @Comment("Display refresh rate in ticks")
     public int displayRefreshRate = 60;
 
