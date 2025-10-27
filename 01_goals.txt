@@ -155,14 +155,40 @@ Okkk
 	- 
 
 
+25. Ability to launch satellite
+---
+	- Launch block model
+	- Interface UI to set coordinates
+		- set X, Y, Z
+		- click on POI
+
+	- launch
+	- target area
+	- recall
+	- Message confirm
+
+26. Custom scanning support
+---
+	- 
+
+27. Larger UI for Satellite Controller
+---
+
+	- 2x2 block touch screen UI for satellite controller
+	- 1A - Ordinal 2A - Height adjust
+	- 1B - Target Block - 2B - Card Interface
+
+
 20. Satellite Update cards
 ---
 
 
-	- Satellite Controller pictures
-	- Recipe Pictures
-	- Side/Side diorama pictures
-	- UI video
+20. Satellite Update cards
+---
+
+
+20. Satellite Update cards
+---
 
 
 20. Satellite Update cards

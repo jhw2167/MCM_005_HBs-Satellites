@@ -10,6 +10,21 @@ import java.util.Set;
 @Config(Constants.MOD_ID)
 public class SatelliteConfig {
 
+    public static class SatelliteRestrictionsConfig {
+
+        @Comment("Satellite will not operate below this y level")
+        public int minSatelliteWorkingHeight = 256;
+
+        @Comment("Maximum chunk sections below surface that a satellite can view by default, each section is 16 blocks tall, larger number indicates deeper reach")
+        public int maxSatelliteDepthSectionDefault = 8;
+
+        @Comment("Maximum number of chunks away from Satellite Block players may view blocks, -1 for no limit")
+        public int satelliteReachDistChunksDefault = -1;
+
+        @Comment("Maximum number of chunks away from launch station satellite may operate, -1 for no limit")
+        public int satelliteOperationalDistChunksDefault = -1;
+
+    }
 
     public static class SatelliteDisplayConfig {
         //add playerRange

@@ -288,6 +288,9 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         if( (isDisplayOn && ticks%PATH_REFRESH_TICKS==0) )
         {
+            boolean playersInRange = HBUtil.PlayerUtil.getAllPlayersInBlockRange(getBlockPos(), PLAYER_RANGE ).size() > 0;
+            if(!playersInRange) { this.turnOff(); return; }
+
             propagateToNeighbors();
             if(forceDisplayUpdates) {
                 if(source != null) source.resetDisplayUpdates();
