@@ -1,8 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "hbs_satellites:holo_base_block",
-    "hbs_satellites:holo_dark_block",
-    "hbs_satellites:holo_light_block"
-  ]
-}

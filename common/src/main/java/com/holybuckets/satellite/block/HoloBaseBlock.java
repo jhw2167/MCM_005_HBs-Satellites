@@ -17,6 +17,7 @@ public class HoloBaseBlock extends Block {
 
     public static final BlockBehaviour.Properties HOLO_BASE_PROPERTIES =
         BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK)
+            .destroyTime(0.05f)
         .sound(Blocks.WHITE_WOOL.getSoundType(null));
 
 //        BlockBehaviour.Properties.copy(Blocks.GLASS)

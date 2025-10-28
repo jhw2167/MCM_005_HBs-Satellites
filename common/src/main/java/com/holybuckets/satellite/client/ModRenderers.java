@@ -16,9 +16,9 @@ public class ModRenderers {
 
     public static void clientInitialize(BalmRenderers renderers) {
 
-        renderers.setBlockRenderType(() -> ModBlocks.holoBaseBlock, RenderType.cutout() );
-        renderers.setBlockRenderType(() -> ModBlocks.holoBaseBlock, RenderType.translucent());
-        renderers.setBlockRenderType(() -> ModBlocks.holoDarkBlock, RenderType.translucent());
+        //renderers.setBlockRenderType(() -> ModBlocks.holoBaseBlock, RenderType.cutout() );
+        //renderers.setBlockRenderType(() -> ModBlocks.holoBaseBlock, RenderType.translucent());
+        //renderers.setBlockRenderType(() -> ModBlocks.holoDarkBlock, RenderType.translucent());
         renderers.setBlockRenderType(() -> ModBlocks.satelliteBlock, RenderType.cutout());
         //waystoneModel = renderers.registerModel(new ResourceLocation(Waystones.MOD_ID, "waystone"), () -> WaystoneModel.createLayer(CubeDeformation.NONE));
         //renderers.setBlockRenderType(() -> ModBlocks.stoneBrickBlockEntity, RenderType.cutout());

@@ -26,15 +26,8 @@ dependencies {
         transitive = false
         changing = true
     }
-    
-    maven {
-        name = "ModMaven"
-        url = "https://modmaven.dev/"
-    }
-    
-    dependencies {
-        modImplementation "curse.maven:chisels-and-bits-${chiselbits_pid_fabric}:${chiselbits_fid_fabric}"
-    }
+
+    modImplementation "curse.maven:chisels-and-bits-${chiselbits_pid_fabric}:${chiselbits_fid_fabric}"
 
 }
 

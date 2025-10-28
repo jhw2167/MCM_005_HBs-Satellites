@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -30,7 +31,7 @@ import java.util.*;
 
 import static com.holybuckets.satellite.SatelliteMain.chiselBitsApi;
 
-public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE
+public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, BlockEntityTicker<SatelliteControllerBlockEntity>
 {
     int colorId;
     SatelliteManager manager;
@@ -243,9 +244,11 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
     private static final int START_BUFFER = 40;
     @Override
-    public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteBlockEntity)
+    public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteControllerBlockEntity satelliteBlockEntity)
     {
-        super.tick(level, blockPos, blockState, satelliteBlockEntity);
+        //super.tick(level, blockPos, blockState, satelliteBlockEntity);
+        //super.tick(true);
+        ticks++;
         if(manager == null) manager = SatelliteManager.get(level);
 
         if (this.level.isClientSide) {
@@ -278,7 +281,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         processCommands();
         renderDisplay();
-        if(source!=null && isDisplayOn) source.resetRateLimiter();
+        if(this.source!=null && ticks%REFRESH_RATE==0) this.source.tickController();
+
     }
 
     public static int PATH_REFRESH_TICKS = 200;

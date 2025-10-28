@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Deque;
 import java.util.Random;
 
-public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelliteDisplayBE, BlockEntityTicker<SatelliteDisplayBlockEntity> {
+public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelliteDisplayBE {
 
     protected SatelliteDisplay source;
     protected Deque<ChunkDisplayInfo> displayInfo;
@@ -69,10 +69,9 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         if(toggle != this.isDisplayOn) {
             this.isDisplayOn = toggle;
             updateBlockState();
-
-            if(!this.isDisplayOn) {
-                this.clearDisplay();
-            }
+        }
+        if(!this.isDisplayOn) {
+            this.clearDisplay();
         }
     }
 
@@ -96,13 +95,13 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     }
 
     @Override
-    public boolean hasPlayer() {
-        return this.hasPlayer;
+    public SatelliteDisplay getSource() {
+        return this.source;
     }
 
     @Override
-    public SatelliteDisplay getSource() {
-        return this.source;
+    public boolean hasPlayer() {
+        return this.hasPlayer;
     }
 
     @Override
@@ -143,32 +142,32 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     }
 
     public void clearDisplay() {
-        clearAboveArea(this.source.getDepth());
-        if(displayInfo == null) return;
-        displayInfo.forEach( info -> info.isActive = false );
-        displayInfo.clear();
+        if(displayInfo == null) {
+            clearAboveArea(this.height);
+        } else {
+            clearAboveArea(this.source.getDepth());
+            displayInfo.forEach( info -> info.isActive = false );
+            displayInfo.clear();
+        }
     }
 
     public void onDestroyed() {
         this.clearDisplay();
     }
 
-    @Override
-    public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
+    public void tick(boolean force) {
         ticks++;
         if(this.level.isClientSide) return;
-        if( source == null) return;
 
-
-        if( source==null || source.noSource() || !source.contains(this.getBlockPos())) {
-            toggleOnOff(false);
+        if(source == null || source.noSource() || !source.contains(this.getBlockPos())) {
+            this.clearDisplay();
         } else if(displayInfo != null && !displayInfo.isEmpty()) {
             renderDisplay();
         }
 
     }
 
-    public static int REFRESH_RATE = 60;
+    public static int REFRESH_RATE = 5;//60;
     public static int PLAYER_REFRESH_RATE = 10;
     protected void renderDisplay()
     {
@@ -181,12 +180,10 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
         if(displayInfo == null || displayInfo.isEmpty()) return;
         boolean stdRefresh = ticks % REFRESH_RATE==0;
+        //boolean stdRefresh = source.testDisplay(this);
         boolean playerRefresh = this.hasPlayer && ticks % PLAYER_REFRESH_RATE==0;
 
-        if(playerRefresh && stdRefresh) {
-            this.displayInfo.forEach( info -> info.refreshBits(true) );
-            this.clearAboveArea(this.height);
-        } else if(playerRefresh) {
+        if(playerRefresh) {
             this.displayInfo.forEach( info -> info.refreshBits(true) );
         } else if (stdRefresh) {
             this.displayInfo.forEach( info -> info.refreshBits(false) );
@@ -219,6 +216,5 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         this.saveAdditional(tag);
         return tag;
     }
-
 
 }

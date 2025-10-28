@@ -20,7 +20,6 @@ import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.DustParticleOptionsBase;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -29,18 +28,19 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
 import static com.holybuckets.foundation.HBUtil.TripleInt;
+import static com.holybuckets.satellite.SatelliteMain.chiselBitsApi;
 
 /**
  * Each Satellite Controller Block contains a single satellite display
@@ -61,22 +61,20 @@ public class SatelliteDisplay {
     int depth;
     boolean needsUpdate;
     boolean needsEntityUpdate;
+
     protected Map<BlockPos, ISatelliteDisplayBE> displayBlocks;
+    private ISatelliteDisplayBE [] displayBlocksArr;
+    Set<Entity> displayEntities;
     protected int minX = Integer.MAX_VALUE;
     protected int maxX = Integer.MIN_VALUE;
     protected int minZ = Integer.MAX_VALUE;
     protected int maxZ = Integer.MIN_VALUE;
 
-    //rendering
-    Set<Entity> displayEntities;
-    private Set<ISatelliteDisplayBE> rateLimiter;
-    private static final int MAX_RENDER_PER_TICK = 5;
-
-
     protected static SatelliteConfig CONFIG;
     public int lifetime;
     private BlockHitResult cursorPos;
     private BlockHitResult cursorSelection;
+    private int currentIteratorIndex;
 
     //For Child client
     protected SatelliteDisplay(Level level,SatelliteControllerBlockEntity controller) {
@@ -93,10 +91,9 @@ public class SatelliteDisplay {
         this.zOffset = 0;
         this.xOffset = 0;
         this.depth = 2;
+        this.currentIteratorIndex = 0;
         this.needsUpdate = true;
         displayBlocks = new HashMap<>();
-
-        rateLimiter = new HashSet<>();
         displayEntities = new HashSet<>();
         if(satellite == null) return;
 
@@ -166,19 +163,13 @@ public class SatelliteDisplay {
         this.needsUpdate = true;
     }
 
-    private void setPosition(Player p, BlockHitResult res)
+    private void setPosition(BlockHitResult res)
     {
         if(this.controller == null) return;
         //Convert cursorPos to overworld block position using offsets
         //calculate chunkOffset from satellite, then blockOffset from fractional cursorPos
         if(this.cursorPos == null) return;
-        Vec3 playerEye = p.getEyePosition(1.0f);
-        Vec3 cursorToEye = playerEye.subtract(res.getLocation()).normalize();
-        this.cursorSelection = new BlockHitResult(
-            res.getLocation().add(cursorToEye.scale(RENDER_SCALE)),
-            res.getDirection(), res.getBlockPos(), res.isInside()
-        );
-
+        this.cursorSelection = res;
         BlockPos holoBlock = cursorSelection.getBlockPos();
         Vec3 hitLoc = cursorSelection.getLocation();
         Vec3i controllerOffset = this.getOffset( holoBlock );
@@ -307,6 +298,7 @@ public class SatelliteDisplay {
         for (BlockPos pos : blocks.keySet()) {
             updateBounds(pos);
         }
+        displayBlocksArr = displayBlocks.values().toArray(new ISatelliteDisplayBE[0]);
     }
 
     public void remove(BlockPos blockPos) {
@@ -364,18 +356,26 @@ public class SatelliteDisplay {
         return INFO_CACHE.get(chunkSelection);
     }
 
+    //** Display Rendering
+    public boolean testDisplay(ISatelliteDisplayBE satelliteDisplayBlockEntity, int index) {
+        if(satelliteDisplayBlockEntity == null) return false;
+        if(satelliteDisplayBlockEntity == controller) return false;
+        if(!satelliteDisplayBlockEntity.isDisplayOn()) return false;
+        if(satelliteDisplayBlockEntity.hasPlayer()) return true;
+        return index==currentIteratorIndex;
+
+    }
+
+    public void tickController() {
+        if(displayBlocks.size() == 0 || displayBlocksArr == null) return;
+        ISatelliteDisplayBE disp = displayBlocksArr[currentIteratorIndex];
+        if(testDisplay(disp, currentIteratorIndex)) {
+            disp.tick(false);
+        }
+        currentIteratorIndex = (currentIteratorIndex + 1) % displayBlocksArr.length;
+    }
 
     //** Render Methods
-
-    public boolean testRender(ISatelliteDisplayBE disp) {
-        if(disp.hasPlayer()) return true;
-        if( rateLimiter.size() > MAX_RENDER_PER_TICK || rateLimiter.contains(disp)) return false;
-        rateLimiter.add(disp);
-        return true;
-    }
-    public void resetRateLimiter() {
-        rateLimiter.clear();
-    }
 
     /**
      * Collects all entities in all observed chunks in this area
@@ -560,17 +560,31 @@ public class SatelliteDisplay {
         }
     }
 
-    public void renderUI(ServerPlayer p, BlockHitResult hitResult)
+    public void renderUI(ServerPlayer p, HitResult hitResult)
     {
         //Render flame particle effect at cursor
-        cursorPos = hitResult;
+
+        boolean blockHit = (hitResult instanceof BlockHitResult);
+        boolean viewingHolo = false;
+        if(blockHit && isHitWithinDisplay(hitResult.getLocation())) {
+            viewingHolo = chiselBitsApi.isViewingHoloBlock(p.level(), (BlockHitResult) hitResult );
+        }
+        if( blockHit && viewingHolo ) {
+            this.cursorPos = (BlockHitResult) hitResult;
+        } else {
+            this.cursorPos = null;
+            this.cursorSelection = null;
+            return;
+        }
+
+
         if(cursorSelection != null)
         {
             Vec3 hitLoc = cursorSelection.getLocation();
             ((ServerLevel) level).sendParticles(
-                DustParticleOptions.REDSTONE,                     // Particle type
-                hitLoc.x, hitLoc.y, hitLoc.z,
-                10,                                // Particle count
+                ParticleTypes.CRIMSON_SPORE ,                     // Particle type
+                hitLoc.x, hitLoc.y + RENDER_SCALE, hitLoc.z,
+                7,                                // Particle count
                 0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
                 0.0                               // Speed
             );
@@ -656,7 +670,6 @@ public class SatelliteDisplay {
 
         Level level = useBlockEvent.getLevel();
         if(level == null || level.isClientSide) return;
-        if( useBlockEvent.getPlayer() == null ) return;
         if( useBlockEvent.getHand() != InteractionHand.MAIN_HAND ) return;
         if( !useBlockEvent.getPlayer().getItemInHand(InteractionHand.MAIN_HAND).isEmpty() ) return;
         if(!SatelliteMain.chiselBitsApi.isChiseledBlock(level, useBlockEvent.getHitResult().getBlockPos() )) return;
@@ -677,7 +690,7 @@ public class SatelliteDisplay {
 
         if( level.getBlockEntity(displayBlockPos) instanceof SatelliteDisplayBlockEntity displayBlockEntity ) {
             SatelliteDisplay source = displayBlockEntity.getSource();
-            if(source != null) { source.setPosition( useBlockEvent.getPlayer(), res ); }
+            if(source != null) { source.setPosition( res ); }
         }
 
     }

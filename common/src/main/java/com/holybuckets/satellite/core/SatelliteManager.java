@@ -8,15 +8,21 @@ import com.holybuckets.foundation.model.ManagedChunk;
 import com.holybuckets.foundation.model.ManagedChunkUtility;
 import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.SatelliteMain;
+import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
+import com.holybuckets.satellite.item.ModItems;
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.blay09.mods.balm.api.event.TossItemEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -84,6 +90,7 @@ public class SatelliteManager {
     public static void init(EventRegistrar reg) {
 
         reg.registerOnServerTick(TickType.ON_20_TICKS, SatelliteManager::onServerTick);
+        reg.registerOnTossItem(SatelliteManager::onTossSatellite);
 
         //SatelliteDisplay
         SatelliteDisplay.init(reg);
@@ -145,6 +152,19 @@ public class SatelliteManager {
 
     public static int totalIds() {
         return woolIds.size();
+    }
+
+    private static void onTossSatellite(TossItemEvent event) {
+        if(event.getPlayer().level().isClientSide) return;
+        ItemStack stack =  event.getItemStack();
+        if(!stack.is(ModBlocks.satelliteBlock.asItem())) return;
+        stack.setCount(stack.getCount()-1);
+        Player p = event.getPlayer();
+
+        //Place satellite 1 bock below and in front of player
+        BlockPos placePos = p.blockPosition().below().relative(p.getDirection());
+        p.level().setBlock(placePos, ModBlocks.satelliteBlock.defaultBlockState(), 3);
+        event.setCanceled(true);
     }
 
     public static Block getWool(int id) {

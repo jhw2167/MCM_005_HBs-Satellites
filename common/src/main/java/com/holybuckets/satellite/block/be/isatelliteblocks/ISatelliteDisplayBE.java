@@ -35,6 +35,8 @@ public interface ISatelliteDisplayBE {
 
     int getHeight();
 
+    boolean hasPlayer();
+
     /*
     static final int DIST_THRESHOLD_SQR = 16*16;
     static void handleClientUpdate(Player player, SatelliteDisplayMessage message) {

@@ -1,4 +1,6 @@
 {
+  "block.hbs_satellites.holo_light_block": "Holoblock Light",
+  "block.hbs_satellites.holo_base_block.desc": "Light variant of the holographic base block",
   "block.hbs_satellites.holo_base_block": "Holoblock Base",
   "block.hbs_satellites.holo_base_block.desc": "Base block for holographic displays",
   "block.hbs_satellites.holo_dark_block": "Holoblock Dark",
@@ -11,7 +13,4 @@
   "block.hbs_satellites.satellite_controller_block.desc": "Controls and manages satellite networks",
   "block.hbs_satellites.satellite_display_block": "Satellite Display",
   "block.hbs_satellites.satellite_display_block.desc": "Displays holographic information from satellites"
-}
-{
-  "block.hbs_satellites.holo_light_block": "Holographic Light Block"
 }

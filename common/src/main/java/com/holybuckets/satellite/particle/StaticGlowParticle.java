@@ -3,10 +3,7 @@ package com.holybuckets.satellite.particle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class StaticGlowParticle extends TextureSheetParticle {
 
     private final SpriteSet sprites;
@@ -98,7 +95,6 @@ public class StaticGlowParticle extends TextureSheetParticle {
     }
 
     // Particle Provider/Factory
-    @OnlyIn(Dist.CLIENT)
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
@@ -116,7 +112,6 @@ public class StaticGlowParticle extends TextureSheetParticle {
 }
 
 // Alternative: Pulsing particle (brightness pulses instead of fade in/out)
-@OnlyIn(Dist.CLIENT)
 class PulsingStaticParticle extends TextureSheetParticle {
 
     private final SpriteSet sprites;
@@ -178,7 +173,6 @@ class PulsingStaticParticle extends TextureSheetParticle {
         return 15728880;
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 
@@ -196,7 +190,6 @@ class PulsingStaticParticle extends TextureSheetParticle {
 }
 
 // 3D Billboard particle - rotates to face camera for 3D appearance
-@OnlyIn(Dist.CLIENT)
 class Static3DBillboardParticle extends TextureSheetParticle {
 
     private final SpriteSet sprites;
@@ -265,7 +258,6 @@ class Static3DBillboardParticle extends TextureSheetParticle {
         return 15728880;
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
 

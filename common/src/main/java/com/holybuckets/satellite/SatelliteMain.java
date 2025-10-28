@@ -37,6 +37,7 @@ public class SatelliteMain {
         INSTANCE = this;
         INSTANCE.chiselBitsApi = (ChiselBitsAPI) Balm.platformProxy()
             .withForge("com.holybuckets.satellite.externalapi.ChiselBitsAPIForge")
+            .withFabric("com.holybuckets.satellite.externalapi.ChiselBitsAPIFabric")
             .build();
 
         //LoggerProject.logInit( "001000", this.getClass().getName() );
@@ -88,8 +89,8 @@ public class SatelliteMain {
         SatelliteControllerBlockEntity.UI_REFRESH_TICKS = CONFIG.displayConfig.controllerUIRefreshRate;
         SatelliteControllerBlockEntity.ENTITY_REFRESH_TICKS = CONFIG.displayConfig.entityRefreshRate;
 
-        SatelliteDisplayBlockEntity.REFRESH_RATE = CONFIG.displayConfig.displayRefreshRate;
-        SatelliteDisplayBlockEntity.PLAYER_REFRESH_RATE = CONFIG.displayConfig.displayPlayerRefreshRate;
+        //SatelliteDisplayBlockEntity.REFRESH_RATE = CONFIG.displayConfig.displayRefreshRate;
+        //SatelliteDisplayBlockEntity.PLAYER_REFRESH_RATE = CONFIG.displayConfig.displayPlayerRefreshRate;
     }
 
     private void onLoadLevel(LevelLoadingEvent event) {
