@@ -36,6 +36,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
@@ -560,17 +561,30 @@ public class SatelliteDisplay {
         }
     }
 
-    public void renderUI(ServerPlayer p, BlockHitResult hitResult)
+    //public void renderUI(ServerPlayer p, HitResult hitResult)
+    public void renderUI()
     {
-        //Render flame particle effect at cursor
-        cursorPos = hitResult;
+        /*
+            boolean blockHit = (hitResult instanceof BlockHitResult);
+            boolean viewingHolo = false;
+            if(blockHit && isHitWithinDisplay(hitResult.getLocation())) {
+                viewingHolo = SatelliteMain.chiselBitsApi
+                    .isViewingHoloBlock(p.level(), (BlockHitResult) hitResult );
+            }
+            if( blockHit && viewingHolo ) {
+                this.cursorPos = (BlockHitResult) hitResult;
+            } else {
+                this.cursorPos = null;
+            }
+            */
+
         if(cursorSelection != null)
         {
             Vec3 hitLoc = cursorSelection.getLocation();
             ((ServerLevel) level).sendParticles(
                 DustParticleOptions.REDSTONE,                     // Particle type
                 hitLoc.x, hitLoc.y, hitLoc.z,
-                10,                                // Particle count
+                5,                                // Particle count
                 0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
                 0.0                               // Speed
             );

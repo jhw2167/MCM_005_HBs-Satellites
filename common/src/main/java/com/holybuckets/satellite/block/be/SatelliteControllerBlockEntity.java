@@ -314,16 +314,15 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         //Get all players within 64 blocks
         if( !isDisplayOn || source==null || source.noSource() ) return;
         if(ticks % PLAYER_UI_REFRESH_TICKS != 0) return;
+        this.source.renderUI();
 
-        List<ServerPlayer> players = HBUtil.PlayerUtil
-            .getAllPlayersInBlockRange(getBlockPos(), PLAYER_RANGE );
-        for(ServerPlayer player : players) {
-            HitResult res = player.pick(REACH_DIST_BLOCKS, 0.5f, true);
-            if( !source.isHitWithinDisplay(res.getLocation()) ) continue;
-            BlockHitResult bhr = (BlockHitResult) res;
-            if( !chiselBitsApi.isViewingHoloBlock(player.level(), bhr)) continue;
-            this.source.renderUI( player, bhr );
-        }
+        /*
+            List<ServerPlayer> players = HBUtil.PlayerUtil
+                .getAllPlayersInBlockRange(getBlockPos(), PLAYER_RANGE );
+            for(ServerPlayer player : players) {
+                this.source.renderUI( null, player.pick(REACH_DIST_BLOCKS, 0.5f, true) );
+            }
+        */
     }
 
     private void recoverSatellite()

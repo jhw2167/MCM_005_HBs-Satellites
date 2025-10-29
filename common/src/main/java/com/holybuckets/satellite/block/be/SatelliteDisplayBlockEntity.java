@@ -143,9 +143,13 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     }
 
     public void clearDisplay() {
-        clearAboveArea(this.source.getDepth());
-        if(displayInfo == null) return;
+        if(displayInfo == null) {
+            this.clearAboveArea(this.height);
+            this.height = 0;
+            return;
+        }
         displayInfo.forEach( info -> info.isActive = false );
+        clearAboveArea(displayInfo.size());
         displayInfo.clear();
     }
 
