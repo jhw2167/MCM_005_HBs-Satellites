@@ -1,6 +1,6 @@
 package com.holybuckets.satellite.client;
 
-
+import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Font.DisplayMode;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
@@ -17,10 +17,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.client.renderer.RenderType;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+
+import java.util.function.Predicate;
 
 public class SatelliteControllerRenderer implements BlockEntityRenderer<SatelliteControllerBlockEntity> {
 
@@ -127,35 +130,44 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
         if(targetPos == null) targetPos = blockEntity.getBlockPos();
         poseStack.pushPose();
 
-    // Translate to top of the block facing direction
-            poseStack.translate(0.5, 1.0, 0.5); // Center of top face
+        poseStack.translate(0.5, 0.925, 0.5);
 
-    // Rotate based on block facing direction
-            Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
-            switch(facing) {
-                case NORTH: poseStack.mulPose(Axis.YP.rotationDegrees(0)); break;
-                case SOUTH: poseStack.mulPose(Axis.YP.rotationDegrees(180)); break;
-                case WEST: poseStack.mulPose(Axis.YP.rotationDegrees(90)); break;
-                case EAST: poseStack.mulPose(Axis.YP.rotationDegrees(270)); break;
-            }
+        BlockState state = blockEntity.getBlockState();
+        Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        switch(facing) {
+            case NORTH:
+                poseStack.translate(0, 0, -0.5);  // Move to north face
+                poseStack.mulPose(Axis.YP.rotationDegrees(0));
+                break;
+            case SOUTH:
+                poseStack.translate(0, 0, 0.5);   // Move to south face
+                poseStack.mulPose(Axis.YP.rotationDegrees(180));
+                break;
+            case WEST:
+                poseStack.translate(-0.5, 0, 0);  // Move to west face
+                poseStack.mulPose(Axis.YP.rotationDegrees(90));
+                break;
+            case EAST:
+                poseStack.translate(0.5, 0, 0);   // Move to east face
+                poseStack.mulPose(Axis.YP.rotationDegrees(270));
+                break;
+        }
 
-        // Move forward slightly so text isn't z-fighting with block face
-        poseStack.translate(0, 0, 0.501);
-
-// Scale to appropriate size
+        poseStack.translate(0, 0, -0.01); // Tiny offset AFTER rotation to prevent z-fighting
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180)); // Flip text right-side up
         float scale = 0.01f;
         poseStack.scale(scale, scale, scale);
 
 // Prepare text components
-        String xText = "X:" + targetPos.getX();
-        String yText = "Y:" + targetPos.getY();
-        String zText = "Z:" + targetPos.getZ();
-        int textColor = 0xFFFFFF;
+        String xText =  getTruncatedString("X:", targetPos.getX());
+        String yText = getTruncatedString("Y:", targetPos.getY());
+        String zText = getTruncatedString("Z:", targetPos.getZ());
+        int textColor = 0x000000;
 
 // Render X in left third
         poseStack.pushPose();
 
-        poseStack.translate(-20, 0, 0);
+        poseStack.translate(-30, 0, 0);
         font.drawInBatch(xText, -font.width(xText) / 2f, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
         poseStack.popPose();
@@ -166,13 +178,20 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
 
 // Render Z in right third
         poseStack.pushPose();
-        poseStack.translate(20, 0, 0);
+        poseStack.translate(30, 0, 0);
         font.drawInBatch(zText, -font.width(zText) / 2f, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
         poseStack.popPose();
 
         poseStack.popPose();
 
+    }
+
+    private String getTruncatedString(String pre, int coord) {
+        if(Math.abs(coord) < 999) {
+            return pre + coord;
+        }
+        return Integer.toString(coord);
     }
 
 }

@@ -27,6 +27,7 @@ dependencies {
         changing = true
     }
 
+    //implementation "curse.maven:chisels-and-bits-${chiselbits_pid_fabric}:${chiselbits_fid_fabric}"
     modImplementation "curse.maven:chisels-and-bits-${chiselbits_pid_fabric}:${chiselbits_fid_fabric}"
 
 }

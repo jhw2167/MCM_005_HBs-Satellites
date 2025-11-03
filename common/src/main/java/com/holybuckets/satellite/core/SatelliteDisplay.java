@@ -154,15 +154,15 @@ public class SatelliteDisplay {
     }
 
     public void adjCurrentSection(int delta) {
-        int temp = this.currentSection + delta;
-        if( temp < depth ||  temp >= maxSection ) return;
-        this.currentSection = temp;
+        int newSection = this.currentSection + delta;
+        if( newSection < 0 ||  newSection+depth > maxSection ) return;
+        this.currentSection = newSection;
         this.needsUpdate = true;
     }
 
     public void adjDisplayDepth(int dDepth) {
         this.depth += dDepth;
-        if(depth == 0) depth = MAX_DEPTH;
+        if(depth <= 0) depth = MAX_DEPTH;
         if(depth > MAX_DEPTH) depth = 1;
         this.needsUpdate = true;
     }
@@ -172,7 +172,7 @@ public class SatelliteDisplay {
         if(this.controller == null) return;
         //Convert cursorPos to overworld block position using offsets
         //calculate chunkOffset from satellite, then blockOffset from fractional cursorPos
-        if(this.cursorPos == null) return;
+        if(res == null || p == null) return;
         Vec3 playerEye = p.getEyePosition(1.0f);
         Vec3 cursorToEye = playerEye.subtract(res.getLocation()).normalize();
         this.cursorSelection = new BlockHitResult(
@@ -584,7 +584,7 @@ public class SatelliteDisplay {
             ((ServerLevel) level).sendParticles(
                 DustParticleOptions.REDSTONE,                     // Particle type
                 hitLoc.x, hitLoc.y, hitLoc.z,
-                5,                                // Particle count
+                2,                                // Particle count
                 0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
                 0.0                               // Speed
             );

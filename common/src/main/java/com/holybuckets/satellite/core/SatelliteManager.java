@@ -1,8 +1,13 @@
 package com.holybuckets.satellite.core;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
+import com.holybuckets.foundation.event.custom.SimpleMessageEvent;
 import com.holybuckets.foundation.event.custom.TickType;
 import com.holybuckets.foundation.model.ManagedChunk;
 import com.holybuckets.foundation.model.ManagedChunkUtility;
@@ -18,6 +23,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.blay09.mods.balm.api.event.TossItemEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -27,12 +33,14 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.*;
 
 public class SatelliteManager {
-    
+
     /** Maps colorId to satellite block entity */
     private final IntObjectHashMap<SatelliteBlockEntity> satellites = new IntObjectHashMap<>(24);
     private final Map<SourceKey, SatelliteDisplay> displaySources = new HashMap<>();
@@ -70,7 +78,7 @@ public class SatelliteManager {
         LevelChunk chunk;
         int lifetime;
         boolean forceLoaded;
-        
+
         CachedChunkInfo(LevelChunk chunk, boolean forceLoaded) {
             this.chunk = chunk;
             this.lifetime = 0;
@@ -81,7 +89,7 @@ public class SatelliteManager {
 
     //State variables
     private final boolean isServerSide;
-    
+
     public SatelliteManager(Level level) {
         this.level = level;
         this.isServerSide = !level.isClientSide();
@@ -91,6 +99,8 @@ public class SatelliteManager {
 
         reg.registerOnServerTick(TickType.ON_20_TICKS, SatelliteManager::onServerTick);
         reg.registerOnTossItem(SatelliteManager::onTossSatellite);
+
+        reg.registerOnSimpleMessage(MSG_ID_TARGET_POS, SatelliteManager::handleTargetPosMessage);
 
         //SatelliteDisplay
         SatelliteDisplay.init(reg);
@@ -241,7 +251,54 @@ public class SatelliteManager {
         }
     }
 
+    public static final String MSG_ID_TARGET_POS = "satellite_target_pos";
+    private static void handleTargetPosMessage(SimpleMessageEvent event) {
+        JsonElement elem = JsonParser.parseString(event.getContent());
 
+        if(elem == null || !elem.isJsonObject()) return;
+        JsonObject json = elem.getAsJsonObject();
+        int colorId = json.get("colorId").getAsInt();
+        BlockPos targetPos = HBUtil.BlockUtil.stringToBlockPos(json.get("targetPos").getAsString());
+        SatelliteManager manager = SatelliteMain.getManager(GeneralConfig.OVERWORLD);
+        if(manager == null) return;
+        SatelliteBlockEntity satellite = manager.get(colorId);
+        if(satellite == null) return;
+        satellite.launch(targetPos);
+    }
+
+    //Move satellite blockentity to target pos without disrupting any currently linked controllers
+    public boolean moveSatellite(SatelliteBlockEntity be, BlockPos targetPos)
+    {
+        if(be == null || targetPos == null) return false;
+        if(level == null || level.isClientSide) return false;
+
+        BlockPos oldPos = be.getBlockPos();
+        if(oldPos.equals(targetPos)) return false;
+
+        ChunkPos targetChunk = new ChunkPos(targetPos);
+        LevelChunk chunk = getChunk((ServerLevel) level, targetChunk);
+        if(chunk == null) return false;
+
+        int colorId = be.getColorId();
+        remove(colorId);
+
+        CompoundTag nbt = be.saveWithFullMetadata();
+        BlockState state = level.getBlockState(oldPos);
+        level.removeBlock(oldPos, false);
+        level.setBlock(targetPos, state, 3); // Flag 3 = notify + update
+
+        BlockEntity newBE = level.getBlockEntity(targetPos);
+        if(newBE instanceof SatelliteBlockEntity newSatellite) {
+
+            newSatellite.load(nbt);
+            newSatellite.setChanged();
+            ((ServerLevel) level).getChunkSource().blockChanged(targetPos);
+            put(colorId, newSatellite);
+            return true;
+        }
+
+        return false;
+    }
 
     //** Events
     public static void onWorldStart() {

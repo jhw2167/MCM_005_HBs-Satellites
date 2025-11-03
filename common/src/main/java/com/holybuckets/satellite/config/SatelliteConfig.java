@@ -10,7 +10,7 @@ import java.util.Set;
 @Config(Constants.MOD_ID)
 public class SatelliteConfig {
 
-    public static class SatelliteRestrictionsConfig {
+    public static class SatelliteBlockConfig {
 
         @Comment("Satellite will not operate below this y level")
         public int minSatelliteWorkingHeight = 256;
@@ -23,6 +23,16 @@ public class SatelliteConfig {
 
         @Comment("Maximum number of chunks away from launch station satellite may operate, -1 for no limit")
         public int satelliteOperationalDistChunksDefault = -1;
+
+        @Comment("Satellite travel rate")
+        public int satelliteTravelRateChunksPerSecond = 8;
+
+        @NestedType(String.class)
+        @Comment("Surface structures the satellite block interface will seek for you. Overworld only. These locations are not validated on the client side.")
+        public Set<String> satelliteStructureTargetOptions = Set.of("minecraft:desert_pyramid", "minecraft:jungle_pyramid",
+         "minecraft:desert_outpost", "minecraft:pillager_outpost", "minecraft:mansion",
+          "minecraft:village_plains", "minecraft:village_desert", "minecraft:village_savanna", "minecraft:village_snowy", "minecraft:village_taiga",
+           "minecraft:swamp_hut", "minecraft:shipwreck", "minecraft:igloo");
 
     }
 
@@ -73,6 +83,7 @@ public class SatelliteConfig {
 
     public SatelliteDisplayConfig displayConfig = new SatelliteDisplayConfig();
     public EntityPingConfig entityPings = new EntityPingConfig();
+    public SatelliteBlockConfig satelliteConfig = new SatelliteBlockConfig();
 
 
 }

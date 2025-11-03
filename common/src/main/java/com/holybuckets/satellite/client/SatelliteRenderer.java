@@ -92,6 +92,7 @@ public class SatelliteRenderer implements BlockEntityRenderer<SatelliteBlockEnti
             .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
 
 // Top face - FIXED: Inverted vertex order
+        /*
         builder.vertex(matrix, minX, 1 + offset, maxX)
             .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 1, 0).endVertex();
         builder.vertex(matrix, maxX, 1 + offset, maxX)
@@ -100,7 +101,7 @@ public class SatelliteRenderer implements BlockEntityRenderer<SatelliteBlockEnti
             .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 1, 0).endVertex();
         builder.vertex(matrix, minX, 1 + offset, minX)
             .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 1, 0).endVertex();
-
+        */
 // Bottom face
         builder.vertex(matrix, minX, -offset, minX)
             .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, -1, 0).endVertex();

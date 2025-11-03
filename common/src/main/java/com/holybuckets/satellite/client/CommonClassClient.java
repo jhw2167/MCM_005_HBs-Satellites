@@ -1,9 +1,16 @@
 package com.holybuckets.satellite.client;
 
+import com.holybuckets.foundation.GeneralConfig;
+import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.satellite.CommonClass;
+import com.holybuckets.satellite.CommonProxy;
 import com.holybuckets.satellite.SatelliteMain;
+import com.holybuckets.satellite.block.be.ModBlockEntities;
+import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
 import com.holybuckets.satellite.client.screen.ModScreens;
+import com.holybuckets.satellite.client.screen.SatelliteScreen;
+import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.core.SatelliteManager;
 import com.holybuckets.foundation.client.ClientEventRegistrar;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -23,6 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
@@ -32,7 +40,7 @@ import static com.holybuckets.satellite.CommonClass.isViewingHoloBit;
 import static com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity.REACH_DIST_BLOCKS;
 
 
-public class CommonClassClient {
+public class CommonClassClient implements CommonProxy {
 
     public static void initClient() {
         ClientEventRegistrar registrar = ClientEventRegistrar.getInstance();
@@ -48,11 +56,18 @@ public class CommonClassClient {
         //ModItems.clientInitialize();
     }
 
+
+    //Instance Proxy Methods
+    public void openScreen(BlockEntity be) {
+        if(be.getType().equals( ModBlockEntities.satelliteBlockEntity.get()) ) {
+            Minecraft.getInstance().setScreen( new SatelliteScreen( (SatelliteBlockEntity) be) );
+        }
+    }
+
     /**
      * Description: Run sample tests methods
      */
-    public static void sample()
-    {
+    public static void sample() {
 
     }
 
@@ -60,6 +75,7 @@ public class CommonClassClient {
     private static void onConnectedToServer(ConnectedToServerEvent event) {
         SatelliteMain.loadConfig();
         SatelliteManager.onWorldStart();
+        ModConfig.onConnectedToServer(HBUtil.LevelUtil.toLevel(HBUtil.LevelUtil.LevelNameSpace.CLIENT, GeneralConfig.OVERWORLD_LOC) );
     }
 
     private static void onDisconnectedFromServer(DisconnectedFromServerEvent event){

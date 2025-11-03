@@ -112,6 +112,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         satelliteTargetPos = (linkedSatellite != null) ? linkedSatellite.getBlockPos() : null;
         if(forceDisplayUpdates) forceUpdate();
         if(source == null || source.noSource()) return;
+        toggleOnOff(true);
         this.displayInfo = source.initDisplayInfo(this);
     }
 
@@ -245,7 +246,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteBlockEntity)
     {
-        super.tick(level, blockPos, blockState, satelliteBlockEntity);
+        ticks++;
         if(manager == null) manager = SatelliteManager.get(level);
 
         if (this.level.isClientSide) {
@@ -271,10 +272,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         if(this.linkedSatellite != manager.get(this.colorId)) {
             this.linkedSatellite = manager.get(this.colorId);
+            this.isDisplayOn = true;
             SatelliteDisplay source = manager.generateSource(this.linkedSatellite, this);
             setSource(source, true);
         }
-
 
         processCommands();
         renderDisplay();

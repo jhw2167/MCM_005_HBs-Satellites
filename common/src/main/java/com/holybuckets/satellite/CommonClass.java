@@ -21,7 +21,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 
-public class CommonClass {
+public class CommonClass implements CommonProxy {
 
     public static boolean isInitialized = false;
     public static void init()

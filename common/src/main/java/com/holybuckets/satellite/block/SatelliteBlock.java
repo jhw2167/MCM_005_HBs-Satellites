@@ -47,14 +47,11 @@ public class SatelliteBlock extends Block implements EntityBlock {
     }
 
     public InteractionResult use(BlockState $$0, Level $$1, BlockPos $$2, Player p, InteractionHand hand, BlockHitResult hitResult) {
-        if ($$1.isClientSide) {
-            return InteractionResult.CONSUME;
-        } else {
-            BlockEntity be = $$1.getBlockEntity($$2);
-            if (be instanceof SatelliteBlockEntity sat) {
-                sat.use(p, hand, hitResult);
-                return InteractionResult.PASS;
-            }
+
+        BlockEntity be = $$1.getBlockEntity($$2);
+        if (be instanceof SatelliteBlockEntity sat) {
+            sat.use(p, hand, hitResult);
+            //return InteractionResult.PASS;
         }
         return InteractionResult.PASS;
     }
