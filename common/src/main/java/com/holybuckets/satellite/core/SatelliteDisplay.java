@@ -120,6 +120,7 @@ public class SatelliteDisplay {
 
     public void adjOrdinal(int dNS, int dEW) {
         if(noSource() || this.satellite == null) return;
+        if(dNS == 0 && dEW == 0) return;
         zOffset += dNS;
         xOffset += dEW;
         ChunkPos satellitePos = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
@@ -128,17 +129,18 @@ public class SatelliteDisplay {
     }
 
     private static int MAX_DEPTH = 4;
-    public void adjDepth(int delta) {
-         int temp = this.depth + delta;
-         if(temp < 1) {
-             depth = MAX_DEPTH;
-         } else {
-             this.depth = temp % (MAX_DEPTH + 1);
-         }
+    public void adjDisplayDepth(int dDepth) {
+        if(noSource() || this.satellite == null) return;
+        if(dDepth == 0) return;
+        this.depth += dDepth;
+        if(depth <= 0) depth = MAX_DEPTH;
+        if(depth > MAX_DEPTH) depth = 1;
         this.needsUpdate = true;
     }
 
     public void setDepth(int newDepth) {
+        if(noSource() || this.satellite == null) return;
+        if(newDepth == this.depth) return;
         if(newDepth < 1)
             newDepth = 1;
         if(newDepth > 4)
@@ -149,23 +151,20 @@ public class SatelliteDisplay {
 
     public void setCurrentSection(int section) {
         if( section < 0 ||  section >= maxSection-depth ) return;
+        if( section == this.currentSection ) return;
         this.currentSection = section;
         this.needsUpdate = true;
     }
 
     public void adjCurrentSection(int delta) {
+        if(noSource() || this.satellite == null) return;
+        if( delta == 0 ) return;
         int newSection = this.currentSection + delta;
         if( newSection < 0 ||  newSection+depth > maxSection ) return;
         this.currentSection = newSection;
         this.needsUpdate = true;
     }
 
-    public void adjDisplayDepth(int dDepth) {
-        this.depth += dDepth;
-        if(depth <= 0) depth = MAX_DEPTH;
-        if(depth > MAX_DEPTH) depth = 1;
-        this.needsUpdate = true;
-    }
 
     private void setPosition(Player p, BlockHitResult res)
     {

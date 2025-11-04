@@ -120,15 +120,29 @@ public class SatelliteManager {
         return satellites.get(colorId);
     }
 
+    /**
+     * Removes any key with this satellite and adds new entry. Does not replace existing colorId entries.
+     * @param colorId
+     * @param be
+     */
     public void put(int colorId, SatelliteBlockEntity be) {
         if(be == null) return;
+        if(satellites.containsKey(colorId)) return;
+
+        List<Integer> colors = new ArrayList<>(satellites.keySet());
+        for(int id : colors) {
+            if(satellites.get(id) == be) {
+                satellites.remove(id);
+            }
+        }
         satellites.putIfAbsent(colorId, be);
         be.setLevelChunk(getChunk(be.getLevel(), be.getBlockPos()));
     }
 
-    public void remove(int colorId) {
+    public void remove(int colorId, SatelliteBlockEntity be) {
         if(colorId < 0) return;
-        satellites.remove(colorId);
+        if(satellites.get(colorId) == be)
+            satellites.remove(colorId);
     }
 
     public SatelliteDisplay generateSource(SatelliteBlockEntity satellite,
@@ -280,7 +294,7 @@ public class SatelliteManager {
         if(chunk == null) return false;
 
         int colorId = be.getColorId();
-        remove(colorId);
+        remove(colorId, be);
 
         CompoundTag nbt = be.saveWithFullMetadata();
         BlockState state = level.getBlockState(oldPos);

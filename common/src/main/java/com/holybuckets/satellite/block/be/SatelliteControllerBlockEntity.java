@@ -272,7 +272,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         if(this.linkedSatellite != manager.get(this.colorId)) {
             this.linkedSatellite = manager.get(this.colorId);
-            this.isDisplayOn = true;
+            this.toggleOnOff(true);
             SatelliteDisplay source = manager.generateSource(this.linkedSatellite, this);
             setSource(source, true);
         }

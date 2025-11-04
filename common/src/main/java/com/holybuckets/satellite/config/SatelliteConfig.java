@@ -32,7 +32,7 @@ public class SatelliteConfig {
         public Set<String> satelliteStructureTargetOptions = Set.of("minecraft:desert_pyramid", "minecraft:jungle_pyramid",
          "minecraft:desert_outpost", "minecraft:pillager_outpost", "minecraft:mansion",
           "minecraft:village_plains", "minecraft:village_desert", "minecraft:village_savanna", "minecraft:village_snowy", "minecraft:village_taiga",
-           "minecraft:swamp_hut", "minecraft:shipwreck", "minecraft:igloo");
+           "minecraft:swamp_hut", "minecraft:igloo");
 
     }
 

@@ -54,23 +54,19 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         }
 
 
-        if(isClientSide || isTopFaceUsed) return;
+        if(isTopFaceUsed) return;
 
 
         int cmd = 16;
         if (cmd == 16)
         {
             //If player is holding wool in their hand, set tot that color
+            int color = (colorId + 1) % SatelliteManager.totalIds();
             if( p.getItemInHand(hand).getItem() instanceof BlockItem bi ) {
                 Block b = bi.getBlock();
-                int color = manager.getColorId(b);
-                if(color >= 0) {
-                    this.setColorId( color );
-                }
-            } else {    //Otherwise, cycle to next color
-                this.setColorId( (this.colorId + 1) % SatelliteManager.totalIds() );
+                color = manager.getColorId(b);
             }
-
+            setColorId(color);
         }
     }
 
@@ -79,9 +75,14 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         return colorId;
     }
 
+    /**
+     * Forcibly remove any satellite associated with the old colorId from the manager, then set to new colorId
+     * @param colorId
+     */
     @Override
     public void setColorId(int colorId) {
-        manager.remove(this.colorId);
+        if(colorId < 0 || colorId >= SatelliteManager.totalIds()) return;
+        manager.remove(this.colorId, this);
         this.colorId = colorId;
         this.markUpdated();
     }
@@ -109,7 +110,7 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
 
 
     public void onDestroyed() {
-        manager.remove(this.colorId);
+        manager.remove(this.colorId, this);
     }
 
     @Override
