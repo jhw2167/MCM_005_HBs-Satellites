@@ -20,6 +20,7 @@ import net.blay09.mods.balm.api.client.BalmClient;
 import net.blay09.mods.balm.api.event.EventPriority;
 import net.blay09.mods.balm.api.event.client.ConnectedToServerEvent;
 import net.blay09.mods.balm.api.event.client.DisconnectedFromServerEvent;
+import net.blay09.mods.balm.api.event.client.screen.ScreenDrawEvent;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -46,6 +47,14 @@ public class CommonClassClient implements CommonProxy {
         ClientEventRegistrar registrar = ClientEventRegistrar.getInstance();
         registrar.registerOnConnectedToServer(CommonClassClient::onConnectedToServer, EventPriority.Highest);
         registrar.registerOnDisconnectedFromServer(CommonClassClient::onDisconnectedFromServer, EventPriority.Lowest);
+        registrar.registerOnScreenDrawPost(event -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.gameRenderer != null && mc.gameRenderer.getMainCamera() != null) {
+                Camera camera = mc.gameRenderer.getMainCamera();
+                PoseStack poseStack = event.getPoseStack();
+                renderUiSphere(camera, poseStack);
+            }
+        });
         SatelliteDisplayClient.init(registrar);
 
         //ClientBalmEventRegister.registerEvents();
