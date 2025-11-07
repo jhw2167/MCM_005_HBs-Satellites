@@ -5,6 +5,8 @@ package com.holybuckets.satellite.command;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.event.CommandRegistry;
 import com.holybuckets.satellite.LoggerProject;
+import com.holybuckets.satellite.core.SatelliteManager;
+import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -19,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
+import java.util.Set;
 
 public class CommandList {
 
@@ -29,6 +32,8 @@ public class CommandList {
         CommandRegistry.register(LocateClusters::noArgs);
         CommandRegistry.register(LocateClusters::limitCount);
         CommandRegistry.register(LocateClusters::limitCountSpecifyBlockType);
+        CommandRegistry.register(GetAllSatellites::command);
+        CommandRegistry.register(GetAllChannels::command);
     }
 
     //**** STATIC UTILITY ****//
@@ -93,6 +98,99 @@ public class CommandList {
         }
 
 
+    }
+    //END COMMAND
+
+    //2. Get All Satellites
+    private static class GetAllSatellites
+    {
+        private static LiteralArgumentBuilder<CommandSourceStack> command() {
+            return Commands.literal(PREFIX)
+                .then(Commands.literal("getAllSatellites")
+                    .executes(context -> execute(context.getSource()))
+                );
+        }
+
+        private static int execute(CommandSourceStack source)
+        {
+            try {
+                if (source.getLevel() == null) {
+                    source.sendFailure(Component.literal("Command must be executed in a world"));
+                    return 0;
+                }
+
+                SatelliteManager manager = SatelliteManager.get(source.getLevel());
+                Set<SatelliteBlockEntity> satellites = manager.getAllSatellites();
+
+                if (satellites.isEmpty()) {
+                    source.sendSuccess(() -> Component.literal("No satellites found"), false);
+                    return 0;
+                }
+
+                source.sendSuccess(() -> Component.literal("Found " + satellites.size() + " satellites:"), false);
+                
+                for (SatelliteBlockEntity satellite : satellites) {
+                    BlockPos pos = satellite.getBlockPos();
+                    int colorId = satellite.getColorId();
+                    String posStr = posString(pos);
+                    source.sendSuccess(() -> Component.literal("  Satellite at " + posStr + " (ColorID: " + colorId + ")"), false);
+                }
+
+                return satellites.size();
+            } catch (Exception e) {
+                source.sendFailure(Component.literal("Error executing getAllSatellites: " + e.getMessage()));
+                return 0;
+            }
+        }
+    }
+    //END COMMAND
+
+    //3. Get All Channels
+    private static class GetAllChannels
+    {
+        private static LiteralArgumentBuilder<CommandSourceStack> command() {
+            return Commands.literal(PREFIX)
+                .then(Commands.literal("getAllChannels")
+                    .executes(context -> execute(context.getSource()))
+                );
+        }
+
+        private static int execute(CommandSourceStack source)
+        {
+            try {
+                if (source.getLevel() == null) {
+                    source.sendFailure(Component.literal("Command must be executed in a world"));
+                    return 0;
+                }
+
+                SatelliteManager manager = SatelliteManager.get(source.getLevel());
+                Set<SatelliteManager.SourceKey> channels = manager.getAllChannels();
+
+                if (channels.isEmpty()) {
+                    source.sendSuccess(() -> Component.literal("No active channels found"), false);
+                    return 0;
+                }
+
+                source.sendSuccess(() -> Component.literal("Found " + channels.size() + " active channels:"), false);
+                
+                for (SatelliteManager.SourceKey channel : channels) {
+                    SatelliteBlockEntity satellite = channel.satellite;
+                    BlockPos satellitePos = satellite.getBlockPos();
+                    int colorId = satellite.getColorId();
+                    String satellitePosStr = posString(satellitePos);
+                    
+                    BlockPos controllerPos = channel.controller.getBlockPos();
+                    String controllerPosStr = posString(controllerPos);
+                    
+                    source.sendSuccess(() -> Component.literal("  Channel " + colorId + ": Satellite at " + satellitePosStr + " -> Controller at " + controllerPosStr), false);
+                }
+
+                return channels.size();
+            } catch (Exception e) {
+                source.sendFailure(Component.literal("Error executing getAllChannels: " + e.getMessage()));
+                return 0;
+            }
+        }
     }
     //END COMMAND
 
