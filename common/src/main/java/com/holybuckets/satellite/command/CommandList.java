@@ -31,6 +31,12 @@ public class CommandList {
         CommandRegistry.register(LocateClusters::limitCountSpecifyBlockType);
     }
 
+    //**** STATIC UTILITY ****//
+
+    static String posString(BlockPos pos) {
+        return HBUtil.BlockUtil.positionToString(pos);
+    }
+
     //1. Locate Clusters
     private static class LocateClusters
     {
