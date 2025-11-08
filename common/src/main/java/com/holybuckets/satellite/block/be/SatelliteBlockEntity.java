@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.CommonProxy;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
@@ -49,8 +50,7 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         boolean isClientSide = this.level.isClientSide;
         boolean isTopFaceUsed = res.getDirection().equals(net.minecraft.core.Direction.UP);
         if(isClientSide && isTopFaceUsed) {
-            ((CommonProxy) Balm.sidedProxy( "com.holybuckets.satellite.CommonClass", "com.holybuckets.satellite.client.CommonClassClient")
-                .get()).openScreen(this);
+            CommonClass.clientSideActions(this);
         }
 
 
