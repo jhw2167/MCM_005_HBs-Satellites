@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "hbs_satellites:block/frame_default",
+    "front": "hbs_satellites:block/heigth_controller_on",
+    "side": "hbs_satellites:block/frame_default"
+  }
+}

@@ -13,6 +13,11 @@ public class ModBlockEntities {
     public static DeferredObject<BlockEntityType<SatelliteBlockEntity>> satelliteBlockEntity;
     public static DeferredObject<BlockEntityType<SatelliteControllerBlockEntity>> satelliteControllerBlockEntity;
     public static DeferredObject<BlockEntityType<SatelliteDisplayBlockEntity>> satelliteDisplayBlockEntity;
+    public static DeferredObject<BlockEntityType<EmptyControllerBlockEntity>> emptyControllerBlockEntity;
+    public static DeferredObject<BlockEntityType<HeightControllerBlockEntity>> heightControllerBlockEntity;
+    public static DeferredObject<BlockEntityType<PositionControllerBlockEntity>> positionControllerBlockEntity;
+    public static DeferredObject<BlockEntityType<TargetControllerBlockEntity>> targetControllerBlockEntity;
+    public static DeferredObject<BlockEntityType<UpgradeControllerBlockEntity>> upgradeControllerBlockEntity;
 
     public static void initialize(BalmBlockEntities blockEntities)
     {
@@ -27,6 +32,26 @@ public class ModBlockEntities {
         satelliteDisplayBlockEntity =  blockEntities.registerBlockEntity(
             id("satellite_display_block_entity") , SatelliteDisplayBlockEntity::new,
             () -> new Block[]{ModBlocks.satelliteDisplayBlock} );
+
+        emptyControllerBlockEntity = blockEntities.registerBlockEntity(
+            id("empty_controller_block_entity"), EmptyControllerBlockEntity::new,
+            () -> new Block[]{ModBlocks.emptyControllerBlock});
+
+        heightControllerBlockEntity = blockEntities.registerBlockEntity(
+            id("height_controller_block_entity"), HeightControllerBlockEntity::new,
+            () -> new Block[]{ModBlocks.heightControllerBlock});
+
+        positionControllerBlockEntity = blockEntities.registerBlockEntity(
+            id("position_controller_block_entity"), PositionControllerBlockEntity::new,
+            () -> new Block[]{ModBlocks.positionControllerBlock});
+
+        targetControllerBlockEntity = blockEntities.registerBlockEntity(
+            id("target_controller_block_entity"), TargetControllerBlockEntity::new,
+            () -> new Block[]{ModBlocks.targetControllerBlock});
+
+        upgradeControllerBlockEntity = blockEntities.registerBlockEntity(
+            id("upgrade_controller_block_entity"), UpgradeControllerBlockEntity::new,
+            () -> new Block[]{ModBlocks.upgradeControllerBlock});
 
     }
 

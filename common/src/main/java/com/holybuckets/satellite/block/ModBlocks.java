@@ -17,6 +17,11 @@ public class ModBlocks {
     public static Block holoLightBlock;
     public static Block holoDarkBlock;
     public static Block holoAirBlock;
+    public static Block emptyControllerBlock;
+    public static Block heightControllerBlock;
+    public static Block positionControllerBlock;
+    public static Block targetControllerBlock;
+    public static Block upgradeControllerBlock;
     //public static Block[] scopedSharestones = new SharestoneBlock[DyeColor.values().length];
 
     public static void initialize(BalmBlocks blocks) {
@@ -28,6 +33,11 @@ public class ModBlocks {
         blocks.register(() -> satelliteBlock = new SatelliteBlock(), () -> itemBlock(satelliteBlock), id("satellite_block"));
         blocks.register(() -> satelliteControllerBlock = new SatelliteControllerBlock(), () -> itemBlock(satelliteControllerBlock), id("satellite_controller_block"));
         blocks.register(() -> satelliteDisplayBlock = new SatelliteDisplayBlock(), () -> itemBlock(satelliteDisplayBlock), id("satellite_display_block"));
+        blocks.register(() -> emptyControllerBlock = new EmptyControllerBlock(), () -> itemBlock(emptyControllerBlock), id("empty_controller_block"));
+        blocks.register(() -> heightControllerBlock = new HeightControllerBlock(), () -> itemBlock(heightControllerBlock), id("height_controller_block"));
+        blocks.register(() -> positionControllerBlock = new PositionControllerBlock(), () -> itemBlock(positionControllerBlock), id("position_controller_block"));
+        blocks.register(() -> targetControllerBlock = new TargetControllerBlock(), () -> itemBlock(targetControllerBlock), id("target_controller_block"));
+        blocks.register(() -> upgradeControllerBlock = new UpgradeControllerBlock(), () -> itemBlock(upgradeControllerBlock), id("upgrade_controller_block"));
 
         /*
         DyeColor[] colors = DyeColor.values();

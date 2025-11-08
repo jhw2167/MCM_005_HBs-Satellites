@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,powered=false": {
+      "model": "hbs_satellites:block/upgrade_controller_block"
+    },
+    "facing=south,powered=false": {
+      "model": "hbs_satellites:block/upgrade_controller_block",
+      "y": 180
+    },
+    "facing=west,powered=false": {
+      "model": "hbs_satellites:block/upgrade_controller_block",
+      "y": 270
+    },
+    "facing=east,powered=false": {
+      "model": "hbs_satellites:block/upgrade_controller_block",
+      "y": 90
+    },
+    "facing=north,powered=true": {
+      "model": "hbs_satellites:block/upgrade_controller_block_on"
+    },
+    "facing=south,powered=true": {
+      "model": "hbs_satellites:block/upgrade_controller_block_on",
+      "y":180
+    },
+    "facing=west,powered=true": {
+      "model": "hbs_satellites:block/upgrade_controller_block_on",
+      "y": 270
+    },
+    "facing=east,powered=true": {
+      "model": "hbs_satellites:block/upgrade_controller_block_on",
+      "y": 90
+    }
+  }
+}
