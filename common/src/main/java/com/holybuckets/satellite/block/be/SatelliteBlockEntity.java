@@ -200,56 +200,67 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
 
     // Package-private subclass that implements ISatelliteBE for screen usage
     static class ScreenSatelliteWrapper implements ISatelliteBE {
-        private final SatelliteBlockEntity satellite;
+        private int colorId;
+        private BlockPos targetPos;
+        private BlockPos blockPos;
+        private boolean traveling;
+        private Level level;
         
-        ScreenSatelliteWrapper(SatelliteBlockEntity satellite) {
-            this.satellite = satellite;
+        ScreenSatelliteWrapper(int colorId, BlockPos targetPos, BlockPos blockPos, boolean traveling, Level level) {
+            this.colorId = colorId;
+            this.targetPos = targetPos;
+            this.blockPos = blockPos;
+            this.traveling = traveling;
+            this.level = level;
         }
         
         @Override
         public int getColorId() {
-            return satellite.getColorId();
+            return colorId;
         }
         
         @Override
         public void setColorId(int colorId) {
-            satellite.setColorId(colorId);
+            this.colorId = colorId;
         }
         
         @Override
         public BlockPos getTargetPos() {
-            return satellite.getTargetPos();
+            return targetPos;
         }
         
         @Override
         public void setTargetPos(BlockPos targetPos) {
-            satellite.setTargetPos(targetPos);
+            this.targetPos = targetPos;
         }
         
         @Override
         public BlockPos getBlockPos() {
-            return satellite.getBlockPos();
+            return blockPos;
         }
         
         @Override
         public boolean isTraveling() {
-            return satellite.isTraveling();
+            return traveling;
         }
         
         @Override
         public void launch(BlockPos targetPos) {
-            satellite.launch(targetPos);
+            if (targetPos != null) {
+                this.targetPos = targetPos;
+            }
+            this.traveling = true;
         }
         
         @Override
         public Level getLevel() {
-            return satellite.getLevel();
+            return level;
         }
     }
     
     // Method to create wrapper for screen usage
     public ISatelliteBE createScreenWrapper() {
-        return new ScreenSatelliteWrapper(this);
+        return new ScreenSatelliteWrapper(this.colorId, this.targetPos, this.getBlockPos(), this.traveling, this.level);
     }
 
 

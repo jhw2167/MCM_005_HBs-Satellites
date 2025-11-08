@@ -217,8 +217,11 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         ISatelliteBE clone = new SatelliteBlockEntity.ScreenSatelliteWrapper(
             this.linkedSatellite.getColorId(),
             this.linkedSatellite.getTargetPos(),
-            this.linkedSatellite.isTraveling()
+            this.linkedSatellite.getBlockPos(),
+            this.linkedSatellite.isTraveling(),
+            this.level
         );
+        return clone;
     }
 
     @Override
