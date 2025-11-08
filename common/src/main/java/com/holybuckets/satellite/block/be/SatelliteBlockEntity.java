@@ -50,7 +50,7 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         boolean isClientSide = this.level.isClientSide;
         boolean isTopFaceUsed = res.getDirection().equals(net.minecraft.core.Direction.UP);
         if(isClientSide && isTopFaceUsed) {
-            CommonClass.clientSideActions(this);
+            CommonClass.clientSideActions(this.level, this);
         }
 
 

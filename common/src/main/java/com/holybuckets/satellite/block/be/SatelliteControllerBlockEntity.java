@@ -2,12 +2,16 @@ package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.console.Messager;
+import com.holybuckets.satellite.CommonClass;
+import com.holybuckets.satellite.CommonProxy;
 import com.holybuckets.satellite.block.SatelliteControllerBlock;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteManager;
+import net.blay09.mods.balm.api.Balm;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -28,6 +32,7 @@ import net.minecraft.world.phys.HitResult;
 
 import java.util.*;
 
+import static com.holybuckets.satellite.CommonClass.clientSideActions;
 import static com.holybuckets.satellite.SatelliteMain.chiselBitsApi;
 
 public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE
@@ -104,6 +109,22 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.markUpdated();
     }
 
+    public SatelliteBlockEntity getLinkedSatellite() {
+        return this.linkedSatellite;
+    }
+
+    public void setLinkedSatellite(SatelliteBlockEntity satBE) {
+        this.linkedSatellite = satBE;
+        if(satBE != null) {
+            this.satelliteTargetPos = satBE.getBlockPos();
+        }
+    }
+
+    public BlockPos getSatelliteTargetPos() {
+        return this.satelliteTargetPos;
+    }
+
+
 
     @Override
     public void setSource(SatelliteDisplay source, boolean forceDisplayUpdates)
@@ -179,10 +200,25 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         } else if( cmd < 7) {   //adjust depth 5 - increase depth, 6 - decrease depth
             //this.source.adjCurrentSection( (cmd == 5 ? 1 : -1) );
             commands.dSection += (cmd == 5 ? 1 : -1);
-        } else if ( cmd < 9) {   //adjust display height
+        } else if ( cmd < 9) {   //adjust display height 7 - inc, 8 - dec
             commands.dDepth += (cmd == 7 ? 1 : -1);
+        } else if( cmd == 9) {  //select block
+            if(this.level.isClientSide)
+                CommonClass.clientSideActions(this.level, this.clientCloneLinkedSatellite());
         }
 
+    }
+
+    private ISatelliteBE clientCloneLinkedSatellite()
+    {
+        if(this.level == null || !this.level.isClientSide) return null;
+        if(this.linkedSatellite == null) return null;
+
+        ISatelliteBE clone = new SatelliteBlockEntity.ScreenSatelliteWrapper(
+            this.linkedSatellite.getColorId(),
+            this.linkedSatellite.getTargetPos(),
+            this.linkedSatellite.isTraveling()
+        );
     }
 
     @Override
@@ -196,7 +232,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     {
         if(isDisplayOn == toggle) return;
         isDisplayOn = toggle;
-        if(!isDisplayOn) turnOff();
+        if(isDisplayOn)
+            { if(source != null) source.resetChunkSection(); }
+        else
+            { turnOff(); }
         this.markUpdated();
         this.updateBlockState();
     }
@@ -271,7 +310,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         }
 
         if(this.linkedSatellite != manager.get(this.colorId)) {
-            this.linkedSatellite = manager.get(this.colorId);
+            linkedSatellite = manager.get(this.colorId);
+            if(linkedSatellite == null) {
+                toggleOnOff(false);
+                setSource(source, true);
+                propagateToNeighbors();
+                return;
+            }
             this.toggleOnOff(true);
             SatelliteDisplay source = manager.generateSource(this.linkedSatellite, this);
             setSource(source, true);
