@@ -91,21 +91,25 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         this.currentChunk = chunk;
     }
 
+    @Override
     public void setTargetPos(BlockPos blockPos) {
         int y = Math.max(blockPos.getY(), SatelliteMain.CONFIG.satelliteConfig.minSatelliteWorkingHeight);
         this.targetPos = blockPos.atY(y);
     }
 
+    @Override
     public void launch(BlockPos pos) {
         if(pos != null) setTargetPos(pos);
         this.traveling = true;
         this.ticks = (TICKS_PER_MINUTE-1);
     }
 
+    @Override
     public BlockPos getTargetPos() {
         return targetPos;
     }
 
+    @Override
     public boolean isTraveling() { return traveling; }
 
 
@@ -192,6 +196,60 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         }
         */
 
+    }
+
+    // Package-private subclass that implements ISatelliteBE for screen usage
+    static class ScreenSatelliteWrapper implements ISatelliteBE {
+        private final SatelliteBlockEntity satellite;
+        
+        ScreenSatelliteWrapper(SatelliteBlockEntity satellite) {
+            this.satellite = satellite;
+        }
+        
+        @Override
+        public int getColorId() {
+            return satellite.getColorId();
+        }
+        
+        @Override
+        public void setColorId(int colorId) {
+            satellite.setColorId(colorId);
+        }
+        
+        @Override
+        public BlockPos getTargetPos() {
+            return satellite.getTargetPos();
+        }
+        
+        @Override
+        public void setTargetPos(BlockPos targetPos) {
+            satellite.setTargetPos(targetPos);
+        }
+        
+        @Override
+        public BlockPos getBlockPos() {
+            return satellite.getBlockPos();
+        }
+        
+        @Override
+        public boolean isTraveling() {
+            return satellite.isTraveling();
+        }
+        
+        @Override
+        public void launch(BlockPos targetPos) {
+            satellite.launch(targetPos);
+        }
+        
+        @Override
+        public Level getLevel() {
+            return satellite.getLevel();
+        }
+    }
+    
+    // Method to create wrapper for screen usage
+    public ISatelliteBE createScreenWrapper() {
+        return new ScreenSatelliteWrapper(this);
     }
 
 
