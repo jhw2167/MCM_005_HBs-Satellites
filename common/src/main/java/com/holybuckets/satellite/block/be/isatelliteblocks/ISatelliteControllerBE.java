@@ -25,6 +25,35 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
     float ORDINAL_COORD_BUFFER_V = 0.25f;
     float ORDINAL_COORD_BUFFER_H = 0.25f;
 
+    // Position Controller constants
+    float POSITION_MIDDLE_LEFT = 0.2f;
+    float POSITION_MIDDLE_RIGHT = 0.8f;
+    float POSITION_MIDDLE_TOP = 0.8f;
+    float POSITION_MIDDLE_BOTTOM = 0.2f;
+    float POSITION_ARROW_SIZE = 0.15f;
+
+    // Height Controller constants
+    float HEIGHT_LEFT_COLUMN = 0.25f;
+    float HEIGHT_RIGHT_COLUMN = 0.75f;
+    float HEIGHT_COLUMN_WIDTH = 0.2f;
+    float HEIGHT_TOP_ARROW = 0.75f;
+    float HEIGHT_BOTTOM_ARROW = 0.25f;
+    float HEIGHT_ARROW_HEIGHT = 0.15f;
+
+    // Target Controller constants
+    float TARGET_BOTTOM_ROW = 0.2f;
+    float TARGET_LEFT_BUTTON = 0.25f;
+    float TARGET_RIGHT_BUTTON = 0.75f;
+    float TARGET_BUTTON_WIDTH = 0.2f;
+
+    // Upgrade Controller constants
+    float UPGRADE_BOTTOM_ROW = 0.2f;
+    float UPGRADE_LEFT_BUTTON = 0.25f;
+    float UPGRADE_RIGHT_BUTTON = 0.75f;
+    float UPGRADE_BUTTON_WIDTH = 0.2f;
+    float UPGRADE_TOP_SECTION = 0.4f;
+    float UPGRADE_QUAD_SPLIT = 0.5f;
+
     /**
      * Return int command value based off where the block was struck
      *  - -1 = no command
@@ -139,6 +168,227 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
             }
 
 
+        }
+
+        return cmd;
+    }
+
+    /**
+     * Position Controller - 4 ordinal arrows in middle left, right, top, bottom
+     * Returns commands 1-4 for ordinal movement
+     */
+    static int calculateHitCommandPosition(BlockHitResult res) {
+        int cmd = -1;
+        BlockPos p = res.getBlockPos();
+        Vec3 blockCoord = res.getLocation().subtract(p.getX(), p.getY(), p.getZ());
+        Direction blockFacing = res.getDirection();
+        if(blockFacing == Direction.UP || blockFacing == Direction.DOWN) return cmd;
+
+        double xz;
+        double y = blockCoord.y;
+
+        // Map coordinates correctly based on facing direction
+        if (blockFacing == Direction.NORTH) {
+            xz = 1.0 - blockCoord.x;
+        } else if (blockFacing == Direction.SOUTH) {
+            xz = blockCoord.x;
+        } else if (blockFacing == Direction.WEST) {
+            xz = blockCoord.z;
+        } else { // EAST
+            xz = 1.0 - blockCoord.z;
+        }
+
+        // Check for middle arrows
+        boolean inMiddleX = (xz > (0.5 - POSITION_ARROW_SIZE/2)) && (xz < (0.5 + POSITION_ARROW_SIZE/2));
+        boolean inMiddleY = (y > (0.5 - POSITION_ARROW_SIZE/2)) && (y < (0.5 + POSITION_ARROW_SIZE/2));
+
+        int input = 0;
+        
+        // Top arrow
+        if (inMiddleX && y > POSITION_MIDDLE_TOP - POSITION_ARROW_SIZE/2 && y < POSITION_MIDDLE_TOP + POSITION_ARROW_SIZE/2) {
+            input = 1;
+        }
+        // Bottom arrow
+        else if (inMiddleX && y > POSITION_MIDDLE_BOTTOM - POSITION_ARROW_SIZE/2 && y < POSITION_MIDDLE_BOTTOM + POSITION_ARROW_SIZE/2) {
+            input = 2;
+        }
+        // Left arrow
+        else if (inMiddleY && xz > POSITION_MIDDLE_LEFT - POSITION_ARROW_SIZE/2 && xz < POSITION_MIDDLE_LEFT + POSITION_ARROW_SIZE/2) {
+            input = 3;
+        }
+        // Right arrow
+        else if (inMiddleY && xz > POSITION_MIDDLE_RIGHT - POSITION_ARROW_SIZE/2 && xz < POSITION_MIDDLE_RIGHT + POSITION_ARROW_SIZE/2) {
+            input = 4;
+        }
+
+        // Map input to directional commands based on block facing
+        if (blockFacing == Direction.NORTH) {
+            if(input == 1) cmd = 2; // Up arrow moves South
+            else if(input == 2) cmd = 1; // Down arrow moves North
+            else if(input == 3) cmd = 4; // Left moves East
+            else if(input == 4) cmd = 3; // Right moves West
+        } else if (blockFacing == Direction.SOUTH) {
+            if(input == 1) cmd = 1; // Up arrow moves North
+            else if(input == 2) cmd = 2; // Down arrow moves South
+            else if(input == 3) cmd = 3; // Left moves West
+            else if(input == 4) cmd = 4; // Right moves East
+        } else if (blockFacing == Direction.EAST) {
+            if(input == 1) cmd = 3; // Up arrow moves West
+            else if(input == 2) cmd = 4; // Down arrow moves East
+            else if(input == 3) cmd = 1; // Left moves North
+            else if(input == 4) cmd = 2; // Right moves South
+        } else if (blockFacing == Direction.WEST) {
+            if(input == 1) cmd = 4; // Up arrow moves East
+            else if(input == 2) cmd = 3; // Down arrow moves West
+            else if(input == 3) cmd = 2; // Left moves South
+            else if(input == 4) cmd = 1; // Right moves North
+        }
+
+        return cmd;
+    }
+
+    /**
+     * Height Controller - Two columns with arrows, left adjusts section depth (5,6), right adjusts height (7,8)
+     */
+    static int calculateHitCommandHeight(BlockHitResult res) {
+        int cmd = -1;
+        BlockPos p = res.getBlockPos();
+        Vec3 blockCoord = res.getLocation().subtract(p.getX(), p.getY(), p.getZ());
+        Direction blockFacing = res.getDirection();
+        if(blockFacing == Direction.UP || blockFacing == Direction.DOWN) return cmd;
+
+        double xz;
+        double y = blockCoord.y;
+
+        // Map coordinates correctly based on facing direction
+        if (blockFacing == Direction.NORTH) {
+            xz = 1.0 - blockCoord.x;
+        } else if (blockFacing == Direction.SOUTH) {
+            xz = blockCoord.x;
+        } else if (blockFacing == Direction.WEST) {
+            xz = blockCoord.z;
+        } else { // EAST
+            xz = 1.0 - blockCoord.z;
+        }
+
+        // Check left column (section depth adjustment)
+        if (xz > (HEIGHT_LEFT_COLUMN - HEIGHT_COLUMN_WIDTH/2) && xz < (HEIGHT_LEFT_COLUMN + HEIGHT_COLUMN_WIDTH/2)) {
+            // Top arrow - increase section depth
+            if (y > (HEIGHT_TOP_ARROW - HEIGHT_ARROW_HEIGHT/2) && y < (HEIGHT_TOP_ARROW + HEIGHT_ARROW_HEIGHT/2)) {
+                cmd = 5;
+            }
+            // Bottom arrow - decrease section depth
+            else if (y > (HEIGHT_BOTTOM_ARROW - HEIGHT_ARROW_HEIGHT/2) && y < (HEIGHT_BOTTOM_ARROW + HEIGHT_ARROW_HEIGHT/2)) {
+                cmd = 6;
+            }
+        }
+        // Check right column (height adjustment)
+        else if (xz > (HEIGHT_RIGHT_COLUMN - HEIGHT_COLUMN_WIDTH/2) && xz < (HEIGHT_RIGHT_COLUMN + HEIGHT_COLUMN_WIDTH/2)) {
+            // Top arrow - increase height
+            if (y > (HEIGHT_TOP_ARROW - HEIGHT_ARROW_HEIGHT/2) && y < (HEIGHT_TOP_ARROW + HEIGHT_ARROW_HEIGHT/2)) {
+                cmd = 7;
+            }
+            // Bottom arrow - decrease height
+            else if (y > (HEIGHT_BOTTOM_ARROW - HEIGHT_ARROW_HEIGHT/2) && y < (HEIGHT_BOTTOM_ARROW + HEIGHT_ARROW_HEIGHT/2)) {
+                cmd = 8;
+            }
+        }
+
+        return cmd;
+    }
+
+    /**
+     * Target Controller - Two buttons on bottom row, left returns 10, right returns 11
+     */
+    static int calculateHitCommandTarget(BlockHitResult res) {
+        int cmd = -1;
+        BlockPos p = res.getBlockPos();
+        Vec3 blockCoord = res.getLocation().subtract(p.getX(), p.getY(), p.getZ());
+        Direction blockFacing = res.getDirection();
+        if(blockFacing == Direction.UP || blockFacing == Direction.DOWN) return cmd;
+
+        double xz;
+        double y = blockCoord.y;
+
+        // Map coordinates correctly based on facing direction
+        if (blockFacing == Direction.NORTH) {
+            xz = 1.0 - blockCoord.x;
+        } else if (blockFacing == Direction.SOUTH) {
+            xz = blockCoord.x;
+        } else if (blockFacing == Direction.WEST) {
+            xz = blockCoord.z;
+        } else { // EAST
+            xz = 1.0 - blockCoord.z;
+        }
+
+        // Check if in bottom row
+        if (y < TARGET_BOTTOM_ROW) {
+            // Left button
+            if (xz > (TARGET_LEFT_BUTTON - TARGET_BUTTON_WIDTH/2) && xz < (TARGET_LEFT_BUTTON + TARGET_BUTTON_WIDTH/2)) {
+                cmd = 10;
+            }
+            // Right button
+            else if (xz > (TARGET_RIGHT_BUTTON - TARGET_BUTTON_WIDTH/2) && xz < (TARGET_RIGHT_BUTTON + TARGET_BUTTON_WIDTH/2)) {
+                cmd = 11;
+            }
+        }
+
+        return cmd;
+    }
+
+    /**
+     * Upgrade Controller - Bottom row with on/off and color controls, top section with 4 quadrants (12-15)
+     */
+    static int calculateHitCommandUpgrade(BlockHitResult res) {
+        int cmd = -1;
+        BlockPos p = res.getBlockPos();
+        Vec3 blockCoord = res.getLocation().subtract(p.getX(), p.getY(), p.getZ());
+        Direction blockFacing = res.getDirection();
+        if(blockFacing == Direction.UP || blockFacing == Direction.DOWN) return cmd;
+
+        double xz;
+        double y = blockCoord.y;
+
+        // Map coordinates correctly based on facing direction
+        if (blockFacing == Direction.NORTH) {
+            xz = 1.0 - blockCoord.x;
+        } else if (blockFacing == Direction.SOUTH) {
+            xz = blockCoord.x;
+        } else if (blockFacing == Direction.WEST) {
+            xz = blockCoord.z;
+        } else { // EAST
+            xz = 1.0 - blockCoord.z;
+        }
+
+        // Check bottom row
+        if (y < UPGRADE_BOTTOM_ROW) {
+            // Left button - on/off toggle
+            if (xz > (UPGRADE_LEFT_BUTTON - UPGRADE_BUTTON_WIDTH/2) && xz < (UPGRADE_LEFT_BUTTON + UPGRADE_BUTTON_WIDTH/2)) {
+                cmd = 0; // Toggle on/off
+            }
+            // Right button - wool color
+            else if (xz > (UPGRADE_RIGHT_BUTTON - UPGRADE_BUTTON_WIDTH/2) && xz < (UPGRADE_RIGHT_BUTTON + UPGRADE_BUTTON_WIDTH/2)) {
+                cmd = 16; // Change wool color
+            }
+        }
+        // Check top section (4 quadrants)
+        else if (y > UPGRADE_TOP_SECTION) {
+            // Top-left quadrant
+            if (xz < UPGRADE_QUAD_SPLIT && y > (UPGRADE_TOP_SECTION + (1.0 - UPGRADE_TOP_SECTION) * UPGRADE_QUAD_SPLIT)) {
+                cmd = 12;
+            }
+            // Top-right quadrant
+            else if (xz > UPGRADE_QUAD_SPLIT && y > (UPGRADE_TOP_SECTION + (1.0 - UPGRADE_TOP_SECTION) * UPGRADE_QUAD_SPLIT)) {
+                cmd = 13;
+            }
+            // Bottom-left quadrant
+            else if (xz < UPGRADE_QUAD_SPLIT && y < (UPGRADE_TOP_SECTION + (1.0 - UPGRADE_TOP_SECTION) * UPGRADE_QUAD_SPLIT)) {
+                cmd = 14;
+            }
+            // Bottom-right quadrant
+            else if (xz > UPGRADE_QUAD_SPLIT && y < (UPGRADE_TOP_SECTION + (1.0 - UPGRADE_TOP_SECTION) * UPGRADE_QUAD_SPLIT)) {
+                cmd = 15;
+            }
         }
 
         return cmd;
