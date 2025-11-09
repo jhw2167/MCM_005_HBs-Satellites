@@ -26,7 +26,7 @@ import java.util.Set;
 public class CommandList {
 
     public static final String CLASS_ID = "033";
-    private static final String PREFIX = "hbTemples";
+    private static final String PREFIX = "hbSatellites";
 
     public static void register() {
         CommandRegistry.register(LocateClusters::noArgs);

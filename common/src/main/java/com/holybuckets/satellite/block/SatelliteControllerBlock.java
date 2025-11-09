@@ -70,20 +70,17 @@ public class SatelliteControllerBlock extends Block implements EntityBlock {
     }
 
     public InteractionResult use(BlockState $$0, Level $$1, BlockPos $$2, Player p, InteractionHand hand, BlockHitResult hitResult) {
-        if ($$1.isClientSide) {
-            return InteractionResult.CONSUME;
-        } else {
-            //If the iteraction was not on the front face, reject
-            Direction d = hitResult.getDirection();
-            Direction front = $$0.getValue(FACING);
-            if (d != front) { return InteractionResult.PASS; }
+        //If the iteraction was not on the front face, reject
+        Direction d = hitResult.getDirection();
+        Direction front = $$0.getValue(FACING);
+        if (d != front) { return InteractionResult.PASS; }
 
-            BlockEntity be = $$1.getBlockEntity($$2);
-            if (be instanceof SatelliteControllerBlockEntity controller) {
-                controller.use(p, hand, hitResult);
-                return InteractionResult.SUCCESS;
-            }
+        BlockEntity be = $$1.getBlockEntity($$2);
+        if (be instanceof SatelliteControllerBlockEntity controller) {
+            controller.use(p, hand, hitResult);
+            return InteractionResult.CONSUME;
         }
+
         return InteractionResult.PASS;
     }
 

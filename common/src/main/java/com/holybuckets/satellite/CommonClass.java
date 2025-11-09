@@ -1,9 +1,12 @@
 package com.holybuckets.satellite;
 
+import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.event.BalmEventRegister;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.ModBlockEntities;
+import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
+import com.holybuckets.satellite.command.CommandList;
 import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.item.ModItems;
 import com.holybuckets.satellite.menu.ModMenus;
@@ -16,6 +19,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -47,15 +51,19 @@ public class CommonClass implements CommonProxy {
         EventRegistrar reg = EventRegistrar.getInstance();
         SatelliteMain.init(reg);
         ModConfig.init(reg);
-
         BalmEventRegister.registerEvents();
+
+        CommandList.register();
         BalmEventRegister.registerCommands();
+
+
         ModBlocks.initialize(Balm.getBlocks());
         ModBlockEntities.initialize(Balm.getBlockEntities());
         ModItems.initialize(Balm.getItems());
         ModMenus.initialize(Balm.getMenus());
         ModParticles.initialize(Balm.getParticles());
         ModNetworking.initialize();
+
 
         isInitialized = true;
     }
@@ -96,5 +104,12 @@ public class CommonClass implements CommonProxy {
         else if( isViewingHoloBlock(level, bufferedResult) ) { hitResult1 = bufferedResult; }
         else return null;
         return hitResult1;
+    }
+
+    public static void clientSideActions(Level level, Object obj) {
+        if(obj == null) return;
+        if(!level.isClientSide()) return;
+        ((CommonProxy) Balm.sidedProxy( "com.holybuckets.satellite.CommonClass", "com.holybuckets.satellite.client.CommonClassClient")
+            .get()).openScreen(obj);
     }
 }

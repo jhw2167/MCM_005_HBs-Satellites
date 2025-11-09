@@ -3,6 +3,7 @@ package com.holybuckets.satellite.client.core;
 import com.holybuckets.foundation.client.ClientEventRegistrar;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.SatelliteMain;
+import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.client.CommonClassClient;
@@ -12,6 +13,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -29,6 +31,10 @@ public class SatelliteDisplayClient extends SatelliteDisplay {
     public SatelliteDisplayClient(Level level, SatelliteControllerBlockEntity controller) {
         super(level, controller);
         this.controller = controller;
+        BlockEntity satellite = level.getBlockEntity(controller.getSatelliteTargetPos());
+        if(satellite instanceof SatelliteBlockEntity satBE) {
+            controller.setLinkedSatellite( satBE );
+        }
         this.displayBlocks = new HashMap<>();
         this.holoBlocks = new LinkedHashSet<>();
         DISPLAYS.add(this);

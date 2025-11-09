@@ -51,7 +51,7 @@ public class SatelliteBlock extends Block implements EntityBlock {
         BlockEntity be = $$1.getBlockEntity($$2);
         if (be instanceof SatelliteBlockEntity sat) {
             sat.use(p, hand, hitResult);
-            //return InteractionResult.PASS;
+            return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;
     }

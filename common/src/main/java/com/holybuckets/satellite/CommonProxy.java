@@ -6,5 +6,5 @@ import org.slf4j.LoggerFactory;
 
 public interface CommonProxy {
 
-	default void openScreen(BlockEntity id) {}
+	default void openScreen(Object screenData) {}
 }

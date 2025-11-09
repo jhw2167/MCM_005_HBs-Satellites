@@ -22,7 +22,7 @@ public class ClientEventsForgeBus {
         Camera camera = event.getCamera();
 
         // Your rendering code here
-        CommonClassClient.renderUiSphere(camera, poseStack);
+        //CommonClassClient.renderUiSphere(camera, poseStack);
     }
 
 }

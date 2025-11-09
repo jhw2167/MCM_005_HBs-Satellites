@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class UpgradeControllerBlockEntity extends BlockEntity implements ISatelliteControllerBE {
+public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE {
     private int colorId = 0;
     private BlockPos uiPosition = BlockPos.ZERO;
 

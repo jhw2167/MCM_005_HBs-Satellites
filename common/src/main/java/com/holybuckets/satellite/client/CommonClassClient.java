@@ -2,11 +2,13 @@ package com.holybuckets.satellite.client;
 
 import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.foundation.client.ClientBalmEventRegister;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.CommonProxy;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.ModBlockEntities;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
 import com.holybuckets.satellite.client.screen.ModScreens;
 import com.holybuckets.satellite.client.screen.SatelliteScreen;
@@ -18,6 +20,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.blay09.mods.balm.api.client.BalmClient;
 import net.blay09.mods.balm.api.event.EventPriority;
+import net.blay09.mods.balm.api.event.client.BlockHighlightDrawEvent;
 import net.blay09.mods.balm.api.event.client.ConnectedToServerEvent;
 import net.blay09.mods.balm.api.event.client.DisconnectedFromServerEvent;
 import net.blay09.mods.balm.api.event.client.screen.ScreenDrawEvent;
@@ -36,6 +39,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import net.blay09.mods.balm.api.event.client.screen.ScreenDrawEvent;
 
 import static com.holybuckets.satellite.CommonClass.isViewingHoloBit;
 import static com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity.REACH_DIST_BLOCKS;
@@ -47,18 +51,10 @@ public class CommonClassClient implements CommonProxy {
         ClientEventRegistrar registrar = ClientEventRegistrar.getInstance();
         registrar.registerOnConnectedToServer(CommonClassClient::onConnectedToServer, EventPriority.Highest);
         registrar.registerOnDisconnectedFromServer(CommonClassClient::onDisconnectedFromServer, EventPriority.Lowest);
-        registrar.registerOnScreenDrawPost(event -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.gameRenderer != null && mc.gameRenderer.getMainCamera() != null) {
-                Camera camera = mc.gameRenderer.getMainCamera();
-                PoseStack poseStack = event.getPoseStack();
-                renderUiSphere(camera, poseStack);
-            }
-        });
+        registrar.registerOnBlockHighlightDraw(CommonClassClient::renderUiSphere, EventPriority.Normal);
         SatelliteDisplayClient.init(registrar);
 
-        //ClientBalmEventRegister.registerEvents();
-
+        ClientBalmEventRegister.registerEvents();
 
         ModRenderers.clientInitialize(BalmClient.getRenderers());
         ModScreens.clientInitialize(BalmClient.getScreens());
@@ -67,9 +63,9 @@ public class CommonClassClient implements CommonProxy {
 
 
     //Instance Proxy Methods
-    public void openScreen(BlockEntity be) {
-        if(be.getType().equals( ModBlockEntities.satelliteBlockEntity.get()) ) {
-            Minecraft.getInstance().setScreen( new SatelliteScreen( (SatelliteBlockEntity) be) );
+    public void openScreen(Object screenData) {
+        if( screenData instanceof ISatelliteBE be ){
+            Minecraft.getInstance().setScreen( new SatelliteScreen( be ) );
         }
     }
 
@@ -103,8 +99,10 @@ public class CommonClassClient implements CommonProxy {
     //Render
 
     //Rendering
-    public static void renderUiSphere(Camera camera, PoseStack poseStack)
+    public static void renderUiSphere(BlockHighlightDrawEvent event)
     {
+        Camera camera = event.getCamera();
+        PoseStack poseStack = event.getPoseStack();
         if (!(camera.getEntity() instanceof Player player)) {
             return;
         }

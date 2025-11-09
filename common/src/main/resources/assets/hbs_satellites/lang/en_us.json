@@ -12,5 +12,18 @@
   "block.hbs_satellites.satellite_controller_block": "Satellite Controller",
   "block.hbs_satellites.satellite_controller_block.desc": "Controls and manages satellite networks",
   "block.hbs_satellites.satellite_display_block": "Satellite Display",
-  "block.hbs_satellites.satellite_display_block.desc": "Displays holographic information from satellites"
+  "block.hbs_satellites.satellite_display_block.desc": "Displays holographic information from satellites",
+
+  "block.hbs_satellites.upgrade_controller_block": "Upgrade Controller",
+  "block.hbs_satellites.upgrade_controller_block.desc": "Manages upgrades for satellite systems",
+  "block.hbs_satellites.height_controller_block": "Height Controller",
+  "block.hbs_satellites.height_controller_block.desc": "Controls height and depth of Satellite Display",
+  "block.hbs_satellites.target_controller_block": "Target Controller",
+  "block.hbs_satellites.target_controller_block.desc": "Sets target coordinates for Satellite Display",
+  "block.hbs_satellites.color_controller_block": "Position Controller",
+  "block.hbs_satellites.color_controller_block.desc": "Adjusts ordinal position for Satellite Display",
+  "block.hbs_satellites.empty_controller_block": "Empty Controller",
+   "block.hbs_satellites.empty_controller_block.desc": "Placeholder controller block",
+
+  "itemGroup.hbs_satellites.hbs_satellites": "HB's Satellites"
 }

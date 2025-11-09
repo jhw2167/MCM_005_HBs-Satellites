@@ -42,8 +42,9 @@ import java.util.*;
 public class SatelliteManager {
 
     /** Maps colorId to satellite block entity */
-    private final IntObjectHashMap<SatelliteBlockEntity> satellites = new IntObjectHashMap<>(24);
-    private final Map<SourceKey, SatelliteDisplay> displaySources = new HashMap<>();
+    private final IntObjectHashMap<SatelliteBlockEntity> satellites;
+    private final HashSet<SatelliteBlockEntity> satellitePositions;
+    private final Map<SourceKey, SatelliteDisplay> displaySources;
 
     private final Long2ObjectMap<CachedChunkInfo> chunkCache = new Long2ObjectOpenHashMap<>(128);
     private static final int MAX_CHUNK_LIFETIME = 300; // 300 seconds
@@ -55,9 +56,9 @@ public class SatelliteManager {
 
     private static SatelliteManager CLIENT_MANAGER;
 
-    private static class SourceKey {
-        SatelliteBlockEntity satellite;
-        SatelliteControllerBlockEntity controller;
+    public static class SourceKey {
+        public SatelliteBlockEntity satellite;
+        public SatelliteControllerBlockEntity controller;
 
         SourceKey(SatelliteBlockEntity satellite, SatelliteControllerBlockEntity controller) {
             this.satellite = satellite;
@@ -93,6 +94,9 @@ public class SatelliteManager {
     public SatelliteManager(Level level) {
         this.level = level;
         this.isServerSide = !level.isClientSide();
+        this.satellites = new IntObjectHashMap<>(24);
+        this.satellitePositions = new HashSet<>(24);
+        this.displaySources = new HashMap<>();
     }
 
     public static void init(EventRegistrar reg) {
@@ -120,14 +124,24 @@ public class SatelliteManager {
         return satellites.get(colorId);
     }
 
+    public Set<SatelliteBlockEntity> getAllSatellites() {
+        return new HashSet<>(satellitePositions);
+    }
+
+    public Set<SourceKey> getAllChannels() {
+        return displaySources.keySet();
+    }
+
     /**
      * Removes any key with this satellite and adds new entry. Does not replace existing colorId entries.
      * @param colorId
      * @param be
      */
-    public void put(int colorId, SatelliteBlockEntity be) {
+    public void put(int colorId, SatelliteBlockEntity be)
+    {
         if(be == null) return;
-        if(satellites.containsKey(colorId)) return;
+        satellitePositions.add(be);
+        if(colorId < 0 || satellites.containsKey(colorId)) return;
 
         List<Integer> colors = new ArrayList<>(satellites.keySet());
         for(int id : colors) {
@@ -140,6 +154,8 @@ public class SatelliteManager {
     }
 
     public void remove(int colorId, SatelliteBlockEntity be) {
+        if(be == null) return;
+        satellitePositions.remove(be);
         if(colorId < 0) return;
         if(satellites.get(colorId) == be)
             satellites.remove(colorId);
@@ -299,6 +315,10 @@ public class SatelliteManager {
         CompoundTag nbt = be.saveWithFullMetadata();
         BlockState state = level.getBlockState(oldPos);
         level.removeBlock(oldPos, false);
+        //While there is an existing satellite in the targetPos, move up 16 blocks
+        while(level.getBlockEntity(targetPos) instanceof SatelliteBlockEntity) {
+            targetPos = targetPos.above(1);
+        }
         level.setBlock(targetPos, state, 3); // Flag 3 = notify + update
 
         BlockEntity newBE = level.getBlockEntity(targetPos);

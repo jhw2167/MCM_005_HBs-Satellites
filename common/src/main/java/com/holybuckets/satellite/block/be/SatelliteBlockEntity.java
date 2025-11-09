@@ -257,12 +257,6 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
             return level;
         }
     }
-    
-    // Method to create wrapper for screen usage
-    public ISatelliteBE createScreenWrapper() {
-        return new ScreenSatelliteWrapper(this.colorId, this.targetPos, this.getBlockPos(), this.traveling, this.level);
-    }
-
 
 
     //** Serialization

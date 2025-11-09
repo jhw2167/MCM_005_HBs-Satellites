@@ -41,6 +41,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     SatelliteManager manager;
     BlockPos uiTargetBlockPos;
     BlockPos satelliteTargetPos;
+    BlockPos satelliteTravelPos;
     SatelliteBlockEntity linkedSatellite;
     boolean forceDisplayUpdates;
     final Commands commands;
@@ -73,6 +74,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.forceDisplayUpdates = false;
         this.linkedSatellite = null;
         this.satelliteTargetPos = null;
+        this.satelliteTravelPos = null;
 
         commands = new Commands();
     }
@@ -215,10 +217,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         if(this.linkedSatellite == null) return null;
 
         ISatelliteBE clone = new SatelliteBlockEntity.ScreenSatelliteWrapper(
-            this.linkedSatellite.getColorId(),
-            this.linkedSatellite.getTargetPos(),
-            this.linkedSatellite.getBlockPos(),
-            this.linkedSatellite.isTraveling(),
+            this.getColorId(),
+            this.satelliteTravelPos,
+            this.getSatelliteTargetPos(),
+            this.satelliteTravelPos != null,
             this.level
         );
         return clone;
@@ -443,6 +445,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             String pos = HBUtil.BlockUtil.positionToString(satelliteTargetPos);
             tag.putString("satelliteTargetPos", pos);
         }
+        if(linkedSatellite != null) {
+            String pos = HBUtil.BlockUtil.positionToString(linkedSatellite.getTargetPos());
+            tag.putString("satelliteTravelPos", pos);
+        }
     }
 
     @Override
@@ -458,6 +464,12 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         if(tag.contains("satelliteTargetPos")) {
             String pos = tag.getString("satelliteTargetPos");
             satelliteTargetPos = new BlockPos( HBUtil.BlockUtil.stringToBlockPos(pos) );
+        }
+        if(tag.contains("satelliteTravelPos")) {
+            String pos = tag.getString("satelliteTravelPos");
+            satelliteTravelPos = new BlockPos( HBUtil.BlockUtil.stringToBlockPos(pos) );
+        } else {
+            satelliteTravelPos = null;
         }
     }
 

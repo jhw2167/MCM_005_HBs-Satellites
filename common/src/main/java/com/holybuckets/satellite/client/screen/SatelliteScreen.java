@@ -8,6 +8,7 @@ import com.holybuckets.foundation.structure.StructureInfo;
 import com.holybuckets.foundation.structure.StructureManager;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.core.SatelliteManager;
 import com.mojang.datafixers.util.Pair;
@@ -37,7 +38,7 @@ public class SatelliteScreen extends Screen {
     private static final Component Y_LABEL = Component.literal("Y:");
     private static final Component Z_LABEL = Component.literal("Z:");
 
-    private final SatelliteBlockEntity satelliteBlock;
+    private final ISatelliteBE satelliteBlock;
 
     // Left column widgets
     private EditBox xEdit;
@@ -69,7 +70,7 @@ public class SatelliteScreen extends Screen {
     private int guiWidth;  // Total GUI width
     private int guiLeft;   // Left edge of GUI
 
-    public SatelliteScreen(SatelliteBlockEntity satelliteBlock) {
+    public SatelliteScreen(ISatelliteBE satelliteBlock) {
         super(TITLE);
         this.satelliteBlock = satelliteBlock;
     }

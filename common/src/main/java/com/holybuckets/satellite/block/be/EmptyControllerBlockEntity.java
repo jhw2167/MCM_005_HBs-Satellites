@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class EmptyControllerBlockEntity extends BlockEntity implements ISatelliteControllerBE {
+public class EmptyControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE {
     private int colorId = 0;
     private BlockPos uiPosition = BlockPos.ZERO;
 
@@ -37,10 +37,6 @@ public class EmptyControllerBlockEntity extends BlockEntity implements ISatellit
         markUpdated();
     }
 
-    @Override
-    public void setSource(SatelliteDisplay source, boolean forceDisplayUpdates) {
-        // Simple controllers don't manage sources
-    }
 
     public void use(Player player, InteractionHand hand, BlockHitResult hitResult) {
         int cmd = ISatelliteControllerBE.calculateHitCommand(hitResult);

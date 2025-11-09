@@ -80,7 +80,7 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
                 float diff = ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD - ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD;
                 cmd = (y > ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD + diff / 2) ? 5 : 6;
             } else {
-                cmd = 7; //Display height adjust
+                cmd = 9; //Display height adjust
             }
 
         } else if (isTopSection) {
@@ -89,7 +89,7 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
         } else if (isBotSection) {
 
             if (xz > ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD ) {
-                cmd = 7; //Display height adjust - prob never reaches
+                cmd = 9; //Display height adjust - prob never reaches
             } else if( xz < ORDINAL_COORD_BLOCK_HORZ_LEFT_THRESHOLD ) {
                 cmd = 0; //Toggle on/off
             } else {    //in the middle
