@@ -37,6 +37,12 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         markUpdated();
     }
 
+    public SatelliteControllerBlockEntity getSatelliteController() {
+        if (source == null)
+            return null;
+        return source.getPrimaryController();
+    }
+
     public void use(Player player, InteractionHand hand, BlockHitResult hitResult)
     {
         if(this.level==null || level.isClientSide) return;
