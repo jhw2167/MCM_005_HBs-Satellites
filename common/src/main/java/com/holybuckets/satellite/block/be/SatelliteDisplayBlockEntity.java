@@ -65,7 +65,8 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
 
     @Override
-    public void toggleOnOff(boolean toggle) {
+    public void toggleOnOff(boolean toggle)
+    {
         if(toggle != this.isDisplayOn) {
             this.isDisplayOn = toggle;
             updateBlockState();
@@ -161,8 +162,6 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
         ticks++;
         if(this.level.isClientSide) return;
-        if( source == null) return;
-
 
         if( source==null || source.noSource() || !source.contains(this.getBlockPos())) {
             toggleOnOff(false);

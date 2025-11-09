@@ -31,10 +31,6 @@ public class SatelliteDisplayClient extends SatelliteDisplay {
     public SatelliteDisplayClient(Level level, SatelliteControllerBlockEntity controller) {
         super(level, controller);
         this.controller = controller;
-        BlockEntity satellite = level.getBlockEntity(controller.getSatelliteTargetPos());
-        if(satellite instanceof SatelliteBlockEntity satBE) {
-            controller.setLinkedSatellite( satBE );
-        }
         this.displayBlocks = new HashMap<>();
         this.holoBlocks = new LinkedHashSet<>();
         DISPLAYS.add(this);

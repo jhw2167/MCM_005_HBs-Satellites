@@ -150,7 +150,7 @@ public class SatelliteDisplay {
     }
 
     public void setCurrentSection(int section) {
-        if( section < 0 ||  section >= maxSection-depth ) return;
+        if( section < depth ||  section > maxSection ) return;
         if( section == this.currentSection ) return;
         this.currentSection = section;
         this.needsUpdate = true;
@@ -159,10 +159,8 @@ public class SatelliteDisplay {
     public void adjCurrentSection(int delta) {
         if(noSource() || this.satellite == null) return;
         if( delta == 0 ) return;
-        int newSection = this.currentSection + delta;
-        if( newSection < 0 ||  newSection+depth > maxSection ) return;
-        this.currentSection = newSection;
-        this.needsUpdate = true;
+        int section = this.currentSection + delta;
+        setCurrentSection( section );
     }
 
 
@@ -695,4 +693,9 @@ public class SatelliteDisplay {
 
     }
 
+    public void sendinput(Player p, InteractionHand hand, int cmd) {
+        if(controller != null) {
+            controller.processInput(p, hand, cmd);
+        }
+    }
 }

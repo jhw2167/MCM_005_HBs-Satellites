@@ -25,55 +25,26 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
     float ORDINAL_COORD_BUFFER_V = 0.25f;
     float ORDINAL_COORD_BUFFER_H = 0.25f;
 
-    // Position Controller constants
-    float POSITION_MIDDLE_LEFT = 0.2f;
-    float POSITION_MIDDLE_RIGHT = 0.8f;
-    float POSITION_MIDDLE_TOP = 0.8f;
-    float POSITION_MIDDLE_BOTTOM = 0.2f;
-    float POSITION_ARROW_SIZE = 0.15f;
-
-    // Height Controller constants
-    float HEIGHT_LEFT_COLUMN = 0.25f;
-    float HEIGHT_RIGHT_COLUMN = 0.75f;
-    float HEIGHT_COLUMN_WIDTH = 0.2f;
-    float HEIGHT_TOP_ARROW = 0.75f;
-    float HEIGHT_BOTTOM_ARROW = 0.25f;
-    float HEIGHT_ARROW_HEIGHT = 0.15f;
-
-    // Target Controller constants
-    float TARGET_BOTTOM_ROW = 0.2f;
-    float TARGET_LEFT_BUTTON = 0.25f;
-    float TARGET_RIGHT_BUTTON = 0.75f;
-    float TARGET_BUTTON_WIDTH = 0.2f;
-
-    // Upgrade Controller constants
-    float UPGRADE_BOTTOM_ROW = 0.2f;
-    float UPGRADE_LEFT_BUTTON = 0.25f;
-    float UPGRADE_RIGHT_BUTTON = 0.75f;
-    float UPGRADE_BUTTON_WIDTH = 0.2f;
-    float UPGRADE_TOP_SECTION = 0.4f;
-    float UPGRADE_QUAD_SPLIT = 0.5f;
-
     /**
      * Return int command value based off where the block was struck
-     *  - -1 = no command
-     *  - 0 = toggle on/off
-     *  - 1-4 = move satellite ordinally North (-1 Z), South (+1 Z), West (-1 X), East (+1 X)
-     *  - 5-6 = adj satellite scanning section (+1 Y) or down (-1 Y)
-     *  - 7-8 = adj display depth (+1) to a max of 4 then back to 1
-     *  - 9 = adj to next wool color
-     *  - 10-15 = undefined
-     *  - 16+ = selects different wool color
+     * - -1 = no command
+     * - 0 = toggle on/off
+     * - 1-4 = move satellite ordinally North (-1 Z), South (+1 Z), West (-1 X), East (+1 X)
+     * - 5-6 = adj satellite scanning section (+1 Y) or down (-1 Y)
+     * - 7-8 = adj display depth (+1) to a max of 4 then back to 1
+     * - 9 = adj to next wool color
+     * - 10-15 = undefined
+     * - 16+ = selects different wool color
+     *
      * @param res
      * @return
      */
-    static int calculateHitCommand(BlockHitResult res)
-    {
+    static int calculateHitCommand(BlockHitResult res) {
         int cmd = -1;
         BlockPos p = res.getBlockPos();
         Vec3 blockCoord = res.getLocation().subtract(p.getX(), p.getY(), p.getZ());
         Direction blockFacing = res.getDirection();
-        if(blockFacing == Direction.UP || blockFacing == Direction.DOWN) return cmd;
+        if (blockFacing == Direction.UP || blockFacing == Direction.DOWN) return cmd;
 
 // Get relative coordinates within the block (0.0 to 1.0)
         double xz;
@@ -99,12 +70,10 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
         boolean isTopSection = y > ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD;
         boolean isBotSection = y < ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD;
 
-        if (isRightColumn)
-        {
-             if(y > ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD) {
-                 //nothing, block position area
-             }
-            else if(y > ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD) {
+        if (isRightColumn) {
+            if (y > ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD) {
+                //nothing, block position area
+            } else if (y > ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD) {
                 //Chunk section depth up down
                 float diff = ORDINAL_COORD_BLOCK_VERT_TOP_THRESHOLD - ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD;
                 cmd = (y > ORDINAL_COORD_BLOCK_VERT_BOT_THRESHOLD + diff / 2) ? 5 : 6;
@@ -117,9 +86,9 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
 
         } else if (isBotSection) {
 
-            if (xz > ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD ) {
+            if (xz > ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD) {
                 cmd = 9; //Display height adjust - prob never reaches
-            } else if( xz < ORDINAL_COORD_BLOCK_HORZ_LEFT_THRESHOLD ) {
+            } else if (xz < ORDINAL_COORD_BLOCK_HORZ_LEFT_THRESHOLD) {
                 cmd = 0; //Toggle on/off
             } else {    //in the middle
                 cmd = 16; //Change wool color
@@ -132,7 +101,7 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
             double rightThreshold = ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD - ORDINAL_COORD_BUFFER_H;
             int input = 0;
 
-            if(y > upThreshold) {
+            if (y > upThreshold) {
                 input = 1; // Top Arrow
             } else if (y < downThreshold) {
                 input = 2; // Bottom Arrow
@@ -142,30 +111,7 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
                 input = 4; // Right Arrow
             }
 
-            /**
-             * Up arrow should move OPPOSITE direction the block is facing, down arrow should move towards, side arrows fill respectively
-             */
-            if( blockFacing == Direction.NORTH ) {
-                if(input == 1) cmd = 2; //Up arrow moves South
-                else if(input == 2) cmd = 1; //Down arrow moves North
-                else if(input == 3) cmd = 4; //left moves East
-                else if(input == 4) cmd = 3; //East moves East
-            } else if( blockFacing == Direction.SOUTH ) {
-                if(input == 1) cmd = 1; //Up arrow moves North
-                else if(input == 2) cmd = 2; //Down arrow moves South
-                else if(input == 3) cmd = 3; //West moves East
-                else if(input == 4) cmd = 4; //East moves West
-            } else if( blockFacing == Direction.EAST ) {
-                if(input == 1) cmd = 3; //Up arrow moves West
-                else if(input == 2) cmd = 4; //Down arrow moves East
-                else if(input == 3) cmd = 1; //West moves North
-                else if(input == 4) cmd = 2; //East moves South
-            } else if( blockFacing == Direction.WEST ) {
-                if(input == 1) cmd = 4; //Up arrow moves East
-                else if(input == 2) cmd = 3; //Down arrow moves West
-                else if(input == 3) cmd = 2; //West moves South
-                else if(input == 4) cmd = 1; //East moves North
-            }
+            cmd = getDirectionFromArrow(blockFacing, input);
 
 
         }
@@ -173,11 +119,49 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
         return cmd;
     }
 
-    /**
-     * Position Controller - 4 ordinal arrows in middle left, right, top, bottom
-     * Returns commands 1-4 for ordinal movement
+    /*
+     * Up arrow should move OPPOSITE direction the block is facing,
+     *  down arrow should move towards, side arrows fill respectively
      */
-    static int calculateHitCommandPosition(BlockHitResult res) {
+        static int getDirectionFromArrow(Direction blockFacing, int input)
+        {
+            int cmd = -1;
+            if (blockFacing == Direction.NORTH) {
+                if (input == 1) cmd = 2; //Up arrow moves South
+                else if (input == 2) cmd = 1; //Down arrow moves North
+                else if (input == 3) cmd = 4; //left moves East
+                else if (input == 4) cmd = 3; //East moves East
+            } else if (blockFacing == Direction.SOUTH) {
+                if (input == 1) cmd = 1; //Up arrow moves North
+                else if (input == 2) cmd = 2; //Down arrow moves South
+                else if (input == 3) cmd = 3; //West moves East
+                else if (input == 4) cmd = 4; //East moves West
+            } else if (blockFacing == Direction.EAST) {
+                if (input == 1) cmd = 3; //Up arrow moves West
+                else if (input == 2) cmd = 4; //Down arrow moves East
+                else if (input == 3) cmd = 1; //West moves North
+                else if (input == 4) cmd = 2; //East moves South
+            } else if (blockFacing == Direction.WEST) {
+                if (input == 1) cmd = 4; //Up arrow moves East
+                else if (input == 2) cmd = 3; //Down arrow moves West
+                else if (input == 3) cmd = 2; //West moves South
+                else if (input == 4) cmd = 1; //East moves North
+            }
+            return cmd;
+        }
+
+
+    // Position Controller constants
+    float POSITION_MIDDLE_LEFT = 0.2f;
+    float POSITION_MIDDLE_RIGHT = 0.8f;
+    float POSITION_MIDDLE_TOP = 0.8f;
+    float POSITION_MIDDLE_BOTTOM = 0.2f;
+    float POSITION_ARROW_SIZE = 0.15f;
+    /**
+     * Position Controller - Four arrows in middle area to move satellite ordinally
+     */
+    static int calculateHitCommandPosition(BlockHitResult res)
+    {
         int cmd = -1;
         BlockPos p = res.getBlockPos();
         Vec3 blockCoord = res.getLocation().subtract(p.getX(), p.getY(), p.getZ());
@@ -202,7 +186,7 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
         boolean inMiddleX = (xz > (0.5 - POSITION_ARROW_SIZE/2)) && (xz < (0.5 + POSITION_ARROW_SIZE/2));
         boolean inMiddleY = (y > (0.5 - POSITION_ARROW_SIZE/2)) && (y < (0.5 + POSITION_ARROW_SIZE/2));
 
-        int input = 0;
+        int input = -1;
         
         // Top arrow
         if (inMiddleX && y > POSITION_MIDDLE_TOP - POSITION_ARROW_SIZE/2 && y < POSITION_MIDDLE_TOP + POSITION_ARROW_SIZE/2) {
@@ -221,36 +205,25 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
             input = 4;
         }
 
-        // Map input to directional commands based on block facing
-        if (blockFacing == Direction.NORTH) {
-            if(input == 1) cmd = 2; // Up arrow moves South
-            else if(input == 2) cmd = 1; // Down arrow moves North
-            else if(input == 3) cmd = 4; // Left moves East
-            else if(input == 4) cmd = 3; // Right moves West
-        } else if (blockFacing == Direction.SOUTH) {
-            if(input == 1) cmd = 1; // Up arrow moves North
-            else if(input == 2) cmd = 2; // Down arrow moves South
-            else if(input == 3) cmd = 3; // Left moves West
-            else if(input == 4) cmd = 4; // Right moves East
-        } else if (blockFacing == Direction.EAST) {
-            if(input == 1) cmd = 3; // Up arrow moves West
-            else if(input == 2) cmd = 4; // Down arrow moves East
-            else if(input == 3) cmd = 1; // Left moves North
-            else if(input == 4) cmd = 2; // Right moves South
-        } else if (blockFacing == Direction.WEST) {
-            if(input == 1) cmd = 4; // Up arrow moves East
-            else if(input == 2) cmd = 3; // Down arrow moves West
-            else if(input == 3) cmd = 2; // Left moves South
-            else if(input == 4) cmd = 1; // Right moves North
-        }
+        if(cmd > 0)
+            cmd = getDirectionFromArrow(blockFacing, input);
 
         return cmd;
     }
 
+    // Height Controller constants
+    float HEIGHT_LEFT_COLUMN = 0.25f;
+    float HEIGHT_RIGHT_COLUMN = 0.75f;
+    float HEIGHT_COLUMN_WIDTH = 0.2f;
+    float HEIGHT_TOP_ARROW = 0.75f;
+    float HEIGHT_BOTTOM_ARROW = 0.25f;
+    float HEIGHT_ARROW_HEIGHT = 0.15f;
+
     /**
      * Height Controller - Two columns with arrows, left adjusts section depth (5,6), right adjusts height (7,8)
      */
-    static int calculateHitCommandHeight(BlockHitResult res) {
+    static int calculateHitCommandHeight(BlockHitResult res)
+    {
         int cmd = -1;
         BlockPos p = res.getBlockPos();
         Vec3 blockCoord = res.getLocation().subtract(p.getX(), p.getY(), p.getZ());
@@ -297,10 +270,17 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
         return cmd;
     }
 
+    // Target Controller constants
+    float TARGET_BOTTOM_ROW = 0.35f;
+    float TARGET_LEFT_BUTTON = 0.25f;
+    float TARGET_RIGHT_BUTTON = 0.75f;
+    float TARGET_BUTTON_WIDTH = 0.2f;
+
     /**
      * Target Controller - Two buttons on bottom row, left returns 10, right returns 11
      */
-    static int calculateHitCommandTarget(BlockHitResult res) {
+    static int calculateHitCommandTarget(BlockHitResult res)
+    {
         int cmd = -1;
         BlockPos p = res.getBlockPos();
         Vec3 blockCoord = res.getLocation().subtract(p.getX(), p.getY(), p.getZ());
@@ -336,10 +316,21 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
         return cmd;
     }
 
+
+    // Upgrade Controller constants
+    float UPGRADE_BOTTOM_ROW = 0.3f;
+    float UPGRADE_LEFT_BUTTON = 0.25f;
+    float UPGRADE_RIGHT_BUTTON = 0.75f;
+    float UPGRADE_BUTTON_WIDTH = 0.2f;
+    float UPGRADE_TOP_SECTION = 0.4f;
+    float UPGRADE_QUAD_SPLIT = 0.5f;
+
     /**
      * Upgrade Controller - Bottom row with on/off and color controls, top section with 4 quadrants (12-15)
      */
-    static int calculateHitCommandUpgrade(BlockHitResult res) {
+    static int calculateHitCommandUpgrade(BlockHitResult res)
+    {
+
         int cmd = -1;
         BlockPos p = res.getBlockPos();
         Vec3 blockCoord = res.getLocation().subtract(p.getX(), p.getY(), p.getZ());

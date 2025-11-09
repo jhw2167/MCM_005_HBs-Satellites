@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.foundation.console.Messager;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.SimpleMessageEvent;
@@ -314,11 +315,18 @@ public class SatelliteManager {
 
         CompoundTag nbt = be.saveWithFullMetadata();
         BlockState state = level.getBlockState(oldPos);
-        level.removeBlock(oldPos, false);
+
         //While there is an existing satellite in the targetPos, move up 16 blocks
         while(level.getBlockEntity(targetPos) instanceof SatelliteBlockEntity) {
             targetPos = targetPos.above(1);
         }
+        if(targetPos.getY() >= level.getMaxBuildHeight()) {
+            Messager.getInstance().sendChat(
+                "Satellite " + colorId + " cannot be moved to target position, out of build height!");
+            return true; //else it will keep retrying
+        }
+
+        level.removeBlock(oldPos, false);
         level.setBlock(targetPos, state, 3); // Flag 3 = notify + update
 
         BlockEntity newBE = level.getBlockEntity(targetPos);

@@ -115,13 +115,6 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         return this.linkedSatellite;
     }
 
-    public void setLinkedSatellite(SatelliteBlockEntity satBE) {
-        this.linkedSatellite = satBE;
-        if(satBE != null) {
-            this.satelliteTargetPos = satBE.getBlockPos();
-        }
-    }
-
     public BlockPos getSatelliteTargetPos() {
         return this.satelliteTargetPos;
     }
@@ -156,60 +149,64 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void use(Player p, InteractionHand hand, BlockHitResult res)
     {
         int cmd = ISatelliteControllerBE.calculateHitCommand(res);
-        if(cmd == -1) return;
-        this.commands.hasUpdate = true;
-
-        if(cmd == 0) {
-            this.toggleOnOff(!this.isDisplayOn);
-        }
-
-
-        if (cmd == 16)
-        {
-            //If player is holding wool in their hand, set to that color
-            if( p.getItemInHand(hand).getItem() instanceof BlockItem bi ) {
-                Block b = bi.getBlock();
-                commands.dIdSet = manager.getColorId(b);
-            }
-
-            if(commands.dIdSet < 0) {
-                commands.dIdAdj += 1; //next wool color
-            }
-
-        } else if (cmd >= 17) {
-            commands.dIdSet = cmd - 17; //set wool color
-        }
-
-        if(!this.isDisplayOn || this.source == null) {
-            return;
-        }
-
-        if(cmd == 0) {
-            //handled above
-        } else if( cmd < 5) {   //adjust ordinally
-            int dNS=0,dEW=0;
-            switch (cmd) {
-                case 1: dNS = 1; break;   //north
-                case 2: dNS = -1; break;  //south
-                case 3: dEW = 1; break;   //east
-                case 4: dEW = -1; break;  //west
-                default: dNS = 0; dEW = 0; break;
-            }
-            //this.source.adjOrdinal(dNS, dEW);
-            commands.dNS += dNS;
-            commands.dEW += dEW;
-
-        } else if( cmd < 7) {   //adjust depth 5 - increase depth, 6 - decrease depth
-            //this.source.adjCurrentSection( (cmd == 5 ? 1 : -1) );
-            commands.dSection += (cmd == 5 ? 1 : -1);
-        } else if ( cmd < 9) {   //adjust display height 7 - inc, 8 - dec
-            commands.dDepth += (cmd == 7 ? 1 : -1);
-        } else if( cmd == 9) {  //select block
-            if(this.level.isClientSide)
-                CommonClass.clientSideActions(this.level, this.clientCloneLinkedSatellite());
-        }
-
+        processInput(p, hand, cmd);
     }
+
+        public void processInput(Player p, InteractionHand hand, int cmd)
+        {
+            if(cmd == -1) return;
+            this.commands.hasUpdate = true;
+
+            if(cmd == 0) {
+                this.toggleOnOff(!this.isDisplayOn);
+            }
+
+
+            if (cmd == 16)
+            {
+                //If player is holding wool in their hand, set to that color
+                if( p.getItemInHand(hand).getItem() instanceof BlockItem bi ) {
+                    Block b = bi.getBlock();
+                    commands.dIdSet = manager.getColorId(b);
+                }
+
+                if(commands.dIdSet < 0) {
+                    commands.dIdAdj += 1; //next wool color
+                }
+
+            } else if (cmd >= 17) {
+                commands.dIdSet = cmd - 17; //set wool color
+            }
+
+            if(!this.isDisplayOn || this.source == null) {
+                return;
+            }
+
+            if(cmd == 0) {
+                //handled above
+            } else if( cmd < 5) {   //adjust ordinally
+                int dNS=0,dEW=0;
+                switch (cmd) {
+                    case 1: dNS = 1; break;   //north
+                    case 2: dNS = -1; break;  //south
+                    case 3: dEW = 1; break;   //east
+                    case 4: dEW = -1; break;  //west
+                    default: dNS = 0; dEW = 0; break;
+                }
+                //this.source.adjOrdinal(dNS, dEW);
+                commands.dNS += dNS;
+                commands.dEW += dEW;
+
+            } else if( cmd < 7) {   //adjust depth 5 - increase depth, 6 - decrease depth
+                //this.source.adjCurrentSection( (cmd == 5 ? 1 : -1) );
+                commands.dSection += (cmd == 5 ? 1 : -1);
+            } else if ( cmd < 9) {   //adjust display height 7 - inc, 8 - dec
+                commands.dDepth += (cmd == 7 ? 1 : -1);
+            } else if( cmd == 9) {  //select block
+                if(this.level.isClientSide)
+                    CommonClass.clientSideActions(this.level, this.clientCloneLinkedSatellite());
+            }
+        }
 
     private ISatelliteBE clientCloneLinkedSatellite()
     {
@@ -314,7 +311,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             recoverSatellite();
         }
 
-        if(this.linkedSatellite != manager.get(this.colorId)) {
+        if(this.linkedSatellite != manager.get(this.colorId))
+        {
             linkedSatellite = manager.get(this.colorId);
             if(linkedSatellite == null) {
                 toggleOnOff(false);

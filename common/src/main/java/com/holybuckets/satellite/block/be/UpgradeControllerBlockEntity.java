@@ -43,7 +43,7 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         int cmd = ISatelliteControllerBE.calculateHitCommandUpgrade(hitResult);
         if (cmd == -1) return;
 
-        if(isDisplayOn && source != null)
+        if(source != null)
             source.sendinput(player, hand, cmd);
         
         updateBlockState();
