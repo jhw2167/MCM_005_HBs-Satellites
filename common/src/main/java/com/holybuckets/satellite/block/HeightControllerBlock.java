@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block;
 
 import com.holybuckets.satellite.block.be.HeightControllerBlockEntity;
+import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -10,12 +11,16 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
+
+import javax.annotation.Nullable;
 
 public class HeightControllerBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -67,5 +72,11 @@ public class HeightControllerBlock extends Block implements EntityBlock {
         }
 
         return InteractionResult.PASS;
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        return level.isClientSide ? null : (l, pos, s, blockEntity) -> ((SatelliteDisplayBlockEntity) blockEntity).tick(l, pos, state, (SatelliteDisplayBlockEntity) blockEntity);
     }
 }
