@@ -25,5 +25,20 @@
   "block.hbs_satellites.empty_controller_block": "Empty Controller",
    "block.hbs_satellites.empty_controller_block.desc": "Placeholder controller block",
 
+  "item.hbs_satellites.multilink_upgrade": "Multilink Upgrade",
+  "item.hbs_satellites.multilink_upgrade.desc": "Allows satellites to connect to multiple controllers simultaneously",
+  "item.hbs_satellites.ore_scanner_upgrade": "Ore Scanner Upgrade",
+  "item.hbs_satellites.ore_scanner_upgrade.desc": "Enables satellites to detect and highlight ore deposits",
+  "item.hbs_satellites.range_upgrade": "Range Upgrade",
+  "item.hbs_satellites.range_upgrade.desc": "Increases the operational range of satellite systems",
+  "item.hbs_satellites.depth_upgrade": "Depth Upgrade",
+  "item.hbs_satellites.depth_upgrade.desc": "Enhances the depth scanning capabilities of satellites",
+  "item.hbs_satellites.entity_scanner_upgrade": "Entity Scanner Upgrade",
+  "item.hbs_satellites.entity_scanner_upgrade.desc": "Allows satellites to detect and track entities",
+  "item.hbs_satellites.player_scanner_upgrade": "Player Scanner Upgrade",
+  "item.hbs_satellites.player_scanner_upgrade.desc": "Enables satellites to locate and track players",
+
+  "item.hbs_satellites.upgrade.tooltip": "Upgrade Color: %s",
+
   "itemGroup.hbs_satellites.hbs_satellites": "HB's Satellites"
 }

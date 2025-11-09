@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "hbs_satellites:item/range_upgrade"
+  }
+}
