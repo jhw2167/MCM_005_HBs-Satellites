@@ -37,14 +37,14 @@ public class PositionControllerBlockEntity extends SatelliteDisplayBlockEntity i
         markUpdated();
     }
 
-    public void use(Player player, InteractionHand hand, BlockHitResult hitResult) {
-        int cmd = ISatelliteControllerBE.calculateHitCommand(hitResult);
+    public void use(Player player, InteractionHand hand, BlockHitResult hitResult)
+    {
+        if(this.level==null || level.isClientSide) return;
+        int cmd = ISatelliteControllerBE.calculateHitCommandPosition(hitResult);
         if (cmd == -1) return;
-        
-        // Handle basic color changing
-        if (cmd == 16) {
-            setColorId((getColorId() + 1) % 16);
-        }
+
+        if(isDisplayOn && source != null)
+            source.sendinput(player, hand, cmd);
         
         updateBlockState();
     }
