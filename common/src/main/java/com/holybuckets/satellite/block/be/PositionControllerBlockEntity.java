@@ -37,11 +37,6 @@ public class PositionControllerBlockEntity extends SatelliteDisplayBlockEntity i
         markUpdated();
     }
 
-    @Override
-    public void setSource(SatelliteDisplay source, boolean forceDisplayUpdates) {
-        // Simple controllers don't manage sources
-    }
-
     public void use(Player player, InteractionHand hand, BlockHitResult hitResult) {
         int cmd = ISatelliteControllerBE.calculateHitCommand(hitResult);
         if (cmd == -1) return;

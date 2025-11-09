@@ -37,10 +37,6 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         markUpdated();
     }
 
-    @Override
-    public void setSource(SatelliteDisplay source, boolean forceDisplayUpdates) {
-        // Simple controllers don't manage sources
-    }
 
     public void use(Player player, InteractionHand hand, BlockHitResult hitResult) {
         int cmd = ISatelliteControllerBE.calculateHitCommand(hitResult);
