@@ -11,6 +11,7 @@ import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
 import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.item.SatelliteItemUpgrade;
@@ -55,6 +56,7 @@ public class SatelliteDisplay {
 
     protected Level level;
     protected SatelliteControllerBlockEntity controller;
+    protected ITargetController targetController;
     private SatelliteBlockEntity satellite;
     int zOffset;
     int xOffset;
@@ -97,6 +99,7 @@ public class SatelliteDisplay {
         this.level = level;
         this.satellite = satellite;
         this.controller = controller;
+        this.targetController = controller;
 
         this.zOffset = 0;
         this.xOffset = 0;
@@ -200,7 +203,7 @@ public class SatelliteDisplay {
 
     private void setPosition(Player p, BlockHitResult res)
     {
-        if(this.controller == null) return;
+        if(this.targetController == null) return;
         //Convert cursorPos to overworld block position using offsets
         //calculate chunkOffset from satellite, then blockOffset from fractional cursorPos
         if(res == null || p == null) return;
@@ -236,11 +239,17 @@ public class SatelliteDisplay {
                 (int) blockOffset.z
             );
 
-        this.controller.setUiPosition(blockTarget);
+        this.targetController.setUiPosition(blockTarget);
     }
 
 
-    void setTargetController(ITargetController targetingController) {
+    void setTargetingControllerPos(ISatelliteControllerBE targetingController) {
+        if (targetingController instanceof ITargetController) {
+            this.targetController = (ITargetController) targetingController;
+        }
+    }
+
+    void fire(ISatelliteControllerBE targetingController) {
 
     }
 
@@ -277,7 +286,7 @@ public class SatelliteDisplay {
             if(info.isActive) info.resetUpdates();
         });
         needsUpdate = true;
-        if(controller != null) controller.setUiPosition(null);
+        if(targetController != null) targetController.setUiPosition(null);
         this.cursorSelection = null;
     }
 
@@ -522,7 +531,9 @@ public class SatelliteDisplay {
             else return false;
 
             if( ModConfig.getHerdEntities().contains(e.getType()) ) {
-                ChunkDisplayInfo info = INFO_CACHE.get(new TripleInt(e.chunkPosition().x, currentSection, e.chunkPosition().z ));
+                ChunkDisplayInfo info = INFO_CACHE.get(new TripleInt(e.chunkPosition().x, current
+
+, e.chunkPosition().z ));
                 if(info == null) return false;
                 return info.acceptLocalEntity(e);
             }

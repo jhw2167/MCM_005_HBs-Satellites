@@ -8,6 +8,7 @@ import com.holybuckets.satellite.block.SatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
 import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteManager;
@@ -36,7 +37,7 @@ import java.util.*;
 import static com.holybuckets.satellite.CommonClass.clientSideActions;
 import static com.holybuckets.satellite.SatelliteMain.chiselBitsApi;
 
-public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE
+public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController
 {
     int colorId;
     SatelliteManager manager;
@@ -89,6 +90,11 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     @Override
     public BlockPos getUiPosition() {
         return uiTargetBlockPos;
+    }
+
+    @Override
+    public int getTargetColorId() {
+        return colorId;
     }
 
     //setTargetPosition, setSelectedPosition
@@ -218,7 +224,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         } else if ( cmd < 12 )
         { //clear selection
             if(cmd == 10) { //clear selected block
-                this.source.setTargetController(controller);
+                this.source.setTargetingControllerPos(controller);
             } else if (cmd == 11) { //clear selected entity
                 this.source.fire(controller);
             }

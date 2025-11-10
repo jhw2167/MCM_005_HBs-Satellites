@@ -2,6 +2,7 @@ package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.satellite.block.TargetControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE {
+public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController {
     private int colorId = 0;
     private BlockPos uiPosition = BlockPos.ZERO;
 
@@ -27,6 +28,12 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     }
 
     @Override
+    public void setUiPosition(BlockPos blockPos) {
+        this.uiPosition = blockPos;
+        markUpdated();
+    }
+
+    @Override
     public int getColorId() {
         return colorId;
     }
@@ -35,6 +42,11 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     public void setColorId(int colorId) {
         this.colorId = colorId;
         markUpdated();
+    }
+
+    @Override
+    public int getTargetColorId() {
+        return colorId;
     }
 
     public SatelliteControllerBlockEntity getSatelliteController() {
