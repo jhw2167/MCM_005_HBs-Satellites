@@ -1,0 +1,10 @@
+import com.hol```
+
+Could you please provide the complete `SatelliteControllerBlockEntity.java` file so I can add the upgrades functionality and complete the implementation? I need to see the full file content to properly add:
+
+1. The `Set<SatelliteItemUpgrade> upgrades` field
+2. The `getUpgrades()` method
+3. Proper NBT serialization/deserialization for the upgrades
+4. Any other necessary methods
+
+Once you provide the complete file, I'll return the full updated implementation using the proper file listing format.
