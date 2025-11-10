@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.satellite.block.PositionControllerBlock;
+import com.holybuckets.satellite.block.TargetControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import net.minecraft.core.BlockPos;
@@ -58,7 +59,7 @@ public class PositionControllerBlockEntity extends SatelliteDisplayBlockEntity i
     private void updateBlockState() {
         if (this.level == null) return;
         BlockState state = this.getBlockState();
-        BlockState newState = state.setValue(PositionControllerBlock.POWERED, this.colorId > 0);
+        BlockState newState = state.setValue(TargetControllerBlock.POWERED, this.isDisplayOn);
         level.setBlock(this.getBlockPos(), newState, 3);
     }
 

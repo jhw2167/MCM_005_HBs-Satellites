@@ -18,6 +18,7 @@ import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.item.ModItems;
+import com.holybuckets.satellite.particle.WoolDustHelper;
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -369,6 +370,10 @@ public class SatelliteManager {
         woolIds.add(Blocks.GRAY_WOOL);
         woolIds.add(Blocks.BROWN_WOOL);
         woolIds.add(Blocks.BLACK_WOOL);
+
+        for(int i = 0; i < 16; i++) {
+            WoolDustHelper.addDustColorFromWool(getWool(i), i);
+        }
     }
 
     private static void onServerTick(ServerTickEvent event)

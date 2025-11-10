@@ -13,10 +13,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
-public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController {
+public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController
+{
     private int colorId = 0;
     private BlockPos uiPosition = BlockPos.ZERO;
+    private Vec3 uiCursorPos = null;
 
     public TargetControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.targetControllerBlockEntity.get(), pos, state);
@@ -33,8 +37,26 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         markUpdated();
     }
 
+    @Nullable
+    @Override
+    public Vec3 getCursorPosition() {
+        return uiCursorPos;
+    }
+
+    @Nullable
+    @Override
+    public void setCursorPosition(Vec3 pos) {
+        this.uiCursorPos = pos;
+    }
+
+
     @Override
     public int getColorId() {
+        return colorId;
+    }
+
+    @Override
+    public int getTargetColorId() {
         return colorId;
     }
 
@@ -42,11 +64,6 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     public void setColorId(int colorId) {
         this.colorId = colorId;
         markUpdated();
-    }
-
-    @Override
-    public int getTargetColorId() {
-        return colorId;
     }
 
     public SatelliteControllerBlockEntity getSatelliteController() {
@@ -61,7 +78,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         if (cmd == -1) return;
 
         if(isDisplayOn && source != null)
-            source.sendinput(player, hand, cmd);
+            source.sendinput(player, hand, cmd, this);
         
         updateBlockState();
     }
@@ -69,7 +86,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     private void updateBlockState() {
         if (this.level == null) return;
         BlockState state = this.getBlockState();
-        BlockState newState = state.setValue(TargetControllerBlock.POWERED, this.colorId > 0);
+        BlockState newState = state.setValue(TargetControllerBlock.POWERED, this.isDisplayOn);
         level.setBlock(this.getBlockPos(), newState, 3);
     }
 

@@ -31,6 +31,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -42,6 +44,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     int colorId;
     SatelliteManager manager;
     BlockPos uiTargetBlockPos;
+    Vec3 uiCursorPos;
     BlockPos satelliteTargetPos;
     BlockPos satelliteTravelPos;
     SatelliteBlockEntity linkedSatellite;
@@ -73,6 +76,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         super(ModBlockEntities.satelliteControllerBlockEntity.get(), pos, state);
         this.setColorId(0);
         this.uiTargetBlockPos = BlockPos.ZERO;
+        this.uiCursorPos = Vec3.ZERO;
         this.forceDisplayUpdates = false;
         this.linkedSatellite = null;
         this.satelliteTargetPos = null;
@@ -92,10 +96,6 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         return uiTargetBlockPos;
     }
 
-    @Override
-    public int getTargetColorId() {
-        return colorId;
-    }
 
     //setTargetPosition, setSelectedPosition
     public void setUiPosition(BlockPos blockTarget)
@@ -117,6 +117,24 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public int getColorId() {
         return colorId;
     }
+
+    @Override
+    public int getTargetColorId() {
+        return colorId;
+    }
+
+    @Nullable
+    @Override
+    public Vec3 getCursorPosition() {
+        return uiCursorPos;
+    }
+
+    @Nullable
+    @Override
+    public void setCursorPosition(Vec3 pos) {
+        this.uiCursorPos = pos;
+    }
+
 
     @Override
     public void setColorId(int colorId) {
@@ -165,7 +183,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void use(Player p, InteractionHand hand, BlockHitResult res)
     {
         int cmd = ISatelliteControllerBE.calculateHitCommand(res);
-        processInput(p, hand, cmd);
+        processInput(p, hand, cmd, null);
     }
 
     public void processInput(Player p, InteractionHand hand, int cmd, ISatelliteControllerBE controller)
@@ -180,7 +198,6 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         if (cmd == 16)
         {
-            //If player is holding wool in their hand, set to that color
             if( p.getItemInHand(hand).getItem() instanceof BlockItem bi ) {
                 Block b = bi.getBlock();
                 commands.dIdSet = manager.getColorId(b);
@@ -221,14 +238,23 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         } else if( cmd == 9) {  //select block
             if(this.level.isClientSide)
                 CommonClass.clientSideActions(this.level, this.clientCloneLinkedSatellite());
+            else
+                this.updateBlockState();    //force sync to client
+            this.commands.hasUpdate = false;
         } else if ( cmd < 12 )
-        { //clear selection
-            if(cmd == 10) { //clear selected block
-                this.source.setTargetingControllerPos(controller);
-            } else if (cmd == 11) { //clear selected entity
-                this.source.fire(controller);
+        {
+            if(controller == null) return;
+           ITargetController tc = (ITargetController) controller;
+            if(cmd == 10) {
+                if(tc.getCursorPosition() != null) tc.setCursorPosition(null);
+                source.setTargetController(tc);
+            } else if (cmd == 11) {
+                if(tc.getUiPosition() == null) {
+                    Messager.getInstance().sendChat(p, "No target selected!");
+                }
+                source.fire(p, (ITargetController) controller);
             }
-
+            this.commands.hasUpdate = false;
         }
     }
 

@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.joml.Matrix3f;
@@ -117,14 +118,11 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         
         if (blockEntity.getSatelliteController() == null) return;
         
-        var upgrades = blockEntity.getSatelliteController().getUpgrades();
-        if (upgrades == null || upgrades.isEmpty()) return;
+        var upgrades = blockEntity.getUpgrades();
+        if (upgrades == null || upgrades.length == 0) return;
 
         VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
-        
-        // Convert set to array for indexing
-        var upgradeArray = upgrades.toArray();
-        
+
         // Define quadrant positions (above bottom row which is at y=0.4)
         float[][] quadrants = {
             {0.05f, 0.45f, 0.65f, 0.95f}, // Top-left quadrant
@@ -136,10 +134,12 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         float offset = 0.01f;
         
         // Render up to 4 upgrades in the quadrants
-        for (int i = 0; i < Math.min(4, upgradeArray.length); i++) {
+        for (int i = 0; i < Math.min(4, upgrades.length); i++)
+        {
             // Get upgrade texture - assuming upgrades have a getTexture() method
             // This will need to be adjusted based on actual SatelliteItemUpgrade API
-            ResourceLocation upgradeLoc = new ResourceLocation("satellite", "textures/item/upgrade_" + i + ".png");
+            ResourceLocation itemLoc = BuiltInRegistries.ITEM.getKey(upgrades[i]);
+            ResourceLocation upgradeLoc = new ResourceLocation("satellite", "textures/item/" + itemLoc.getPath() + ".png");
             TextureAtlasSprite upgradeSprite = CommonClassClient.getSprite(upgradeLoc);
             
             float u0 = upgradeSprite.getU0();

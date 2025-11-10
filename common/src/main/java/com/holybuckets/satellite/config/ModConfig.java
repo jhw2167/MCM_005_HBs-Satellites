@@ -13,9 +13,12 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class ModConfig {
@@ -25,6 +28,8 @@ public class ModConfig {
     private static Set<EntityType<?>> herdEntities = new HashSet<>();
 
     private static Set<ResourceLocation> trackedStructures = new HashSet<>();
+
+    private static Map<Block, Block> oreScannerBlockMap = new HashMap<>();
 
     public static void init(EventRegistrar reg) {
         reg.registerOnBeforeServerStarted( e -> loadDynamicConfigs(e.getServer().registryAccess()), EventPriority.High);
@@ -74,6 +79,30 @@ public class ModConfig {
             ResourceLocation loc = new ResourceLocation(structId);
             if (loc != null) trackedStructures.add(loc);
             else LoggerProject.logWarning("010001", "Satellite Config: Could not find structure type for id: " + structId);
+        }
+
+
+        //Ores
+        oreScannerBlockMap.clear();
+        Registry<Block> blockRegistry = reg.registryOrThrow(Registries.BLOCK);
+        for (String pair : config.displayUpgrades.oreScannerBlockMappings )
+        {
+            String[] parts = pair.split("=");
+            if (parts.length != 2) {
+                LoggerProject.logWarning("010002", "Satellite Config: Invalid ore scanner block mapping: " + pair);
+                continue;
+            }
+            Block oreBlock = blockRegistry.get(new ResourceLocation(parts[0]));
+            Block storageBlock = blockRegistry.get(new ResourceLocation(parts[1]));
+            if (oreBlock == null) {
+                LoggerProject.logWarning("010003", "Satellite Config: Could not find ore block for id: " + parts[0]);
+                continue;
+            }
+            if (storageBlock == null) {
+                LoggerProject.logWarning("010004", "Satellite Config: Could not find storage block for id: " + parts[1]);
+                continue;
+            }
+            oreScannerBlockMap.put(oreBlock, storageBlock);
         }
 
     }

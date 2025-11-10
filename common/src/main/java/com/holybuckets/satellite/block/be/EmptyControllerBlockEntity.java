@@ -44,14 +44,6 @@ public class EmptyControllerBlockEntity extends SatelliteDisplayBlockEntity impl
     }
 
     public void use(Player player, InteractionHand hand, BlockHitResult hitResult) {
-        int cmd = ISatelliteControllerBE.calculateHitCommand(hitResult);
-        if (cmd == -1) return;
-        
-        // Handle basic color changing
-        if (cmd == 16) {
-            setColorId((getColorId() + 1) % 16);
-        }
-        
         updateBlockState();
     }
 

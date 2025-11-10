@@ -1,8 +1,10 @@
 package com.holybuckets.satellite.block.be;
 
+import com.holybuckets.satellite.block.TargetControllerBlock;
 import com.holybuckets.satellite.block.UpgradeControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.core.SatelliteDisplay;
+import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -12,6 +14,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+
+import java.util.List;
+import java.util.Set;
 
 public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE {
     private int colorId = 0;
@@ -37,6 +42,11 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         markUpdated();
     }
 
+    public SatelliteItemUpgrade[] getUpgrades() {
+        if(this.source == null) return null;
+        return source.getUpgrades();
+    }
+
     @Override
     public SatelliteControllerBlockEntity getSatelliteController() {
         if (source == null) return null;
@@ -58,7 +68,7 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
     private void updateBlockState() {
         if (this.level == null) return;
         BlockState state = this.getBlockState();
-        BlockState newState = state.setValue(UpgradeControllerBlock.POWERED, this.colorId > 0);
+        BlockState newState = state.setValue(TargetControllerBlock.POWERED, this.isDisplayOn);
         level.setBlock(this.getBlockPos(), newState, 3);
     }
 
@@ -91,4 +101,5 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         this.saveAdditional(tag);
         return tag;
     }
+
 }

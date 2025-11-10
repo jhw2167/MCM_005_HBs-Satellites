@@ -36,6 +36,34 @@ public class SatelliteConfig {
 
     }
 
+    public static class SatelliteDisplayUpgrades {
+        @Comment("Maximum chunk sections below surface that a satellite can view with the depth upgrade, should be at least maxSatelliteDepthSectionDefault")
+        public int maxSatelliteDepthSectionUpgraded = 16;
+
+        @Comment("Maximum number of chunks away from Satellite Block players may view blocks per upgrade, -1 for no limit")
+        public int satelliteReachDistChunksUpgraded = -1;
+
+        @Comment("Maximum number of chunks away from launch station satellite may operate per upgrade, -1 for no limit")
+        public int satelliteOperationalDistChunksUpgraded = -1;
+
+        @Comment("Pairs ore blocks with chiseled block representations on the Satellite Display. NOTE: the block after '=' MUST be Chiselable with the chisel & bits mod or it will crash the game. Safest to use Vanilla Blocks.")
+        @NestedType(String.class)
+        public Set<String> oreScannerBlockMappings = Set.of(
+                "minecraft:coal_ore=minecraft:coal_block",
+                "minecraft:copper_ore=minecraft:copper_block",
+                "minecraft:iron_ore=minecraft:iron_block",
+                "minecraft:gold_ore=minecraft:gold_block",
+                "minecraft:redstone_ore=minecraft:redstone_block",
+                "minecraft:lapis_ore=minecraft:lapis_block",
+                "minecraft:diamond_ore=minecraft:diamond_block",
+                "minecraft:emerald_ore=minecraft:emerald_block",
+
+                "minecraft:stone=hbs_satellites:holo_air_block",
+                "minecraft:deepslate=hbs_satellites:holo_air_block"
+        );
+
+    }
+
     public static class SatelliteDisplayConfig {
         //add playerRange
         @Comment("If there is no player within this range from the satellite controller, the controller turns off")
@@ -81,9 +109,10 @@ public class SatelliteConfig {
         public int minHerdCountThreshold = 5;
     }
 
+    public SatelliteBlockConfig satelliteConfig = new SatelliteBlockConfig();
+    public SatelliteDisplayUpgrades displayUpgrades = new SatelliteDisplayUpgrades();
     public SatelliteDisplayConfig displayConfig = new SatelliteDisplayConfig();
     public EntityPingConfig entityPings = new EntityPingConfig();
-    public SatelliteBlockConfig satelliteConfig = new SatelliteBlockConfig();
 
 
 }

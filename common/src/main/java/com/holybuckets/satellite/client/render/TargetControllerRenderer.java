@@ -117,6 +117,12 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         renderTargetInfo(blockEntity, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
     }
 
+    static int textColor = 0x000000;
+
+    // Y grows downward since we flipped Z earlier
+    static float rowHeight = 20f;
+    static float startY = 0f; // start higher on screen (negative moves up visually)
+
     private void renderTargetInfo(TargetControllerBlockEntity blockEntity, float partialTick,
                                  PoseStack poseStack, MultiBufferSource bufferSource,
                                  int combinedLight, int combinedOverlay)
@@ -160,27 +166,22 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         float scale = 0.008f; // Smaller scale to fit more content
         poseStack.scale(scale, scale, scale);
 
-        int textColor = 0x000000;
-
-        // Y grows downward since we flipped Z earlier
-        float rowHeight = 15f;
-        float startY = -35f; // start higher on screen (negative moves up visually)
-
+        float leftAlignOffset = -10;
 // X coordinate (top)
         poseStack.pushPose();
-        poseStack.translate(0, startY, 0);
+        poseStack.translate(leftAlignOffset, startY, 0);
         drawCoordRow(poseStack, bufferSource, combinedLight, targetPos.getX(), "X");
         poseStack.popPose();
 
 // Y coordinate (middle)
         poseStack.pushPose();
-        poseStack.translate(0, startY + rowHeight, 0);
+        poseStack.translate(leftAlignOffset, startY + rowHeight, 0);
         drawCoordRow(poseStack, bufferSource, combinedLight, targetPos.getY(), "Y");
         poseStack.popPose();
 
 // Z coordinate (bottom)
         poseStack.pushPose();
-        poseStack.translate(0, startY + rowHeight * 2, 0);
+        poseStack.translate(leftAlignOffset, startY + rowHeight * 2, 0);
         drawCoordRow(poseStack, bufferSource, combinedLight, targetPos.getZ(), "Z");
         poseStack.popPose();
 
@@ -188,7 +189,8 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         float buttonY = startY + rowHeight * 3 + 10f;
         poseStack.pushPose();
         poseStack.translate(-25, buttonY, 0);
-        font.drawInBatch("TARGET", -font.width("TARGET") / 2f, 0, textColor, false,
+        String targetOrClear = (blockEntity.getCursorPosition()==null) ? "TARGET" : "CLEAR";
+        font.drawInBatch(targetOrClear, -font.width(targetOrClear) / 2f, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
         poseStack.popPose();
 

@@ -159,7 +159,7 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
     float POSITION_MIDDLE_RIGHT = 0.8f;
     float POSITION_MIDDLE_TOP = 0.8f;
     float POSITION_MIDDLE_BOTTOM = 0.2f;
-    float POSITION_ARROW_SIZE = 0.15f;
+    float POSITION_ARROW_SIZE = 0.3f;
     /**
      * Position Controller - Four arrows in middle area to move satellite ordinally
      */

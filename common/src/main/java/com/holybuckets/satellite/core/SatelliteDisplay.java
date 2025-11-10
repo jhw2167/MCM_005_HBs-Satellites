@@ -16,6 +16,7 @@ import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import com.holybuckets.satellite.particle.ModParticles;
+import com.holybuckets.satellite.particle.WoolDustHelper;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.blay09.mods.balm.api.event.EventPriority;
 import net.blay09.mods.balm.api.event.UseBlockEvent;
@@ -35,6 +36,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
@@ -111,7 +113,7 @@ public class SatelliteDisplay {
 
         displayBlocks = new HashMap<>();
         controllerBlocks = new HashSet<>();
-        upgrades = new LinkedHashSet<>();
+        upgrades = new SatelliteItemUpgrade[4];
         if(satellite == null) return;
 
         this.target = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
@@ -240,16 +242,15 @@ public class SatelliteDisplay {
             );
 
         this.targetController.setUiPosition(blockTarget);
+        this.targetController.setCursorPosition(hitLoc);
     }
 
 
-    void setTargetingControllerPos(ISatelliteControllerBE targetingController) {
-        if (targetingController instanceof ITargetController) {
-            this.targetController = (ITargetController) targetingController;
-        }
+    public void setTargetController(ITargetController targetingController) {
+        this.targetController =  targetingController;
     }
 
-    void fire(ISatelliteControllerBE targetingController) {
+    public void fire(Player p, ITargetController targetingController) {
 
     }
 
@@ -305,6 +306,7 @@ public class SatelliteDisplay {
 
     public void add(BlockPos blockPos, ISatelliteDisplayBE displayBlock) {
         displayBlocks.put(blockPos, displayBlock);
+        if(displayBlock instanceof ISatelliteControllerBE cb) controllerBlocks.add( cb );
         updateBounds(blockPos);
     }
 
@@ -351,12 +353,15 @@ public class SatelliteDisplay {
     public void addAll(Map<BlockPos, ISatelliteDisplayBE> blocks) {
         displayBlocks.putAll(blocks);
         for (BlockPos pos : blocks.keySet()) {
+            if(displayBlocks.get(pos) instanceof  ISatelliteControllerBE cb)
+                controllerBlocks.add( cb );
             updateBounds(pos);
         }
     }
 
     public void remove(BlockPos blockPos) {
-        displayBlocks.remove(blockPos);
+        ISatelliteDisplayBE be = displayBlocks.remove(blockPos);
+        if(be instanceof ISatelliteControllerBE cb) controllerBlocks.remove( cb );
         recalculateBounds();
     }
 
@@ -366,6 +371,7 @@ public class SatelliteDisplay {
 
     public void clear()
     {
+        controllerBlocks.clear();
         displayBlocks.clear();
         minX = Integer.MAX_VALUE;
         maxX = Integer.MIN_VALUE;
@@ -531,9 +537,7 @@ public class SatelliteDisplay {
             else return false;
 
             if( ModConfig.getHerdEntities().contains(e.getType()) ) {
-                ChunkDisplayInfo info = INFO_CACHE.get(new TripleInt(e.chunkPosition().x, current
-
-, e.chunkPosition().z ));
+                ChunkDisplayInfo info = INFO_CACHE.get(new TripleInt(e.chunkPosition().x, currentSection , e.chunkPosition().z ));
                 if(info == null) return false;
                 return info.acceptLocalEntity(e);
             }
@@ -625,16 +629,20 @@ public class SatelliteDisplay {
             }
             */
 
-        if(cursorSelection != null)
+        for(ISatelliteControllerBE ctrlBlock : controllerBlocks)
         {
-            Vec3 hitLoc = cursorSelection.getLocation();
-            ((ServerLevel) level).sendParticles(
-                DustParticleOptions.REDSTONE,                     // Particle type
-                hitLoc.x, hitLoc.y, hitLoc.z,
-                2,                                // Particle count
-                0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
-                0.0                               // Speed
-            );
+            if(ctrlBlock instanceof ITargetController tc && tc.getCursorPosition() != null)
+            {
+                Vec3 hitLoc = tc.getCursorPosition();
+                ((ServerLevel) level).sendParticles(
+                    WoolDustHelper.getDust(tc.getTargetColorId()),                     // Particle type
+                    hitLoc.x, hitLoc.y, hitLoc.z,
+                    2,                                // Particle count
+                    0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
+                    0.0                               // Speed
+                );
+            }
+
         }
 
 
@@ -743,9 +751,14 @@ public class SatelliteDisplay {
 
     }
 
+
     public void sendinput(Player p, InteractionHand hand, int cmd) {
+        this.sendinput(p, hand, cmd, null);
+    }
+
+    public void sendinput(Player p, InteractionHand hand, int cmd, ISatelliteControllerBE block) {
         if(controller != null) {
-            controller.processInput(p, hand, cmd);
+            controller.processInput(p, hand, cmd, block);
         }
     }
 
