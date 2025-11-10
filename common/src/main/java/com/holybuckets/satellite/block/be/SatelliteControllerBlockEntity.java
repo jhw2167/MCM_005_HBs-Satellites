@@ -11,6 +11,7 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteManager;
+import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import net.blay09.mods.balm.api.Balm;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -125,7 +126,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         return this.satelliteTargetPos;
     }
 
-
+    public SatelliteItemUpgrade[] getUpgrades() {
+        if(this.source == null) return null;
+        return source.getUpgrades();
+    }
 
     @Override
     public void setSource(SatelliteDisplay source, boolean forceDisplayUpdates)
@@ -158,7 +162,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         processInput(p, hand, cmd);
     }
 
-    public void processInput(Player p, InteractionHand hand, int cmd)
+    public void processInput(Player p, InteractionHand hand, int cmd, ISatelliteControllerBE controller)
     {
         if(cmd == -1) return;
         this.commands.hasUpdate = true;
@@ -211,6 +215,14 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         } else if( cmd == 9) {  //select block
             if(this.level.isClientSide)
                 CommonClass.clientSideActions(this.level, this.clientCloneLinkedSatellite());
+        } else if ( cmd < 12 )
+        { //clear selection
+            if(cmd == 10) { //clear selected block
+                this.source.setTargetController(controller);
+            } else if (cmd == 11) { //clear selected entity
+                this.source.fire(controller);
+            }
+
         }
     }
 

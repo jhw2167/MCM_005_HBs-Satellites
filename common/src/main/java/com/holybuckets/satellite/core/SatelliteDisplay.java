@@ -9,9 +9,11 @@ import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.config.SatelliteConfig;
+import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import com.holybuckets.satellite.particle.ModParticles;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.blay09.mods.balm.api.event.EventPriority;
@@ -57,22 +59,27 @@ public class SatelliteDisplay {
     int zOffset;
     int xOffset;
     ChunkPos target;
+
     int currentSection;
     int maxSection;
     int depth;
-    boolean needsUpdate;
-    boolean needsEntityUpdate;
+
     protected Map<BlockPos, ISatelliteDisplayBE> displayBlocks;
     protected int minX = Integer.MAX_VALUE;
     protected int maxX = Integer.MIN_VALUE;
     protected int minZ = Integer.MAX_VALUE;
     protected int maxZ = Integer.MIN_VALUE;
 
+    protected SatelliteItemUpgrade[] upgrades;
+    protected Set<ISatelliteControllerBE> controllerBlocks;
+
     //rendering
     Set<Entity> displayEntities;
     private Set<ISatelliteDisplayBE> rateLimiter;
     private static final int MAX_RENDER_PER_TICK = 5;
 
+    boolean needsUpdate;
+    boolean needsEntityUpdate;
 
     protected static SatelliteConfig CONFIG;
     public int lifetime;
@@ -95,10 +102,13 @@ public class SatelliteDisplay {
         this.xOffset = 0;
         this.depth = 2;
         this.needsUpdate = true;
-        displayBlocks = new HashMap<>();
 
         rateLimiter = new HashSet<>();
         displayEntities = new HashSet<>();
+
+        displayBlocks = new HashMap<>();
+        controllerBlocks = new HashSet<>();
+        upgrades = new LinkedHashSet<>();
         if(satellite == null) return;
 
         this.target = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
@@ -113,6 +123,26 @@ public class SatelliteDisplay {
         return controller;
     }
 
+    /**
+     *  Add an upgrade to the satellite display, 4 max slots
+     *  returns the previous upgrade in the slot, or the upgrade added if slot was empty
+     */
+    public SatelliteItemUpgrade addUpgrade(SatelliteItemUpgrade upgrade, int slot) {
+        if(slot > upgrades.length ) return null;
+        SatelliteItemUpgrade temp = upgrades[slot];
+        upgrades[slot] = upgrade;
+        if(temp != null) return temp;
+        return upgrade;
+    }
+
+    public SatelliteItemUpgrade removeUpgrade(int slot) {
+        if(slot > upgrades.length ) return null;
+        return upgrades[slot];
+    }
+
+    public SatelliteItemUpgrade[] getUpgrades() {
+        return upgrades;
+    }
 
 
     public int getDepth() {
@@ -209,6 +239,12 @@ public class SatelliteDisplay {
         this.controller.setUiPosition(blockTarget);
     }
 
+
+    void setTargetController(ITargetController targetingController) {
+
+    }
+
+    //** DISPLAY METHODS
     public void resetChunkSection()
     {
         if(noSource() || this.satellite == null || this.target == null) return;
@@ -245,7 +281,6 @@ public class SatelliteDisplay {
         this.cursorSelection = null;
     }
 
-    //** DISPLAY METHODS
 
     public static boolean hasActiveDisplay(LevelChunk chunk) {
         for(ChunkDisplayInfo info : INFO_CACHE.values()) {
