@@ -37,6 +37,12 @@ public class PositionControllerBlockEntity extends SatelliteDisplayBlockEntity i
         markUpdated();
     }
 
+    @Override
+    public SatelliteControllerBlockEntity getSatelliteController() {
+        if (source == null) return null;
+        return source.getSatelliteController();
+    }
+
     public void use(Player player, InteractionHand hand, BlockHitResult hitResult)
     {
         if(this.level==null || level.isClientSide) return;
