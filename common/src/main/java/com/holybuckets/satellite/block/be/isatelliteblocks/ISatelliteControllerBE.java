@@ -1,5 +1,6 @@
 package com.holybuckets.satellite.block.be.isatelliteblocks;
 
+import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -16,6 +17,8 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
     int getColorId();
 
     void setColorId(int colorId);
+
+    SatelliteControllerBlockEntity getSatelliteController();
 
 
     float ORDINAL_COORD_BLOCK_HORZ_RIGHT_THRESHOLD = 0.7f;

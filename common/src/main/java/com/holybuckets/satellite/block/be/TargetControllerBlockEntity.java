@@ -38,9 +38,8 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     }
 
     public SatelliteControllerBlockEntity getSatelliteController() {
-        if (source == null)
-            return null;
-        return source.getPrimaryController();
+        if (source == null) return null;
+        return source.getSatelliteController();
     }
 
     public void use(Player player, InteractionHand hand, BlockHitResult hitResult)
@@ -91,4 +90,5 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         this.saveAdditional(tag);
         return tag;
     }
+
 }

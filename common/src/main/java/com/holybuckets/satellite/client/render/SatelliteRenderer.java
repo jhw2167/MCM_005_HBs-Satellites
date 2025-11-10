@@ -1,6 +1,7 @@
-package com.holybuckets.satellite.client;
+package com.holybuckets.satellite.client.render;
 
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
+import com.holybuckets.satellite.client.CommonClassClient;
 import com.holybuckets.satellite.core.SatelliteManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.LightTexture;

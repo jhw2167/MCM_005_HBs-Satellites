@@ -1,51 +1,47 @@
-package com.holybuckets.satellite.client;
+package com.holybuckets.satellite.client.render;
 
-import net.minecraft.world.level.block.entity.StructureBlockEntity;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.Font.DisplayMode;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
+import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
+import com.holybuckets.satellite.client.CommonClassClient;
 import com.holybuckets.satellite.core.SatelliteManager;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.client.renderer.RenderType;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
-import java.util.function.Predicate;
-
-public class SatelliteControllerRenderer implements BlockEntityRenderer<SatelliteControllerBlockEntity> {
+public class TargetControllerRenderer implements BlockEntityRenderer<TargetControllerBlockEntity> {
 
     private Font font;
-    public SatelliteControllerRenderer(BlockEntityRendererProvider.Context context) {
+    
+    public TargetControllerRenderer(BlockEntityRendererProvider.Context context) {
         font = context.getFont();
     }
 
     @Override
-    public void render(SatelliteControllerBlockEntity blockEntity, float partialTick, PoseStack poseStack, 
+    public void render(TargetControllerBlockEntity blockEntity, float partialTick, PoseStack poseStack, 
                       MultiBufferSource bufferSource, int packedLight, int packedOverlay)
     {
-
         poseStack.pushPose();
 
         // Get VertexConsumer AFTER pushPose and BEFORE building vertices
         VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
 
         // Get texture
-        ResourceLocation woolLoc = SatelliteManager.getResourceForColorId( blockEntity.getColorId() );
+        ResourceLocation woolLoc = SatelliteManager.getResourceForColorId(blockEntity.getColorId());
         TextureAtlasSprite woolSprite = CommonClassClient.getSprite(woolLoc);
-
 
         Matrix4f matrix = poseStack.last().pose();
         Matrix3f normal = poseStack.last().normal();
@@ -67,7 +63,7 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
         float maxY = 0.20f;
         float offset = 0.01f; // Small offset from face
 
-// Transform based on facing direction
+        // Transform based on facing direction
         switch (facing) {
             case NORTH -> {
                 // Face toward negative Z - Flip U coordinates
@@ -117,23 +113,29 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
 
         poseStack.popPose();
 
-        //Render Text
-        renderTargetPos(blockEntity, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
-
+        // Render coordinate information and buttons
+        renderTargetInfo(blockEntity, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
     }
 
-    private void renderTargetPos(SatelliteControllerBlockEntity blockEntity, float partialTick,
+    private void renderTargetInfo(TargetControllerBlockEntity blockEntity, float partialTick,
                                  PoseStack poseStack, MultiBufferSource bufferSource,
                                  int combinedLight, int combinedOverlay)
     {
-        BlockPos targetPos = blockEntity.getUiPosition();
-        if(targetPos == null) targetPos = blockEntity.getBlockPos();
+        // Get the primary controller to retrieve satellite position
+        SatelliteControllerBlockEntity mainController = blockEntity.getSatelliteController();
+        BlockPos targetPos = BlockPos.ZERO;
+        if (mainController == null) {
+            //nothing
+        }
+        else if (blockEntity.getUiPosition() != null) {
+            targetPos = blockEntity.getUiPosition();
+        }
+
         poseStack.pushPose();
 
         poseStack.translate(0.5, 0.925, 0.5);
 
-        BlockState state = blockEntity.getBlockState();
-        Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
         switch(facing) {
             case NORTH:
                 poseStack.translate(0, 0, -0.5);  // Move to north face
@@ -155,43 +157,56 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
 
         poseStack.translate(0, 0, -0.01); // Tiny offset AFTER rotation to prevent z-fighting
         poseStack.mulPose(Axis.ZP.rotationDegrees(180)); // Flip text right-side up
-        float scale = 0.01f;
+        float scale = 0.008f; // Smaller scale to fit more content
         poseStack.scale(scale, scale, scale);
 
-// Prepare text components
-        String xText =  getTruncatedString("X:", targetPos.getX());
-        String yText = getTruncatedString("Y:", targetPos.getY());
-        String zText = getTruncatedString("Z:", targetPos.getZ());
         int textColor = 0x000000;
 
-// Render X in left third
+        // Y grows downward since we flipped Z earlier
+        float rowHeight = 15f;
+        float startY = -35f; // start higher on screen (negative moves up visually)
+
+// X coordinate (top)
         poseStack.pushPose();
-
-        poseStack.translate(-30, 0, 0);
-        font.drawInBatch(xText, -font.width(xText) / 2f, 0, textColor, false,
-            poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
+        poseStack.translate(0, startY, 0);
+        drawCoordRow(poseStack, bufferSource, combinedLight, targetPos.getX(), "X");
         poseStack.popPose();
 
-// Render Y in middle third
-        font.drawInBatch(yText, -font.width(yText) / 2f, 0, textColor, false,
-            poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
-
-// Render Z in right third
+// Y coordinate (middle)
         poseStack.pushPose();
-        poseStack.translate(30, 0, 0);
-        font.drawInBatch(zText, -font.width(zText) / 2f, 0, textColor, false,
+        poseStack.translate(0, startY + rowHeight, 0);
+        drawCoordRow(poseStack, bufferSource, combinedLight, targetPos.getY(), "Y");
+        poseStack.popPose();
+
+// Z coordinate (bottom)
+        poseStack.pushPose();
+        poseStack.translate(0, startY + rowHeight * 2, 0);
+        drawCoordRow(poseStack, bufferSource, combinedLight, targetPos.getZ(), "Z");
+        poseStack.popPose();
+
+// Buttons below coordinates
+        float buttonY = startY + rowHeight * 3 + 10f;
+        poseStack.pushPose();
+        poseStack.translate(-25, buttonY, 0);
+        font.drawInBatch("TARGET", -font.width("TARGET") / 2f, 0, textColor, false,
+            poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
+        poseStack.popPose();
+
+        poseStack.pushPose();
+        poseStack.translate(25, buttonY, 0);
+        font.drawInBatch("FIRE", -font.width("FIRE") / 2f, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
         poseStack.popPose();
 
         poseStack.popPose();
-
     }
 
-    private String getTruncatedString(String pre, int coord) {
-        if(Math.abs(coord) < 999) {
-            return pre + coord;
-        }
-        return Integer.toString(coord);
+    private void drawCoordRow(PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int value, String label) {
+        int textColor = 0x000000;
+        font.drawInBatch(label + ":", -40, 0, textColor, false,
+            poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
+        font.drawInBatch(String.valueOf(value), 10, 0, textColor, false,
+            poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
     }
 
 }

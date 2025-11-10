@@ -109,6 +109,12 @@ public class SatelliteDisplay {
 
     //** GETTERS SETTERS
 
+    public SatelliteControllerBlockEntity getSatelliteController() {
+        return controller;
+    }
+
+
+
     public int getDepth() {
         return this.depth;
     }
@@ -118,7 +124,8 @@ public class SatelliteDisplay {
     }
 
 
-    public void adjOrdinal(int dNS, int dEW) {
+    public void adjOrdinal(int dNS, int dEW)
+    {
         if(noSource() || this.satellite == null) return;
         if(dNS == 0 && dEW == 0) return;
         zOffset += dNS;
@@ -133,19 +140,16 @@ public class SatelliteDisplay {
         if(noSource() || this.satellite == null) return;
         if(dDepth == 0) return;
         this.depth += dDepth;
-        if(depth <= 0) depth = MAX_DEPTH;
-        if(depth > MAX_DEPTH) depth = 1;
+        setDepth( this.depth );
         this.needsUpdate = true;
     }
 
     public void setDepth(int newDepth) {
         if(noSource() || this.satellite == null) return;
         if(newDepth == this.depth) return;
-        if(newDepth < 1)
-            newDepth = 1;
-        if(newDepth > 4)
-            newDepth = 4;
-        this.depth = newDepth;
+        if(newDepth <= 1)             { depth = 1; }
+        else if(newDepth > MAX_DEPTH) { depth = MAX_DEPTH; }
+        else                          { this.depth = newDepth; }
         this.needsUpdate = true;
     }
 
@@ -546,7 +550,7 @@ public class SatelliteDisplay {
             // check against Max and min values
             if(x < minX || x > maxX || z < minZ || z > maxZ) continue;
 
-            ((ServerLevel) level).sendParticles(
+            ((ServerLevel) level).sendParticles (
                 particleType,                     // Particle type
                 x, y, z,
                 1,                                // Particle count
@@ -698,4 +702,5 @@ public class SatelliteDisplay {
             controller.processInput(p, hand, cmd);
         }
     }
+
 }

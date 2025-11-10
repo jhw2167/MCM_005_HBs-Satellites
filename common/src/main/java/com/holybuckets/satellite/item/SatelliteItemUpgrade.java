@@ -11,10 +11,10 @@ import net.blay09.mods.balm.api.Balm;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class UpdateSatelliteItem extends Item {
+public class SatelliteItemUpgrade extends Item {
     private final DyeColor dyeColor;
 
-    public UpdateSatelliteItem(DyeColor dyeColor) {
+    public SatelliteItemUpgrade(DyeColor dyeColor) {
         super(Balm.getItems().itemProperties());
         this.dyeColor = dyeColor;
     }

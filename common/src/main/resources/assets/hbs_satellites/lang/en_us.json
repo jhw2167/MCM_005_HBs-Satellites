@@ -30,13 +30,13 @@
   "item.hbs_satellites.ore_scanner_upgrade": "Ore Scanner Upgrade",
   "item.hbs_satellites.ore_scanner_upgrade.desc": "Enables satellites to detect and highlight ore deposits",
   "item.hbs_satellites.range_upgrade": "Range Upgrade",
-  "item.hbs_satellites.range_upgrade.desc": "Increases the operational range of satellite systems",
+  "item.hbs_satellites.range_upgrade.desc": "Increases the viewing range of the Satellite Display",
   "item.hbs_satellites.depth_upgrade": "Depth Upgrade",
-  "item.hbs_satellites.depth_upgrade.desc": "Enhances the depth scanning capabilities of satellites",
+  "item.hbs_satellites.depth_upgrade.desc": "Increases the viewing depth of satellite display",
   "item.hbs_satellites.entity_scanner_upgrade": "Entity Scanner Upgrade",
-  "item.hbs_satellites.entity_scanner_upgrade.desc": "Allows satellites to detect and track entities",
+  "item.hbs_satellites.entity_scanner_upgrade.desc": "Allows Entity Pings to be revealed on the Satellite Display",
   "item.hbs_satellites.player_scanner_upgrade": "Player Scanner Upgrade",
-  "item.hbs_satellites.player_scanner_upgrade.desc": "Enables satellites to locate and track players",
+  "item.hbs_satellites.player_scanner_upgrade.desc": "Instead of being shown as a Neutral White Ping. Players will be shown as Green if wearing a dyed item  equivalent to the Satellites Wool Color and Red otherwise",
 
   "item.hbs_satellites.upgrade.tooltip": "Upgrade Color: %s",
 

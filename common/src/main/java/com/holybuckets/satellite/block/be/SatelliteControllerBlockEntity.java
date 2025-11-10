@@ -81,12 +81,18 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
 
     @Override
+    public SatelliteControllerBlockEntity getSatelliteController() {
+        return this;
+    }
+
+    @Override
     public BlockPos getUiPosition() {
         return uiTargetBlockPos;
     }
 
     //setTargetPosition, setSelectedPosition
-    public void setUiPosition(BlockPos blockTarget) {
+    public void setUiPosition(BlockPos blockTarget)
+    {
         this.uiTargetBlockPos = blockTarget;
         markUpdated();
         if(level == null || blockTarget == null) return;
