@@ -255,7 +255,22 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
                 source.fire(p, (ITargetController) controller);
             }
             this.commands.hasUpdate = false;
+        } else if( cmd < 16 ) //12-15, upgrade slots
+        {
+            SatelliteItemUpgrade prevItem = null;
+             if(p.getItemInHand(hand).getItem() instanceof  SatelliteItemUpgrade item) {
+                 prevItem = this.source.addUpgrade(item, 15-cmd);
+             } else {
+                 prevItem = this.source.removeUpgrade(15-cmd);
+             }
+
+            if(prevItem != null) {
+                if (!p.getInventory().add(prevItem.getDefaultInstance())) {
+                    p.drop(prevItem.getDefaultInstance(), false);
+                }
+            }
         }
+
     }
 
     private ISatelliteBE clientCloneLinkedSatellite()

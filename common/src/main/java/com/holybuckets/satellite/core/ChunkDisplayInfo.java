@@ -2,6 +2,7 @@ package com.holybuckets.satellite.core;
 
 
 import com.holybuckets.satellite.SatelliteMain;
+import com.holybuckets.satellite.api.ChiselBitsAPI;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -25,9 +26,11 @@ public class ChunkDisplayInfo {
     public LevelChunk chunk;
     public TripleInt blockOffset;
     public int[] holoBits;
+    public int[] oreScanBits;
     public boolean[] hasUpdates;
 
     public int currentYIndexForBatch;
+    public boolean useOreScan;
     public boolean isActive;
     public int lifetime;
 
@@ -37,29 +40,43 @@ public class ChunkDisplayInfo {
     private ChunkDisplayInfo() {
         this.currentYIndexForBatch = -1;
         this.isActive = true;
+        this.useOreScan = false;
         this.hasPlayer = false;
+        this.lifetime = 0;
 
         hasUpdates = new boolean[16];
         localEntities = new HashMap<>();
     }
 
-    public ChunkDisplayInfo(int[] bits) {
-        this();
-        holoBits = bits;
-    }
 
-    public ChunkDisplayInfo(int levelSectionIndex, LevelChunk chunk, TripleInt blockOffset) {
+    public ChunkDisplayInfo(LevelChunk chunk, TripleInt blockOffset, boolean useOreScan)
+    {
         this();
-        this.levelSectionIndex = levelSectionIndex;
+        this.levelSectionIndex = blockOffset.y;
         this.chunk = chunk;
         this.blockOffset = blockOffset;
+        this.useOreScan = useOreScan;
 
         holoBits = new int[4096];
-        updateBits(holoBits, this, true);
+        if(useOreScan) {
+            oreScanBits = new int[4096];
+            updateBits(oreScanBits, this, true);
+            return;
+        }
+        updateBits(holoBits, this, false);
     }
 
-    public ChunkDisplayInfo(LevelChunk chunk, int levelSectionIndex) {
-        this(levelSectionIndex, chunk, new TripleInt(0, 0, 0));
+    //** GETTERS / SETTERS **//
+    void setUseOreScan(boolean useOreScan) {
+        this.useOreScan = useOreScan;
+    }
+
+    public int[] getHoloBits() {
+        return holoBits;
+    }
+
+    public int[] getOreScanBits() {
+        return oreScanBits;
     }
 
     public int augmentBatch() {
@@ -79,7 +96,15 @@ public class ChunkDisplayInfo {
         this.isActive = true;
         if(chunk == null) return;
         if( force  || chunk.isUnsaved())
-            updateBits(holoBits, this, false);
+        {
+            if(useOreScan) {
+                updateBits(holoBits, this, false);
+            } else {
+                if(oreScanBits == null) oreScanBits = new int[4096];
+                updateBits(oreScanBits, this, true);
+            }
+        }
+
 
         if(force)
             this.resetUpdates();
@@ -93,9 +118,10 @@ public class ChunkDisplayInfo {
 
     //** STATICS
 
-    static Set<Integer> updateBits(int[] holoBits, ChunkDisplayInfo info, boolean init) {
+    static Set<Integer> updateBits(int[] holoBits, ChunkDisplayInfo info, boolean useOreScan)
+    {
         LevelChunk chunk = info.chunk;
-            LevelChunkSection section = chunk.getSections()[info.levelSectionIndex];
+        LevelChunkSection section = chunk.getSections()[info.levelSectionIndex];
         //Set<Integer> changed = new HashSet<>(64);
         for (int y = 0; y < 16; y++) {
             //info.hasUpdates[y] = false;
@@ -104,7 +130,10 @@ public class ChunkDisplayInfo {
                     BlockState originalBlock = section.getBlockState(x, y, z);
                     int p = ISatelliteDisplayBE.getCachePos(x, y, z);
                     int temp;
-                    if (IGNORE.contains(originalBlock.getBlock())) {
+
+                    if(useOreScan && ChiselBitsAPI.HOLO_ORE_BLOCK_INDEX(originalBlock.getBlock()) > -1) {
+                        temp = ChiselBitsAPI.HOLO_ORE_BLOCK_INDEX(originalBlock.getBlock());
+                    } else if (IGNORE.contains(originalBlock.getBlock())) {
                         temp = 0;
                     } else if( DARK.contains(originalBlock.getBlock()) ) {
                         temp = 4;
@@ -160,6 +189,7 @@ public class ChunkDisplayInfo {
                 info.target = null;
         }
     }
+
 
     static class EntityInfo {
         public Entity target;

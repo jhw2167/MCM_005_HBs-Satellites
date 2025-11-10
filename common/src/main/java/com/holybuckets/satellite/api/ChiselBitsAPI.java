@@ -1,16 +1,15 @@
 package com.holybuckets.satellite.api;
 
 import com.holybuckets.foundation.event.EventRegistrar;
-import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.ModBlocks;
+import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
+import io.netty.util.collection.IntObjectHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import net.blay09.mods.balm.api.event.server.ServerStartedEvent;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -24,7 +23,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,20 +31,24 @@ import static com.holybuckets.foundation.HBUtil.TripleInt;
 
 public interface ChiselBitsAPI {
 
-    int DEMARCATOR_START_IDX = 8;
+    int OREMAP_START_IDX = 8;
 
     Set<Block> IGNORE = new HashSet<>();
     Set<Block> DARK = new HashSet<>();
+    Object2IntArrayMap<Block> WORLD_ORE_BLOCKS = new Object2IntArrayMap<>();
+    IntObjectHashMap<Block> HOLO_ORE_BLOCKS = new IntObjectHashMap<>();
 
     static void init(EventRegistrar reg) {
-        reg.registerOnBeforeServerStarted(ChiselBitsAPI::onServerStart);
+        reg.registerOnServerStarted(ChiselBitsAPI::onServerStart);
     }
 
-    static void onServerStart(ServerStartingEvent event) {
+    static void onServerStart(ServerStartedEvent event)
+    {
 
         //Finish initializing ignoreBlocks
 
         //Explicit ignores
+        IGNORE.clear();
         IGNORE.addAll( Set.of(
             Blocks.WATER,
             Blocks.AIR,
@@ -106,6 +108,14 @@ public interface ChiselBitsAPI {
         //Ignore vine
         IGNORE.add(Blocks.VINE);
 
+        //3. Add ore blocks from ModConfig
+        WORLD_ORE_BLOCKS.clear();
+        HOLO_ORE_BLOCKS.clear();
+        ModConfig.getOreScannerBlocks().forEach( (worldBlock, holoBlock) -> {
+            WORLD_ORE_BLOCKS.put(worldBlock, HOLO_ORE_BLOCKS.size()+OREMAP_START_IDX);
+            HOLO_ORE_BLOCKS.put(HOLO_ORE_BLOCKS.size()+OREMAP_START_IDX, holoBlock);
+        });
+
     }
 
     static Block HOLO_EMPTY() {
@@ -119,31 +129,14 @@ public interface ChiselBitsAPI {
     static Block HOLO_DARK() { return  ModBlocks.holoDarkBlock ; }
     static Block HOLO_BLACK() { return  ModBlocks.holoDarkBlock; }
 
-    static List<Player> players = new ArrayList<>();
-    static int DEMARCATOR(Player p) {
-        int color = 0;
-        if(p != null) {
-            color = players.indexOf(p);
-            if(color < 0) {
-                players.add(p);
-                color = players.size() - 1;
-            }
-            color = (color % DEMARCATOR_START_IDX);
-        }
-        return color;
+    // returns null for i < OREMAP_START_IDX
+    static Block HOLO_ORE_BLOCK(int i) {
+        return HOLO_ORE_BLOCKS.get(i);
     }
 
-    static Block DEMARCATOR(int i) {
-        //Up to 9 stained glass
-        if(i < 0 || i > 8) i = 0;
-        switch(i) {
-            case 0: return Blocks.ORANGE_STAINED_GLASS;
-            case 1: return Blocks.YELLOW_STAINED_GLASS;
-            case 2: return Blocks.LIME_STAINED_GLASS;
-            case 3: return Blocks.GREEN_STAINED_GLASS;
-            default: return Blocks.ORANGE_STAINED_GLASS;
-
-        }
+    /** @returns -1 if not an ore block */
+    static int HOLO_ORE_BLOCK_INDEX(Block block) {
+        return WORLD_ORE_BLOCKS.getOrDefault(block, -1);
     }
 
     public BlockEntity build(Level level, int[] bits, BlockPos pos);

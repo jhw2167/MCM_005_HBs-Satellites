@@ -16,10 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ModConfig {
     private static Set<EntityType<?>> friendlyEntities = new HashSet<>();
@@ -29,7 +26,8 @@ public class ModConfig {
 
     private static Set<ResourceLocation> trackedStructures = new HashSet<>();
 
-    private static Map<Block, Block> oreScannerBlockMap = new HashMap<>();
+    private static Map<Block, Block> oreScannerBlockMap = new LinkedHashMap<>();
+    public static int MAX_ORE_SCANNER_MAPPINGS = 64;
 
     public static void init(EventRegistrar reg) {
         reg.registerOnBeforeServerStarted( e -> loadDynamicConfigs(e.getServer().registryAccess()), EventPriority.High);
@@ -85,8 +83,10 @@ public class ModConfig {
         //Ores
         oreScannerBlockMap.clear();
         Registry<Block> blockRegistry = reg.registryOrThrow(Registries.BLOCK);
+        int i= 0;
         for (String pair : config.displayUpgrades.oreScannerBlockMappings )
         {
+            if(i++ >= MAX_ORE_SCANNER_MAPPINGS) break;
             String[] parts = pair.split("=");
             if (parts.length != 2) {
                 LoggerProject.logWarning("010002", "Satellite Config: Invalid ore scanner block mapping: " + pair);
@@ -131,5 +131,9 @@ public class ModConfig {
 
     public static Set<ResourceLocation> getTrackedStructures() {
         return trackedStructures;
+    }
+
+    public static Map<Block, Block> getOreScannerBlocks() {
+        return Collections.unmodifiableMap(oreScannerBlockMap);
     }
 }

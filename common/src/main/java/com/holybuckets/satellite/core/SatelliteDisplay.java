@@ -14,6 +14,7 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
 import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.config.SatelliteConfig;
+import com.holybuckets.satellite.item.ModItems;
 import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import com.holybuckets.satellite.particle.ModParticles;
 import com.holybuckets.satellite.particle.WoolDustHelper;
@@ -130,19 +131,28 @@ public class SatelliteDisplay {
 
     /**
      *  Add an upgrade to the satellite display, 4 max slots
-     *  returns the previous upgrade in the slot, or the upgrade added if slot was empty
+     *  returns the previous upgrade in the slot
      */
     public SatelliteItemUpgrade addUpgrade(SatelliteItemUpgrade upgrade, int slot) {
         if(slot > upgrades.length ) return null;
         SatelliteItemUpgrade temp = upgrades[slot];
         upgrades[slot] = upgrade;
-        if(temp != null) return temp;
-        return upgrade;
+        return temp;
+
     }
 
     public SatelliteItemUpgrade removeUpgrade(int slot) {
         if(slot > upgrades.length ) return null;
-        return upgrades[slot];
+        SatelliteItemUpgrade temp = upgrades[slot];
+        upgrades[slot] = null;
+        return temp;
+    }
+
+    public boolean hasUpgrade(SatelliteItemUpgrade upgrade) {
+        return (upgrades[0]==upgrade
+            || upgrades[1]==upgrade
+            || upgrades[2]==upgrade
+            || upgrades[3]==upgrade);
     }
 
     public SatelliteItemUpgrade[] getUpgrades() {
@@ -399,10 +409,11 @@ public class SatelliteDisplay {
     public ChunkDisplayInfo getDisplayInfo(SatelliteDisplayBlockEntity displayblock, int section)
     {
         BlockPos dispOffset = getOffset(displayblock.getBlockPos());
-
+        boolean useOreScan = this.hasUpgrade( ModItems.oreScannerUpgrade );
         TripleInt chunkSelection = new TripleInt(target.x + dispOffset.getX(), section, target.z + dispOffset.getZ());
         if(INFO_CACHE.containsKey(chunkSelection)) {
             ChunkDisplayInfo info = INFO_CACHE.get(chunkSelection);
+            info.setUseOreScan( useOreScan );
             if(!info.isActive) info.refreshBits(true);
             info.isActive = true;
             return info;
@@ -412,9 +423,10 @@ public class SatelliteDisplay {
         if(chunk == null) return null;
         if(chunk.getSections().length <= section) return null;
 
-        INFO_CACHE.put(chunkSelection, new ChunkDisplayInfo(chunk, section));
+        INFO_CACHE.put(chunkSelection, new ChunkDisplayInfo(chunk, chunkSelection, useOreScan));
         return INFO_CACHE.get(chunkSelection);
     }
+
 
 
     //** Render Methods

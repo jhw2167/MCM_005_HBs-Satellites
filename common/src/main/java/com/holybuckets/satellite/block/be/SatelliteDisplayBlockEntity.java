@@ -1,10 +1,12 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.satellite.SatelliteMain;
+import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.SatelliteDisplayBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.holybuckets.satellite.core.SatelliteDisplay;
+import com.holybuckets.satellite.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
@@ -133,8 +135,10 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
             }
             if(proceedWithUpdates) {
                 BlockState before = level.getBlockState(pos);
+                int[] holoBits = (source.hasUpgrade(ModItems.oreScannerUpgrade))
+                    ? info.getOreScanBits() : info.getHoloBits();
                 BlockEntity be = SatelliteMain.chiselBitsApi.build(
-                    this.level, info.holoBits, pos, info.hasUpdates);
+                    this.level, holoBits, pos, info.hasUpdates);
                 if( be != null ) {
                     level.sendBlockUpdated(pos, before, be.getBlockState(), 11 );
                 }

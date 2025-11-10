@@ -69,11 +69,11 @@ public class ChiselBitsAPIFabric implements ChiselBitsAPI {
         );
 
         //Fill with [4] up to index 6
-        for(int i = 5; i < ChiselBitsAPI.DEMARCATOR_START_IDX; i++) HOLO_BLOCKS[i] = HOLO_BLOCKS[4];
+        for(int i = 5; i < ChiselBitsAPI.OREMAP_START_IDX; i++) HOLO_BLOCKS[i] = HOLO_BLOCKS[4];
 
         //Fill with stained glass colors up to 15
-        for(int i = ChiselBitsAPI.DEMARCATOR_START_IDX; i < 16; i++) {
-            BlockState STAINED = ChiselBitsAPI.DEMARCATOR(i-8).defaultBlockState();
+        for(int i = ChiselBitsAPI.OREMAP_START_IDX; i < 16; i++) {
+            BlockState STAINED = ChiselBitsAPI.HOLO_ORE_BLOCK(i-8).defaultBlockState();
             HOLO_BLOCKS[i] = new BlockInformation( STAINED,
                 IStateVariantManager.getInstance().getStateVariant(STAINED, CHISELED)
             );

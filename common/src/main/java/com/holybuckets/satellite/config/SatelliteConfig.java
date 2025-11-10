@@ -58,6 +58,14 @@ public class SatelliteConfig {
                 "minecraft:diamond_ore=minecraft:diamond_block",
                 "minecraft:emerald_ore=minecraft:emerald_block",
 
+                "minecraft:deepslate_coal_ore=minecraft:coal_block",
+                "minecraft:deepslate_iron_ore=minecraft:iron_block",
+                "minecraft:deepslate_gold_ore=minecraft:gold_block",
+                "minecraft:deepslate_diamond_ore=minecraft:diamond_block",
+                "minecraft:deepslate_emerald_ore=minecraft:emerald_block",
+                "minecraft:deepslate_redstone_ore=minecraft:redstone_block",
+                "minecraft:deepslate_lapis_ore=minecraft:lapis_block",
+
                 "minecraft:stone=hbs_satellites:holo_air_block",
                 "minecraft:deepslate=hbs_satellites:holo_air_block"
         );
