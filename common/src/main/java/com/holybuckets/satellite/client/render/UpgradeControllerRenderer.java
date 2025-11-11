@@ -116,8 +116,6 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
                                      MultiBufferSource bufferSource, Direction facing, Matrix4f matrix, 
                                      Matrix3f normal, int light, int overlay) {
         
-        if (blockEntity.getSatelliteController() == null) return;
-        
         var upgrades = blockEntity.getUpgrades();
         if (upgrades == null || upgrades.length == 0) return;
 
