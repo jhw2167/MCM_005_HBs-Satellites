@@ -3,6 +3,7 @@ package com.holybuckets.satellite.client.render;
 import com.holybuckets.satellite.client.CommonClassClient;
 import com.holybuckets.satellite.block.be.UpgradeControllerBlockEntity;
 import com.holybuckets.satellite.core.SatelliteManager;
+import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.LightTexture;
@@ -121,12 +122,12 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
 
         VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
 
-        // Define quadrant positions (above bottom row which is at y=0.4)
+        // Define quadrant positions above the bottom row (which is at y=0.05-0.20)
         float[][] quadrants = {
-            {0.05f, 0.45f, 0.65f, 0.95f}, // Top-left quadrant
-            {0.55f, 0.95f, 0.65f, 0.95f}, // Top-right quadrant  
-            {0.05f, 0.45f, 0.45f, 0.75f}, // Bottom-left quadrant
-            {0.55f, 0.95f, 0.45f, 0.75f}  // Bottom-right quadrant
+            {0.67f, 0.83f, 0.25f, 0.41f}, // Top-left quadrant
+            {0.83f, 0.99f, 0.25f, 0.41f}, // Top-right quadrant  
+            {0.67f, 0.83f, 0.41f, 0.57f}, // Bottom-left quadrant
+            {0.83f, 0.99f, 0.41f, 0.57f}  // Bottom-right quadrant
         };
         
         float offset = 0.01f;
@@ -134,10 +135,10 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         // Render up to 4 upgrades in the quadrants
         for (int i = 0; i < Math.min(4, upgrades.length); i++)
         {
-            // Get upgrade texture - assuming upgrades have a getTexture() method
-            // This will need to be adjusted based on actual SatelliteItemUpgrade API
-            ResourceLocation itemLoc = BuiltInRegistries.ITEM.getKey(upgrades[i]);
-            ResourceLocation upgradeLoc = new ResourceLocation("satellite", "textures/item/" + itemLoc.getPath() + ".png");
+            if (upgrades[i] == null) continue;
+            
+            // Get upgrade texture based on the dye color
+            ResourceLocation upgradeLoc = new ResourceLocation("minecraft", "block/" + upgrades[i].getDyeColor().getName() + "_wool");
             TextureAtlasSprite upgradeSprite = CommonClassClient.getSprite(upgradeLoc);
             
             float u0 = upgradeSprite.getU0();
@@ -187,11 +188,11 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
                     builder.vertex(matrix, 1 + offset, minY, maxX)
                         .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
                     builder.vertex(matrix, 1 + offset, minY, minX)
-                        .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+                        .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0,0).endVertex();
                     builder.vertex(matrix, 1 + offset, maxY, minX)
                         .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
                     builder.vertex(matrix, 1 + offset, maxY, maxX)
-                        .color(255,255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+                        .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
                 }
             }
         }
