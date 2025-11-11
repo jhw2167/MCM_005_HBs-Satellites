@@ -51,11 +51,11 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
 
         Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 
-        // Right center position for wool
-        float minX = 0.67f;
-        float maxX = 0.99f;
-        float minY = 0.35f;
-        float maxY = 0.65f;
+        // Same size and Y position as SatelliteControllerRenderer, but offset to the right
+        float minX = 0.67f;  // 0.34f + 0.33f offset
+        float maxX = 0.99f;  // 0.66f + 0.33f offset  
+        float minY = 0.05f;  // Same as SatelliteControllerRenderer
+        float maxY = 0.20f;  // Same as SatelliteControllerRenderer
         float offset = 0.01f; // Small offset from face
 
         // Transform based on facing direction
@@ -191,7 +191,7 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
                     builder.vertex(matrix, 1 + offset, maxY, minX)
                         .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
                     builder.vertex(matrix, 1 + offset, maxY, maxX)
-                        .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+                        .color(255,255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
                 }
             }
         }
