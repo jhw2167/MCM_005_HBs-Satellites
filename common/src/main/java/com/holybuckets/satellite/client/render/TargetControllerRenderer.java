@@ -29,6 +29,11 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
     private static final float COORD_LABEL_SCALE = 1.2f;
     private static final float COORD_VALUE_SCALE = 0.9f;
     
+    // Button positioning configuration
+    private static final float BUTTON_Y_OFFSET = 10f;
+    private static final float TARGET_BUTTON_X_OFFSET = -34f;
+    private static final float FIRE_BUTTON_X_OFFSET = 25f;
+    
     public TargetControllerRenderer(BlockEntityRendererProvider.Context context) {
         font = context.getFont();
     }
@@ -187,16 +192,16 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         poseStack.popPose();
 
 // Buttons below coordinates
-        float buttonY = startY + rowHeight * 4 + 10f;
+        float buttonY = startY + rowHeight * 4 + BUTTON_Y_OFFSET;
         poseStack.pushPose();
-        poseStack.translate(-34, buttonY, 0);
+        poseStack.translate(TARGET_BUTTON_X_OFFSET, buttonY, 0);
         String targetOrClear = (blockEntity.getCursorPosition()==null) ? "TARGET" : "CLEAR";
         font.drawInBatch(targetOrClear, -font.width(targetOrClear) / 2f, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
         poseStack.popPose();
 
         poseStack.pushPose();
-        poseStack.translate(25, buttonY, 0);
+        poseStack.translate(FIRE_BUTTON_X_OFFSET, buttonY, 0);
         font.drawInBatch("FIRE", -font.width("FIRE") / 2f, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
         poseStack.popPose();
