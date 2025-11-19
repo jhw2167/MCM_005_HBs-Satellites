@@ -1,6 +1,5 @@
 package com.holybuckets.satellite.client.render;
 
-import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
 import com.holybuckets.satellite.client.CommonClassClient;
 import com.holybuckets.satellite.core.SatelliteManager;
@@ -120,21 +119,18 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
     static int textColor = 0x000000;
 
     // Y grows downward since we flipped Z earlier
-    static float rowHeight = 20f;
-    static float startY = 0f; // start higher on screen (negative moves up visually)
+    static float rowHeight = 25f;
+    static float startY = 6f; // start higher on screen (negative moves up visually)
 
     private void renderTargetInfo(TargetControllerBlockEntity blockEntity, float partialTick,
                                  PoseStack poseStack, MultiBufferSource bufferSource,
                                  int combinedLight, int combinedOverlay)
     {
         // Get the primary controller to retrieve satellite position
-        SatelliteControllerBlockEntity mainController = blockEntity.getSatelliteController();
+        //SatelliteControllerBlockEntity mainController = blockEntity.getSatelliteController();
         BlockPos targetPos = BlockPos.ZERO;
-        if (mainController == null) {
-            //nothing
-        }
-        else if (blockEntity.getUiPosition() != null) {
-            targetPos = blockEntity.getUiPosition();
+        if (blockEntity.getUiTargetBlockPos() != null) {
+            targetPos = blockEntity.getUiTargetBlockPos();
         }
 
         poseStack.pushPose();
@@ -166,7 +162,7 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         float scale = 0.008f; // Smaller scale to fit more content
         poseStack.scale(scale, scale, scale);
 
-        float leftAlignOffset = -10;
+        float leftAlignOffset = -15;
 // X coordinate (top)
         poseStack.pushPose();
         poseStack.translate(leftAlignOffset, startY, 0);
@@ -186,9 +182,9 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         poseStack.popPose();
 
 // Buttons below coordinates
-        float buttonY = startY + rowHeight * 3 + 10f;
+        float buttonY = startY + rowHeight * 4 + 10f;
         poseStack.pushPose();
-        poseStack.translate(-25, buttonY, 0);
+        poseStack.translate(-34, buttonY, 0);
         String targetOrClear = (blockEntity.getCursorPosition()==null) ? "TARGET" : "CLEAR";
         font.drawInBatch(targetOrClear, -font.width(targetOrClear) / 2f, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
