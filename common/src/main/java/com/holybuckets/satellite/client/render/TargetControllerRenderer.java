@@ -26,8 +26,8 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
     private Font font;
     
     // Font scale configuration
-    private static final float COORD_LABEL_SCALE = 1.0f;
-    private static final float COORD_VALUE_SCALE = 1.2f;
+    private static final float COORD_LABEL_SCALE = 1.2f;
+    private static final float COORD_VALUE_SCALE = 0.9f;
     
     public TargetControllerRenderer(BlockEntityRendererProvider.Context context) {
         font = context.getFont();
@@ -123,8 +123,9 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
     static int textColor = 0x000000;
 
     // Y grows downward since we flipped Z earlier
-    static float rowHeight = 25f;
-    static float startY = 6f; // start higher on screen (negative moves up visually)
+    static float rowHeight = 24f;
+    static float startY = 5.9f; // start higher on screen (negative moves up visually)
+    static int labelMarginAdjust = -32;
 
     private void renderTargetInfo(TargetControllerBlockEntity blockEntity, float partialTick,
                                  PoseStack poseStack, MultiBufferSource bufferSource,
@@ -209,7 +210,7 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         // Draw label with label scale
         poseStack.pushPose();
         poseStack.scale(COORD_LABEL_SCALE, COORD_LABEL_SCALE, COORD_LABEL_SCALE);
-        font.drawInBatch(label + ":", -40 / COORD_LABEL_SCALE, 0, textColor, false,
+        font.drawInBatch(label + ":", labelMarginAdjust / COORD_LABEL_SCALE, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
         poseStack.popPose();
         
