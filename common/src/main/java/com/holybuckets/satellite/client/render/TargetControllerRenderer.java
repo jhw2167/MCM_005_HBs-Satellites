@@ -25,6 +25,10 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
 
     private Font font;
     
+    // Font scale configuration
+    private static final float COORD_LABEL_SCALE = 1.0f;
+    private static final float COORD_VALUE_SCALE = 1.2f;
+    
     public TargetControllerRenderer(BlockEntityRendererProvider.Context context) {
         font = context.getFont();
     }
@@ -201,10 +205,20 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
 
     private void drawCoordRow(PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int value, String label) {
         int textColor = 0x000000;
-        font.drawInBatch(label + ":", -40, 0, textColor, false,
+        
+        // Draw label with label scale
+        poseStack.pushPose();
+        poseStack.scale(COORD_LABEL_SCALE, COORD_LABEL_SCALE, COORD_LABEL_SCALE);
+        font.drawInBatch(label + ":", -40 / COORD_LABEL_SCALE, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
-        font.drawInBatch(String.valueOf(value), 10, 0, textColor, false,
+        poseStack.popPose();
+        
+        // Draw value with value scale
+        poseStack.pushPose();
+        poseStack.scale(COORD_VALUE_SCALE, COORD_VALUE_SCALE, COORD_VALUE_SCALE);
+        font.drawInBatch(String.valueOf(value), 10 / COORD_VALUE_SCALE, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
+        poseStack.popPose();
     }
 
 }
