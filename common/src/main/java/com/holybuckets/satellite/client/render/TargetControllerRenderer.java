@@ -24,16 +24,7 @@ import org.joml.Matrix4f;
 public class TargetControllerRenderer implements BlockEntityRenderer<TargetControllerBlockEntity> {
 
     private Font font;
-    
-    // Font scale configuration
-    private static final float COORD_LABEL_SCALE = 1.2f;
-    private static final float COORD_VALUE_SCALE = 0.9f;
-    
-    // Button positioning configuration
-    private static final float BUTTON_Y_OFFSET = 10f;
-    private static final float TARGET_BUTTON_X_OFFSET = -34f;
-    private static final float FIRE_BUTTON_X_OFFSET = 25f;
-    
+
     public TargetControllerRenderer(BlockEntityRendererProvider.Context context) {
         font = context.getFont();
     }
@@ -65,10 +56,10 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
 
         Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 
-        float minX = 0.34f;
-        float maxX = 0.66f;
-        float minY = 0.05f;
-        float maxY = 0.20f;
+        float minX = 0.48f;//0.34f;
+        float maxX = 0.54f;// 0.66f;
+        float minY = 0.16f;
+        float maxY = 0.26f;
         float offset = 0.01f; // Small offset from face
 
         // Transform based on facing direction
@@ -122,15 +113,26 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         poseStack.popPose();
 
         // Render coordinate information and buttons
-        renderTargetInfo(blockEntity, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
+        renderTargetInfo(blockEntity, partialTick, poseStack, bufferSource, light, packedOverlay);
     }
 
     static int textColor = 0x000000;
 
+    // Font scale configuration
+    private static final float COORD_LABEL_SCALE = 1.2f;
+    private static final float COORD_VALUE_SCALE = 0.9f;
+
+
     // Y grows downward since we flipped Z earlier
-    static float rowHeight = 24f;
-    static float startY = 5.9f; // start higher on screen (negative moves up visually)
+    static float rowHeight = 23.5f;
+    static float startY = 6.1f; // start higher on screen (negative moves up visually)
     static int labelMarginAdjust = -32;
+
+    // Button positioning configuration
+    private static final float BUTTON_Y_OFFSET = (rowHeight * 3) + 10;
+    private static final float TARGET_BUTTON_X_OFFSET = -28f;
+    private static final float FIRE_BUTTON_X_OFFSET = 30f;
+
 
     private void renderTargetInfo(TargetControllerBlockEntity blockEntity, float partialTick,
                                  PoseStack poseStack, MultiBufferSource bufferSource,
@@ -192,7 +194,7 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         poseStack.popPose();
 
 // Buttons below coordinates
-        float buttonY = startY + rowHeight * 4 + BUTTON_Y_OFFSET;
+        float buttonY = startY + BUTTON_Y_OFFSET;
         poseStack.pushPose();
         poseStack.translate(TARGET_BUTTON_X_OFFSET, buttonY, 0);
         String targetOrClear = (blockEntity.getCursorPosition()==null) ? "TARGET" : "CLEAR";
