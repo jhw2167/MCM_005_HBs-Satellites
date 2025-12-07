@@ -59,7 +59,7 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         float minX = 0.48f;//0.34f;
         float maxX = 0.54f;// 0.66f;
         float minY = 0.16f;
-        float maxY = 0.26f;
+        float maxY = 0.21f; // Cut off top half by reducing from 0.26f to 0.21f
         float offset = 0.01f; // Small offset from face
 
         // Transform based on facing direction
@@ -128,10 +128,10 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
     static float startY = 6.1f; // start higher on screen (negative moves up visually)
     static int labelMarginAdjust = -32;
 
-    // Button positioning configuration
-    private static final float BUTTON_Y_OFFSET = (rowHeight * 3) + 10;
-    private static final float TARGET_BUTTON_X_OFFSET = -28f;
-    private static final float FIRE_BUTTON_X_OFFSET = 30f;
+    // Button positioning configuration - moved down 20%
+    private static final float BUTTON_Y_OFFSET = (rowHeight * 3) + 10 + ((rowHeight * 3) + 10) * 0.2f;
+    private static final float TARGET_BUTTON_X_OFFSET = -33f; // Moved slightly left from -28f
+    private static final float FIRE_BUTTON_X_OFFSET = 36f; // Moved 20% right from 30f
 
 
     private void renderTargetInfo(TargetControllerBlockEntity blockEntity, float partialTick,
@@ -171,7 +171,7 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
 
         poseStack.translate(0, 0, -0.01); // Tiny offset AFTER rotation to prevent z-fighting
         poseStack.mulPose(Axis.ZP.rotationDegrees(180)); // Flip text right-side up
-        float scale = 0.008f; // Smaller scale to fit more content
+        float scale = 0.007f; // Decreased from 0.008f for slightly smaller font
         poseStack.scale(scale, scale, scale);
 
         float leftAlignOffset = -15;
