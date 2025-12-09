@@ -128,9 +128,9 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
     static float startY = 6.1f; // start higher on screen (negative moves up visually)
     static int labelMarginAdjust = -32;
 
-    // Button positioning configuration - moved down 20%
-    private static final float BUTTON_Y_OFFSET = (rowHeight * 3) + 10 + ((rowHeight * 3) + 10);
-    private static final float TARGET_BUTTON_X_OFFSET = -33f; // Moved 20% right from -33f: -33 * 0.8 = -26.4f
+    // Button positioning configuration - raised higher on the block
+    private static final float BUTTON_Y_OFFSET = (rowHeight * 3) - 10;
+    private static final float TARGET_BUTTON_X_OFFSET = -26.4f; // Moved 20% right from -33f: -33 * 0.8 = -26.4f
     private static final float FIRE_BUTTON_X_OFFSET = 36f; // Moved 20% right from 30f
 
 
