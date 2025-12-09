@@ -56,10 +56,10 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
 
         Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 
-        float minX = 0.48f;//0.34f;
-        float maxX = 0.54f;// 0.66f;
+        float minX = 0.40f; // Moved left from 0.48f
+        float maxX = 0.46f; // Moved left from 0.54f
         float minY = 0.16f;
-        float maxY = 0.21f; // Cut off top half by reducing from 0.26f to 0.21f
+        float maxY = 0.215f; // Made 10% taller: (0.21 - 0.16) * 1.1 + 0.16 = 0.215f
         float offset = 0.01f; // Small offset from face
 
         // Transform based on facing direction
@@ -130,7 +130,7 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
 
     // Button positioning configuration - moved down 20%
     private static final float BUTTON_Y_OFFSET = (rowHeight * 3) + 10 + ((rowHeight * 3) + 10) * 0.2f;
-    private static final float TARGET_BUTTON_X_OFFSET = -33f; // Moved slightly left from -28f
+    private static final float TARGET_BUTTON_X_OFFSET = -26.4f; // Moved 20% right from -33f: -33 * 0.8 = -26.4f
     private static final float FIRE_BUTTON_X_OFFSET = 36f; // Moved 20% right from 30f
 
 
