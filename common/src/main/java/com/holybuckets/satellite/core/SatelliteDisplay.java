@@ -4,7 +4,6 @@ import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.TickType;
-import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
@@ -24,8 +23,6 @@ import net.blay09.mods.balm.api.event.UseBlockEvent;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.DustParticleOptionsBase;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -37,12 +34,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
@@ -178,6 +173,7 @@ public class SatelliteDisplay {
         ChunkPos satellitePos = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
         this.target = new ChunkPos(satellitePos.x + xOffset, satellitePos.z + zOffset);
         this.needsUpdate = true;
+        this.refreshUiPositions();
     }
 
     private static int MAX_DEPTH = 4;
@@ -196,6 +192,16 @@ public class SatelliteDisplay {
         else if(newDepth > MAX_DEPTH) { depth = MAX_DEPTH; }
         else                          { this.depth = newDepth; }
         this.needsUpdate = true;
+        this.refreshUiPositions();
+    }
+
+    private void refreshUiPositions() {
+        for(ISatelliteControllerBE cb : controllerBlocks) {
+            if(cb instanceof ITargetController tc) {
+                tc.setUiTargetBlockPos(null);
+                tc.setCursorPosition(null);
+            }
+        }
     }
 
     public void setCurrentSection(int section) {
@@ -203,6 +209,7 @@ public class SatelliteDisplay {
         if( section == this.currentSection ) return;
         this.currentSection = section;
         this.needsUpdate = true;
+        this.refreshUiPositions();
     }
 
     public void adjCurrentSection(int delta) {
@@ -251,7 +258,7 @@ public class SatelliteDisplay {
                 (int) blockOffset.z
             );
 
-        this.targetController.setUiPosition(blockTarget);
+        this.targetController.setUiTargetBlockPos(blockTarget);
         this.targetController.setCursorPosition(hitLoc);
     }
 
@@ -279,6 +286,7 @@ public class SatelliteDisplay {
             break;
         }
         this.needsUpdate = true;
+        this.refreshUiPositions();
     }
 
     public void resetOrdinal() {
@@ -287,6 +295,7 @@ public class SatelliteDisplay {
         if(noSource() || this.satellite == null) return;
         this.target = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
         this.needsUpdate = true;
+        this.refreshUiPositions();
     }
 
     public boolean needsClear() { return needsUpdate; }
@@ -297,7 +306,7 @@ public class SatelliteDisplay {
             if(info.isActive) info.resetUpdates();
         });
         needsUpdate = true;
-        if(targetController != null) targetController.setUiPosition(null);
+        if(targetController != null) targetController.setUiTargetBlockPos(null);
         this.cursorSelection = null;
     }
 

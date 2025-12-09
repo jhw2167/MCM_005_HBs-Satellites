@@ -22,12 +22,14 @@ import java.util.List;
 import java.util.Set;
 
 public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE {
-    private int colorId = 0;
-    private BlockPos uiPosition = BlockPos.ZERO;
-    private SatelliteItemUpgrade[] upgrades = new SatelliteItemUpgrade[4];
+    private int colorId;
+    private BlockPos uiPosition;
+    private SatelliteItemUpgrade[] upgrades;
 
     public UpgradeControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.upgradeControllerBlockEntity.get(), pos, state);
+        upgrades = new SatelliteItemUpgrade[4];
+        colorId = 0;
     }
 
     @Override
@@ -59,14 +61,23 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
 
     public void use(Player player, InteractionHand hand, BlockHitResult hitResult)
     {
-        if(this.level==null || level.isClientSide) return;
+        if(this.level==null) return;
         int cmd = ISatelliteControllerBE.calculateHitCommandUpgrade(hitResult);
         if (cmd == -1) return;
 
-        if(source != null)
+        if(source != null) {
             source.sendinput(player, hand, cmd);
-        
+            setUpgrades(source.getUpgrades());
+        }
+
         updateBlockState();
+    }
+
+    private void setUpgrades(SatelliteItemUpgrade[] upgrades) {
+        if(upgrades == null) return;
+        for(int i = 0; i < this.upgrades.length; i++) {
+            this.upgrades[i] = upgrades[i];
+        }
     }
 
     private void updateBlockState() {
@@ -74,6 +85,7 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         BlockState state = this.getBlockState();
         BlockState newState = state.setValue(TargetControllerBlock.POWERED, this.isDisplayOn);
         level.setBlock(this.getBlockPos(), newState, 3);
+        this.markUpdated();
     }
 
     @Override
@@ -82,13 +94,8 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         tag.putInt("colorId", colorId);
         
         // Save upgrades array
-        for (int i = 0; i < upgrades.length; i++) {
-            if (upgrades[i] != null) {
-                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(upgrades[i]);
-                tag.putString("upgrade_" + i, itemId.toString());
-            } else {
-                tag.putString("upgrade_" + i, "");
-            }
+        for(int i = 0; i < upgrades.length; i++) {
+            tag.putString(UPGRADE_KEY+i, upgradeString(upgrades[i]));
         }
     }
 
@@ -98,29 +105,19 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         colorId = tag.getInt("colorId");
         
         // Load upgrades array
-        for (int i = 0; i < upgrades.length; i++) {
-            String upgradeString = tag.getString("upgrade_" + i);
-            if (!upgradeString.isEmpty()) {
-                ResourceLocation itemId = new ResourceLocation(upgradeString);
-                Item item = BuiltInRegistries.ITEM.get(itemId);
-                if (item instanceof SatelliteItemUpgrade) {
-                    upgrades[i] = (SatelliteItemUpgrade) item;
-                } else {
-                    upgrades[i] = null;
-                }
-            } else {
-                upgrades[i] = null;
+        for(int i = 0; i < upgrades.length; i++) {
+           String upgString = tag.getString(UPGRADE_KEY+i);
+           ResourceLocation upgRL = ResourceLocation.tryParse(upgString);
+           if(upgRL == null || !BuiltInRegistries.ITEM.containsKey(upgRL)) {
+               upgrades[i] = null;
+               continue;
+           }
+            upgrades[i] = (SatelliteItemUpgrade) BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(upgString));
+            if(source != null) {
+                source.addUpgrade(upgrades[i], i);
             }
         }
-        
-        // Add upgrades to source if source is not null
-        if (source != null) {
-            for (SatelliteItemUpgrade upgrade : upgrades) {
-                if (upgrade != null) {
-                    source.addUpgrade(upgrade);
-                }
-            }
-        }
+
     }
 
     private void markUpdated() {
@@ -139,6 +136,15 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         CompoundTag tag = super.getUpdateTag();
         this.saveAdditional(tag);
         return tag;
+    }
+
+
+    //** Statics
+    private static final String UPGRADE_KEY = "SatelliteItemUpgrade";
+    private static String upgradeString(SatelliteItemUpgrade upgrade) {
+        if (upgrade == null) return "";
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(upgrade);
+        return itemId.toString();
     }
 
 }

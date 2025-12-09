@@ -20,5 +20,10 @@ public class ModRenderers {
             ModBlockEntities.targetControllerBlockEntity::get,
             TargetControllerRenderer::new
         );
+
+        renderers.registerBlockEntityRenderer(
+            ModBlockEntities.upgradeControllerBlockEntity::get,
+            UpgradeControllerRenderer::new
+        );
     }
 }

@@ -12,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
 
-    BlockPos getUiPosition();
+    BlockPos getUiTargetBlockPos();
 
     int getColorId();
 
@@ -192,23 +192,23 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
         int input = -1;
         
         // Top arrow
-        if (inMiddleX && y > POSITION_MIDDLE_TOP - POSITION_ARROW_SIZE/2 && y < POSITION_MIDDLE_TOP + POSITION_ARROW_SIZE/2) {
+        if (inMiddleX && y > POSITION_MIDDLE_TOP - POSITION_ARROW_SIZE/2 ) {
             input = 1;
         }
         // Bottom arrow
-        else if (inMiddleX && y > POSITION_MIDDLE_BOTTOM - POSITION_ARROW_SIZE/2 && y < POSITION_MIDDLE_BOTTOM + POSITION_ARROW_SIZE/2) {
+        else if (inMiddleX && y < POSITION_MIDDLE_BOTTOM + POSITION_ARROW_SIZE/2) {
             input = 2;
         }
         // Left arrow
-        else if (inMiddleY && xz > POSITION_MIDDLE_LEFT - POSITION_ARROW_SIZE/2 && xz < POSITION_MIDDLE_LEFT + POSITION_ARROW_SIZE/2) {
+        else if (inMiddleY  && xz < POSITION_MIDDLE_LEFT + POSITION_ARROW_SIZE/2) {
             input = 3;
         }
         // Right arrow
-        else if (inMiddleY && xz > POSITION_MIDDLE_RIGHT - POSITION_ARROW_SIZE/2 && xz < POSITION_MIDDLE_RIGHT + POSITION_ARROW_SIZE/2) {
+        else if (inMiddleY && xz > POSITION_MIDDLE_RIGHT - POSITION_ARROW_SIZE/2 ) {
             input = 4;
         }
 
-        if(cmd > 0)
+        if(input > 0)
             cmd = getDirectionFromArrow(blockFacing, input);
 
         return cmd;
@@ -366,6 +366,8 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
             }
         }
         // Check top section (4 quadrants)
+        // 0 1
+        // 2 3
         else if (y > UPGRADE_TOP_SECTION) {
             // Top-left quadrant
             if (xz < UPGRADE_QUAD_SPLIT && y > (UPGRADE_TOP_SECTION + (1.0 - UPGRADE_TOP_SECTION) * UPGRADE_QUAD_SPLIT)) {

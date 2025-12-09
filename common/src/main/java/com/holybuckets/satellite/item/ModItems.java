@@ -25,12 +25,12 @@ public class ModItems {
         creativeModeTab = items.registerCreativeModeTab(id(Constants.MOD_ID), () -> new ItemStack(ModBlocks.satelliteBlock));
 
         // Register upgrade items with random dye colors
-        items.registerItem(() -> multilinkUpgrade = new SatelliteItemUpgrade(DyeColor.PURPLE), id("multilink_upgrade"));
-        items.registerItem(() -> oreScannerUpgrade = new SatelliteItemUpgrade(DyeColor.GREEN), id("ore_scanner_upgrade"));
-        items.registerItem(() -> rangeUpgrade = new SatelliteItemUpgrade(DyeColor.BLUE), id("range_upgrade"));
-        items.registerItem(() -> depthUpgrade = new SatelliteItemUpgrade(DyeColor.BROWN), id("depth_upgrade"));
-        items.registerItem(() -> entityScannerUpgrade = new SatelliteItemUpgrade(DyeColor.RED), id("entity_scanner_upgrade"));
-        items.registerItem(() -> playerScannerUpgrade = new SatelliteItemUpgrade(DyeColor.YELLOW), id("player_scanner_upgrade"));
+        items.registerItem(() -> multilinkUpgrade = new SatelliteItemUpgrade("multilink_upgrade"), id("multilink_upgrade"));
+        items.registerItem(() -> oreScannerUpgrade = new SatelliteItemUpgrade("ore_scanner_upgrade"), id("ore_scanner_upgrade"));
+        items.registerItem(() -> rangeUpgrade = new SatelliteItemUpgrade("range_upgrade"), id("range_upgrade"));
+        items.registerItem(() -> depthUpgrade = new SatelliteItemUpgrade("depth_upgrade"), id("depth_upgrade"));
+        items.registerItem(() -> entityScannerUpgrade = new SatelliteItemUpgrade("entity_scanner_upgrade"), id("entity_scanner_upgrade"));
+        items.registerItem(() -> playerScannerUpgrade = new SatelliteItemUpgrade("player_scanner_upgrade"), id("player_scanner_upgrade"));
     }
 
     private static ResourceLocation id(String name) {

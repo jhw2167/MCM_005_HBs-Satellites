@@ -23,7 +23,7 @@ public class PositionControllerBlockEntity extends SatelliteDisplayBlockEntity i
     }
 
     @Override
-    public BlockPos getUiPosition() {
+    public BlockPos getUiTargetBlockPos() {
         return uiPosition;
     }
 

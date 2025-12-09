@@ -210,6 +210,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         super.saveAdditional(tag);
         tag.putInt("height", height);
         tag.putInt("holoLift", holoLift);
+        tag.putBoolean("isDisplayOn", isDisplayOn);
     }
 
     @Override
@@ -217,6 +218,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         super.load(tag);
         this.height = tag.getInt("height");
         this.holoLift = tag.getInt("holoLift");
+        this.isDisplayOn = tag.getBoolean("isDisplayOn");
         //if(height > 0) clearAboveArea(height);
     }
 

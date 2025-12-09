@@ -3,7 +3,6 @@ package com.holybuckets.satellite.block.be;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.console.Messager;
 import com.holybuckets.satellite.CommonClass;
-import com.holybuckets.satellite.CommonProxy;
 import com.holybuckets.satellite.block.SatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
@@ -13,7 +12,6 @@ import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteManager;
 import com.holybuckets.satellite.item.SatelliteItemUpgrade;
-import net.blay09.mods.balm.api.Balm;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -23,21 +21,16 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-
-import static com.holybuckets.satellite.CommonClass.clientSideActions;
-import static com.holybuckets.satellite.SatelliteMain.chiselBitsApi;
 
 public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController
 {
@@ -92,13 +85,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     }
 
     @Override
-    public BlockPos getUiPosition() {
+    public BlockPos getUiTargetBlockPos() {
         return uiTargetBlockPos;
     }
 
 
     //setTargetPosition, setSelectedPosition
-    public void setUiPosition(BlockPos blockTarget)
+    public void setUiTargetBlockPos(BlockPos blockTarget)
     {
         this.uiTargetBlockPos = blockTarget;
         markUpdated();
@@ -249,7 +242,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
                 if(tc.getCursorPosition() != null) tc.setCursorPosition(null);
                 source.setTargetController(tc);
             } else if (cmd == 11) {
-                if(tc.getUiPosition() == null) {
+                if(tc.getUiTargetBlockPos() == null) {
                     Messager.getInstance().sendChat(p, "No target selected!");
                 }
                 source.fire(p, (ITargetController) controller);
@@ -258,9 +251,11 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         } else if( cmd < 16 ) //12-15, upgrade slots
         {
             SatelliteItemUpgrade prevItem = null;
-             if(p.getItemInHand(hand).getItem() instanceof  SatelliteItemUpgrade item) {
+             if(p.getItemInHand(hand).getItem() instanceof SatelliteItemUpgrade item) {
                  prevItem = this.source.addUpgrade(item, 15-cmd);
-             } else {
+                 //remove one from player hand
+                 p.getItemInHand(hand).shrink(1);
+             } else if(p.getItemInHand(hand).isEmpty() ) {
                  prevItem = this.source.removeUpgrade(15-cmd);
              }
 
@@ -300,9 +295,9 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         if(isDisplayOn == toggle) return;
         isDisplayOn = toggle;
         if(isDisplayOn)
-        { if(source != null) source.resetChunkSection(); }
+            { if(source != null) source.resetChunkSection(); }
         else
-        { turnOff(); }
+            { turnOff(); }
         this.markUpdated();
         this.updateBlockState();
     }
@@ -453,6 +448,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         }
     }
 
+    //pathToNeighbors
     public void propagateToNeighbors()
     {
         if (level == null) return;
@@ -499,7 +495,6 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putInt("colorId", colorId);
-        tag.putBoolean("isDisplayOn", isDisplayOn);
         if(uiTargetBlockPos != null) {  //saved to send to client for rendering
             String pos = HBUtil.BlockUtil.positionToString(uiTargetBlockPos);
             tag.putString("uiTargetBlockPos", pos);
@@ -518,7 +513,6 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void load(CompoundTag tag) {
         super.load(tag);
         colorId = tag.getInt("colorId");
-        isDisplayOn = tag.getBoolean("isDisplayOn");
 
         if(tag.contains("uiTargetBlockPos")) {
             String targetPosStr = tag.getString("uiTargetBlockPos");

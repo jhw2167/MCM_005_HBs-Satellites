@@ -3,7 +3,6 @@ package com.holybuckets.satellite.client.render;
 import com.holybuckets.satellite.client.CommonClassClient;
 import com.holybuckets.satellite.block.be.UpgradeControllerBlockEntity;
 import com.holybuckets.satellite.core.SatelliteManager;
-import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.LightTexture;
@@ -14,7 +13,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.joml.Matrix3f;
@@ -53,10 +51,10 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 
         // Same size and Y position as SatelliteControllerRenderer, but offset to the right
-        float minX = 0.67f;  // 0.34f + 0.33f offset
-        float maxX = 0.99f;  // 0.66f + 0.33f offset  
-        float minY = 0.05f;  // Same as SatelliteControllerRenderer
-        float maxY = 0.20f;  // Same as SatelliteControllerRenderer
+        float minX = 0.54f;  // 0.34f + 0.33f offset
+        float maxX = 0.84f;  // 0.66f + 0.33f offset
+        float minY = 0.1f;  // Same as SatelliteControllerRenderer
+        float maxY = 0.22f;  // Same as SatelliteControllerRenderer
         float offset = 0.01f; // Small offset from face
 
         // Transform based on facing direction
@@ -123,11 +121,14 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
 
         // Define quadrant positions above the bottom row (which is at y=0.05-0.20)
+        // 0 1
+        // 2 3
+        //XZ start, XZ end, Y start, Y end
         float[][] quadrants = {
-            {0.67f, 0.83f, 0.25f, 0.41f}, // Top-left quadrant
-            {0.83f, 0.99f, 0.25f, 0.41f}, // Top-right quadrant  
-            {0.67f, 0.83f, 0.41f, 0.57f}, // Bottom-left quadrant
-            {0.83f, 0.99f, 0.41f, 0.57f}  // Bottom-right quadrant
+            {0.20f, 0.3f, 0.75f, 0.9f}, // Top-left quadrant
+            {0.55f, 0.75f, 0.75f, 0.9f}, // Top-right quadrant
+            {0.20f, 0.3f, 0.5f, 0.7f}, // Bottom-left quadrant
+            {0.55f, 0.75f, 0.5f, 0.7f}  // Bottom-right quadrant
         };
         
         float offset = 0.01f;
@@ -138,8 +139,7 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
             if (upgrades[i] == null) continue;
             
             // Get upgrade texture based on the dye color
-            ResourceLocation upgradeLoc = new ResourceLocation("minecraft", "block/" + upgrades[i].getDyeColor().getName() + "_wool");
-            TextureAtlasSprite upgradeSprite = CommonClassClient.getSprite(upgradeLoc);
+            TextureAtlasSprite upgradeSprite = CommonClassClient.getSprite(upgrades[i].getUpgradeSpriteLocation());
             
             float u0 = upgradeSprite.getU0();
             float v0 = upgradeSprite.getV0();

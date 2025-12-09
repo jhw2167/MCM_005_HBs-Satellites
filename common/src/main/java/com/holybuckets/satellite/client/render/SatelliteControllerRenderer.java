@@ -123,7 +123,7 @@ public class SatelliteControllerRenderer implements BlockEntityRenderer<Satellit
                                  PoseStack poseStack, MultiBufferSource bufferSource,
                                  int combinedLight, int combinedOverlay)
     {
-        BlockPos targetPos = blockEntity.getUiPosition();
+        BlockPos targetPos = blockEntity.getUiTargetBlockPos();
         if(targetPos == null) targetPos = blockEntity.getBlockPos();
         poseStack.pushPose();
 

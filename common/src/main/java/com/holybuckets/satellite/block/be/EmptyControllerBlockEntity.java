@@ -22,7 +22,7 @@ public class EmptyControllerBlockEntity extends SatelliteDisplayBlockEntity impl
     }
 
     @Override
-    public BlockPos getUiPosition() {
+    public BlockPos getUiTargetBlockPos() {
         return uiPosition;
     }
 

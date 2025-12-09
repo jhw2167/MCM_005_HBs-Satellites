@@ -7,9 +7,9 @@ import javax.annotation.Nullable;
 
 public interface ITargetController {
     
-    void setUiPosition(BlockPos blockPos);
+    void setUiTargetBlockPos(BlockPos blockPos);
     
-    BlockPos getUiPosition();
+    BlockPos getUiTargetBlockPos();
     
     int getTargetColorId();
 
