@@ -171,7 +171,7 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
 
         poseStack.translate(0, 0, -0.01); // Tiny offset AFTER rotation to prevent z-fighting
         poseStack.mulPose(Axis.ZP.rotationDegrees(180)); // Flip text right-side up
-        float scale = 0.007f; // Decreased from 0.008f for slightly smaller font
+        float scale = 0.008f; // Reverted to original font size for coordinates
         poseStack.scale(scale, scale, scale);
 
         float leftAlignOffset = -15;
@@ -193,10 +193,13 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         drawCoordRow(poseStack, bufferSource, combinedLight, targetPos.getZ(), "Z");
         poseStack.popPose();
 
-// Buttons below coordinates
+// Buttons below coordinates - using smaller font scale
         float buttonY = startY + BUTTON_Y_OFFSET;
+        float buttonScale = 0.007f / 0.008f; // Scale down buttons relative to coordinate font
+        
         poseStack.pushPose();
         poseStack.translate(TARGET_BUTTON_X_OFFSET, buttonY, 0);
+        poseStack.scale(buttonScale, buttonScale, buttonScale);
         String targetOrClear = (blockEntity.getCursorPosition()==null) ? "TARGET" : "CLEAR";
         font.drawInBatch(targetOrClear, -font.width(targetOrClear) / 2f, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
@@ -204,6 +207,7 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
 
         poseStack.pushPose();
         poseStack.translate(FIRE_BUTTON_X_OFFSET, buttonY, 0);
+        poseStack.scale(buttonScale, buttonScale, buttonScale);
         font.drawInBatch("FIRE", -font.width("FIRE") / 2f, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
         poseStack.popPose();
