@@ -148,6 +148,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     }
 
     public void clearDisplay() {
+
         if(displayInfo == null) {
             this.clearAboveArea(this.height);
             this.height = 0;

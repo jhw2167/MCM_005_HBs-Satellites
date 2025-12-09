@@ -314,6 +314,10 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
             else if (xz > (TARGET_RIGHT_BUTTON - TARGET_BUTTON_WIDTH/2) && xz < (TARGET_RIGHT_BUTTON + TARGET_BUTTON_WIDTH/2)) {
                 cmd = 11;
             }
+            //center wool changer
+            else if (xz > (0.5 - TARGET_BUTTON_WIDTH/4) && xz < (0.5 + TARGET_BUTTON_WIDTH/4)) {
+                cmd = 16;
+            }
         }
 
         return cmd;
@@ -366,8 +370,8 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
             }
         }
         // Check top section (4 quadrants)
-        // 0 1
-        // 2 3
+        // 0 1      12 13
+        // 2 3      14 14
         else if (y > UPGRADE_TOP_SECTION) {
             // Top-left quadrant
             if (xz < UPGRADE_QUAD_SPLIT && y > (UPGRADE_TOP_SECTION + (1.0 - UPGRADE_TOP_SECTION) * UPGRADE_QUAD_SPLIT)) {

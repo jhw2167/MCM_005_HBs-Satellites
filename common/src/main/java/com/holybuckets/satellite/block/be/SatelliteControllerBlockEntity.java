@@ -163,6 +163,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.turnOff();
     }
 
+    @Override
+    public void clearDisplay() {
+        super.clearDisplay();
+        setCursorPosition(null);
+        setUiTargetBlockPos(null);
+    }
+
     private void turnOff() {
         this.clearDisplay();
         if(this.source != null) {
@@ -237,10 +244,15 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         } else if ( cmd < 12 )
         {
             if(controller == null) return;
-           ITargetController tc = (ITargetController) controller;
+            ITargetController tc = (ITargetController) controller;
             if(cmd == 10) {
-                if(tc.getCursorPosition() != null) tc.setCursorPosition(null);
-                source.setTargetController(tc);
+                if(tc.getCursorPosition() == null) {
+                    source.setTargetController(tc);
+                } else {
+                    tc.setCursorPosition(null);
+                    tc.setUiTargetBlockPos(null);
+                    source.setTargetController(this);
+                }
             } else if (cmd == 11) {
                 if(tc.getUiTargetBlockPos() == null) {
                     Messager.getInstance().sendChat(p, "No target selected!");
@@ -252,11 +264,11 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         {
             SatelliteItemUpgrade prevItem = null;
              if(p.getItemInHand(hand).getItem() instanceof SatelliteItemUpgrade item) {
-                 prevItem = this.source.addUpgrade(item, 15-cmd);
+                 prevItem = this.source.addUpgrade(item, cmd-12);
                  //remove one from player hand
                  p.getItemInHand(hand).shrink(1);
              } else if(p.getItemInHand(hand).isEmpty() ) {
-                 prevItem = this.source.removeUpgrade(15-cmd);
+                 prevItem = this.source.removeUpgrade(cmd-12);
              }
 
             if(prevItem != null) {
@@ -271,7 +283,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     private ISatelliteBE clientCloneLinkedSatellite()
     {
         if(this.level == null || !this.level.isClientSide) return null;
-        if(this.linkedSatellite == null) return null;
+        if(this.satelliteTravelPos == null) return null;
 
         ISatelliteBE clone = new SatelliteBlockEntity.ScreenSatelliteWrapper(
             this.getColorId(),
