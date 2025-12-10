@@ -26,6 +26,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -33,8 +35,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
@@ -575,11 +579,62 @@ public class SatelliteDisplay {
             displayEntities.add(e);
         }
 
-        private static ParticleOptions getParticleType(Entity e) {
-        if(Math.random() < 0.5)
+        private static ParticleOptions getBasicParticleType(Entity e) {
             return PARTICLE_TYPE_MAP.getOrDefault(e.getType(), ParticleTypes.ELECTRIC_SPARK );
-        else
-            return  ParticleTypes.ELECTRIC_SPARK;
+        }
+
+        private static ParticleOptions getPlayerParticleType(ServerPlayer sp, int colorId) {
+            Block woolBlock  = SatelliteManager.getWool(colorId);
+
+            // Get the target dye color from the wool block
+            DyeColor targetColor = DyeColor.WHITE;
+            for(DyeColor dyeColor : DyeColor.values()) {
+                if(dyeColor.getMapColor() == woolBlock.defaultMapColor()) {
+                    targetColor = dyeColor;
+                    break;
+                }
+            }
+
+            if (targetColor == null) return ParticleTypes.ELECTRIC_SPARK;
+
+
+            // Search player inventory
+            for (ItemStack stack : sp.getInventory().items) {
+                if (stack.isEmpty()) continue;
+
+                // Check 1: Direct wool block match
+                if (Block.byItem(stack.getItem()) == woolBlock) {
+                    return ModParticles.greenPing;
+                }
+
+                //Check 2: Check banner
+                if(stack.getItem() instanceof BannerItem bannerItem) {
+                    DyeColor bannerColor = bannerItem.getColor();
+                    if(bannerColor == targetColor) {
+                        return ModParticles.greenPing;
+                    }
+                }
+
+                //If it has color tag, check dyed armor item
+                if(stack.getTagElement("display") != null)
+                {
+                    CompoundTag compoundTag = stack.getTagElement("display");
+                    if(!compoundTag.contains("color", 99)) continue;
+
+                    ItemStack leatherTunic = Items.LEATHER_CHESTPLATE.getDefaultInstance();
+                    ItemStack testDyedArmor = DyeableLeatherItem.dyeArmor(leatherTunic, List.of(DyeItem.byColor(targetColor)));
+                    if(testDyedArmor == null || testDyedArmor.isEmpty() ) continue;
+                    if(testDyedArmor.getItem() instanceof DyeableLeatherItem dyedItem) {
+                        if(dyedItem.getColor(testDyedArmor) == compoundTag.getInt("color") )
+                            return ModParticles.greenPing;
+                    }
+
+                }
+
+            }
+
+            // No matching items found
+            return ModParticles.redPing; // Default particle
         }
 
 
@@ -621,7 +676,10 @@ public class SatelliteDisplay {
                 blockOffsetY = 16*(depth+1);
             }
 
-            ParticleOptions particleType = getParticleType(e);
+            ParticleOptions particleType = getBasicParticleType(e);
+            if(hasUpgrade(ModItems.playerScannerUpgrade) && e instanceof ServerPlayer sp) {
+                particleType = getPlayerParticleType(sp, controller.getColorId());
+            }
             float x = cntrlPos.getX() + chunkOffsetX + (blockOffsetX * RENDER_SCALE);
             float z = cntrlPos.getZ() + chunkOffsetZ + (blockOffsetZ * RENDER_SCALE);
             float y = cntrlPos.getY()+1.125f + (blockOffsetY * RENDER_SCALE);
@@ -747,7 +805,6 @@ public class SatelliteDisplay {
         }
 
         PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ModParticles.basePing);
-        PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ModParticles.greenPing);
         PARTICLE_TYPE_MAP.put(EntityType.SLIME, ParticleTypes.ITEM_SLIME);
     }
     private static void onBlockUsed(UseBlockEvent useBlockEvent)
