@@ -6,6 +6,7 @@ import net.blay09.mods.balm.api.client.rendering.BalmRenderers;
 public class ModRenderers {
     public static void clientInitialize(BalmRenderers renderers)
     {
+
         renderers.registerBlockEntityRenderer(
             ModBlockEntities.satelliteBlockEntity::get,
             SatelliteRenderer::new
