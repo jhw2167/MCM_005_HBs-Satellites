@@ -56,10 +56,10 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
 
         Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 
-        float minX = 0.46f; // Moved left from 0.48f
-        float maxX = 0.42f; // Moved left from 0.54f
+        float minX = 0.47f; // Moved left from 0.48f
+        float maxX = 0.53f; // Moved left from 0.54f
         float minY = 0.16f;
-        float maxY = 0.215f; // Made 10% taller: (0.21 - 0.16) * 1.1 + 0.16 = 0.215f
+        float maxY = 0.22f; // Made 10% taller: (0.21 - 0.16) * 1.1 + 0.16 = 0.215f
         float offset = 0.01f; // Small offset from face
 
         // Transform based on facing direction
@@ -113,7 +113,10 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         poseStack.popPose();
 
         // Render coordinate information and buttons
+        poseStack.pushPose();
         renderTargetInfo(blockEntity, partialTick, poseStack, bufferSource, light, packedOverlay);
+        renderInteractableButtons(blockEntity, partialTick, poseStack, bufferSource, light, packedOverlay);
+        poseStack.popPose();
     }
 
     static int textColor = 0x000000;
@@ -129,9 +132,9 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
     static int labelMarginAdjust = -32;
 
     // Button positioning configuration - raised higher on the block
-    private static final float BUTTON_Y_OFFSET = (rowHeight * 3);
-    private static final float TARGET_BUTTON_X_OFFSET = -26.4f; // Moved 20% right from -33f: -33 * 0.8 = -26.4f
-    private static final float FIRE_BUTTON_X_OFFSET = 36f; // Moved 20% right from 30f
+    private static final float BUTTON_Y_OFFSET = (rowHeight * 4)-10;
+    private static final float TARGET_BUTTON_X_OFFSET = -32f; // Moved 20% right from -33f: -33 * 0.8 = -26.4f
+    private static final float FIRE_BUTTON_X_OFFSET = 32f; // Moved 20% right from 30f
 
 
     private void renderTargetInfo(TargetControllerBlockEntity blockEntity, float partialTick,
@@ -144,8 +147,6 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         if (blockEntity.getUiTargetBlockPos() != null) {
             targetPos = blockEntity.getUiTargetBlockPos();
         }
-
-        poseStack.pushPose();
 
         poseStack.translate(0.5, 0.925, 0.5);
 
@@ -193,10 +194,34 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         drawCoordRow(poseStack, bufferSource, combinedLight, targetPos.getZ(), "Z");
         poseStack.popPose();
 
-// Buttons below coordinates - using smaller font scale
+    }
+
+        private void drawCoordRow(PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int value, String label) {
+            int textColor = 0x000000;
+
+            // Draw label with label scale
+            poseStack.pushPose();
+            poseStack.scale(COORD_LABEL_SCALE, COORD_LABEL_SCALE, COORD_LABEL_SCALE);
+            font.drawInBatch(label + ":", labelMarginAdjust / COORD_LABEL_SCALE, 0, textColor, false,
+                poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
+            poseStack.popPose();
+
+            // Draw value with value scale
+            poseStack.pushPose();
+            poseStack.scale(COORD_VALUE_SCALE, COORD_VALUE_SCALE, COORD_VALUE_SCALE);
+            font.drawInBatch(String.valueOf(value), 10 / COORD_VALUE_SCALE, 0, textColor, false,
+                poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
+            poseStack.popPose();
+        }
+
+    private void renderInteractableButtons(TargetControllerBlockEntity blockEntity, float partialTick,
+                                 PoseStack poseStack, MultiBufferSource bufferSource,
+                                 int combinedLight, int combinedOverlay)
+    {
+        // Buttons below coordinates - using smaller font scale
         float buttonY = startY + BUTTON_Y_OFFSET;
-        float buttonScale = 0.007f / 0.008f; // Scale down buttons relative to coordinate font
-        
+        float buttonScale = 1; // Scale down buttons relative to coordinate font
+
         poseStack.pushPose();
         poseStack.translate(TARGET_BUTTON_X_OFFSET, buttonY, 0);
         poseStack.scale(buttonScale, buttonScale, buttonScale);
@@ -209,26 +234,6 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         poseStack.translate(FIRE_BUTTON_X_OFFSET, buttonY, 0);
         poseStack.scale(buttonScale, buttonScale, buttonScale);
         font.drawInBatch("FIRE", -font.width("FIRE") / 2f, 0, textColor, false,
-            poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
-        poseStack.popPose();
-
-        poseStack.popPose();
-    }
-
-    private void drawCoordRow(PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int value, String label) {
-        int textColor = 0x000000;
-        
-        // Draw label with label scale
-        poseStack.pushPose();
-        poseStack.scale(COORD_LABEL_SCALE, COORD_LABEL_SCALE, COORD_LABEL_SCALE);
-        font.drawInBatch(label + ":", labelMarginAdjust / COORD_LABEL_SCALE, 0, textColor, false,
-            poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
-        poseStack.popPose();
-        
-        // Draw value with value scale
-        poseStack.pushPose();
-        poseStack.scale(COORD_VALUE_SCALE, COORD_VALUE_SCALE, COORD_VALUE_SCALE);
-        font.drawInBatch(String.valueOf(value), 10 / COORD_VALUE_SCALE, 0, textColor, false,
             poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, combinedLight);
         poseStack.popPose();
     }

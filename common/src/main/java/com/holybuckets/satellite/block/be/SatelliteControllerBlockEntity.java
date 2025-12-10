@@ -562,11 +562,5 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         return tag;
     }
 
-    private void updateBlockState() {
-        if(this.level == null) return;
-        BlockState state = this.getBlockState();
-        BlockState newState = state.setValue(SatelliteControllerBlock.POWERED, this.isDisplayOn);
-        level.setBlock(this.getBlockPos(), newState, 3);
-    }
 
 }

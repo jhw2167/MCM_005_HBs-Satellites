@@ -48,6 +48,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     @Override
     public void setCursorPosition(Vec3 pos) {
         this.uiCursorPos = pos;
+        updateBlockState();
     }
 
 
@@ -69,8 +70,9 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
 
     @Override
     public void toggleOnOff(boolean toggle) {
-        super.toggleOnOff(toggle);
         this.uiCursorPos = null;
+        this.uiTargetBlockPos = null;
+        super.toggleOnOff(toggle);
     }
 
     public SatelliteControllerBlockEntity getSatelliteController() {
@@ -92,21 +94,15 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
             } else {
                 colorId = (colorId + 1) % 16;
             }
-            return;
+            cmd = -1;
         }
 
-        if(isDisplayOn && source != null)
+        if( isDisplayOn && (source!=null) && (cmd>-1))
             source.sendinput(p, hand, cmd, this);
         
         updateBlockState();
     }
 
-    private void updateBlockState() {
-        if (this.level == null) return;
-        BlockState state = this.getBlockState();
-        BlockState newState = state.setValue(TargetControllerBlock.POWERED, this.isDisplayOn);
-        level.setBlock(this.getBlockPos(), newState, 3);
-    }
 
     @Override
     protected void saveAdditional(CompoundTag tag) {
@@ -115,6 +111,8 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         if(uiTargetBlockPos != null) {  //saved to send to client for rendering
             String pos = HBUtil.BlockUtil.positionToString(uiTargetBlockPos);
             tag.putString("uiTargetBlockPos", pos);
+        } else {
+            tag.putString("uiTargetBlockPos", "");
         }
     }
 
@@ -123,8 +121,9 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         super.load(tag);
         colorId = tag.getInt("colorId");
         if(tag.contains("uiTargetBlockPos")) {
-            String targetPosStr = tag.getString("uiTargetBlockPos");
-            uiTargetBlockPos = new BlockPos( HBUtil.BlockUtil.stringToBlockPos(targetPosStr) );
+            String str = tag.getString("uiTargetBlockPos");
+            uiTargetBlockPos = (str.equals("")) ? null :
+                new BlockPos( HBUtil.BlockUtil.stringToBlockPos(str) );
         }
     }
 

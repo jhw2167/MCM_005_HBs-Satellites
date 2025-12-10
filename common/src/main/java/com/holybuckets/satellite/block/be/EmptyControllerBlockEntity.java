@@ -47,12 +47,6 @@ public class EmptyControllerBlockEntity extends SatelliteDisplayBlockEntity impl
         updateBlockState();
     }
 
-    private void updateBlockState() {
-        if (this.level == null) return;
-        BlockState state = this.getBlockState();
-        BlockState newState = state.setValue(EmptyControllerBlock.POWERED, this.colorId > 0);
-        level.setBlock(this.getBlockPos(), newState, 3);
-    }
 
     @Override
     protected void saveAdditional(CompoundTag tag) {

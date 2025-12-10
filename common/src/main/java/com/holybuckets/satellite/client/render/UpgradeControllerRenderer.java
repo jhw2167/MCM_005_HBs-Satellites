@@ -2,6 +2,7 @@ package com.holybuckets.satellite.client.render;
 
 import com.holybuckets.satellite.client.CommonClassClient;
 import com.holybuckets.satellite.block.be.UpgradeControllerBlockEntity;
+import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
 import com.holybuckets.satellite.core.SatelliteManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -30,14 +31,31 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         poseStack.pushPose();
 
         // Get VertexConsumer AFTER pushPose and BEFORE building vertices
+        Matrix4f matrix = poseStack.last().pose();
+        Matrix3f normal = poseStack.last().normal();
+
+        int light = LightTexture.FULL_BRIGHT;
+        int overlay = OverlayTexture.NO_OVERLAY;
+        Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+
+        // Render upgrade textures in 4 quadrants above bottom row
+        renderWoolColorTexture(blockEntity, poseStack, bufferSource, facing, matrix, normal, light, overlay);
+        renderUpgradeTextures(blockEntity, poseStack, bufferSource, facing, matrix, normal, light, overlay);
+
+        poseStack.popPose();
+    }
+
+    private void renderWoolColorTexture(UpgradeControllerBlockEntity blockEntity, PoseStack poseStack,
+                                        MultiBufferSource bufferSource, Direction facing, Matrix4f matrix,
+                                        Matrix3f normal, int light, int overlay)
+    {
         VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
 
         // Get wool texture from satellite controller
-        ResourceLocation woolLoc = SatelliteManager.getResourceForColorId(blockEntity.getColorId());
+        if( !blockEntity.isDisplayOn() || blockEntity.getSatelliteController() == null) return;
+        int colorId = blockEntity.getSatelliteController().getColorId();
+        ResourceLocation woolLoc = SatelliteManager.getResourceForColorId(colorId);
         TextureAtlasSprite woolSprite = CommonClassClient.getSprite(woolLoc);
-
-        Matrix4f matrix = poseStack.last().pose();
-        Matrix3f normal = poseStack.last().normal();
 
         // Use the wool sprite UVs
         float u0 = woolSprite.getU0();
@@ -45,15 +63,11 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         float u1 = woolSprite.getU1();
         float v1 = woolSprite.getV1();
 
-        int light = LightTexture.FULL_BRIGHT;
-        int overlay = OverlayTexture.NO_OVERLAY;
-
-        Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 
         // Same size and Y position as SatelliteControllerRenderer, but offset to the right
-        float minX = 0.54f;  // 0.34f + 0.33f offset
-        float maxX = 0.84f;  // 0.66f + 0.33f offset
-        float minY = 0.1f;  // Same as SatelliteControllerRenderer
+        float minX = 0.52f;  // 0.34f + 0.33f offset
+        float maxX = 0.85f;  // 0.66f + 0.33f offset
+        float minY = 0.08f;  // Same as SatelliteControllerRenderer
         float maxY = 0.22f;  // Same as SatelliteControllerRenderer
         float offset = 0.01f; // Small offset from face
 
@@ -105,10 +119,6 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
             }
         }
 
-        // Render upgrade textures in 4 quadrants above bottom row
-        renderUpgradeTextures(blockEntity, poseStack, bufferSource, facing, matrix, normal, light, overlay);
-
-        poseStack.popPose();
     }
 
     private void renderUpgradeTextures(UpgradeControllerBlockEntity blockEntity, PoseStack poseStack, 
@@ -125,10 +135,10 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         // 2 3
         //XZ start, XZ end, Y start, Y end
         float[][] quadrants = {
-            {0.20f, 0.3f, 0.75f, 0.9f}, // Top-left quadrant
-            {0.55f, 0.75f, 0.75f, 0.9f}, // Top-right quadrant
-            {0.20f, 0.3f, 0.5f, 0.7f}, // Bottom-left quadrant
-            {0.55f, 0.75f, 0.5f, 0.7f}  // Bottom-right quadrant
+            {0.12f, 0.3f, 0.7f, 0.85f}, // Top-left quadrant
+            {0.57f, 0.75f, 0.7f, 0.85f}, // Top-right quadrant
+            {0.12f, 0.3f, 0.35f, 0.50f}, // Bottom-left quadrant
+            {0.57f, 0.75f, 0.35f, 0.50f}  // Bottom-right quadrant
         };
         
         float offset = 0.01f;

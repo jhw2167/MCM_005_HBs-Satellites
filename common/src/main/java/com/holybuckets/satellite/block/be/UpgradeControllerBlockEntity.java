@@ -80,11 +80,9 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         }
     }
 
-    private void updateBlockState() {
-        if (this.level == null) return;
-        BlockState state = this.getBlockState();
-        BlockState newState = state.setValue(TargetControllerBlock.POWERED, this.isDisplayOn);
-        level.setBlock(this.getBlockPos(), newState, 3);
+    @Override
+    protected void updateBlockState() {
+        super.updateBlockState();
         this.markUpdated();
     }
 
@@ -102,7 +100,7 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
-        colorId = tag.getInt("colorId");
+         colorId = tag.getInt("colorId");
         
         // Load upgrades array
         for(int i = 0; i < upgrades.length; i++) {

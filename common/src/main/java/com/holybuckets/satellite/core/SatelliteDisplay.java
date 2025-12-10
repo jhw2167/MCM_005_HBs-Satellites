@@ -8,6 +8,7 @@ import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
+import com.holybuckets.satellite.block.be.UpgradeControllerBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
@@ -372,8 +373,12 @@ public class SatelliteDisplay {
     public void addAll(Map<BlockPos, ISatelliteDisplayBE> blocks) {
         displayBlocks.putAll(blocks);
         for (BlockPos pos : blocks.keySet()) {
-            if(displayBlocks.get(pos) instanceof  ISatelliteControllerBE cb)
+            if(displayBlocks.get(pos) instanceof  ISatelliteControllerBE cb) {
                 controllerBlocks.add( cb );
+            }
+            if(displayBlocks.get(pos) instanceof  UpgradeControllerBlockEntity cbe) {
+                cbe.setColorId( this.controller.getColorId() );
+            }
             updateBounds(pos);
         }
     }
@@ -571,7 +576,10 @@ public class SatelliteDisplay {
         }
 
         private static ParticleOptions getParticleType(Entity e) {
-            return PARTICLE_TYPE_MAP.getOrDefault(e.getType(), ParticleTypes.MYCELIUM );
+        if(Math.random() < 0.5)
+            return PARTICLE_TYPE_MAP.getOrDefault(e.getType(), ParticleTypes.ELECTRIC_SPARK );
+        else
+            return  ParticleTypes.ELECTRIC_SPARK;
         }
 
 
@@ -739,6 +747,7 @@ public class SatelliteDisplay {
         }
 
         PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ModParticles.basePing);
+        PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ModParticles.greenPing);
         PARTICLE_TYPE_MAP.put(EntityType.SLIME, ParticleTypes.ITEM_SLIME);
     }
     private static void onBlockUsed(UseBlockEvent useBlockEvent)

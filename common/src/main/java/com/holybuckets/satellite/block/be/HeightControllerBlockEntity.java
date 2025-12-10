@@ -56,12 +56,6 @@ public class HeightControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         updateBlockState();
     }
 
-    private void updateBlockState() {
-        if (this.level == null) return;
-        BlockState state = this.getBlockState();
-        BlockState newState = state.setValue(TargetControllerBlock.POWERED, this.isDisplayOn);
-        level.setBlock(this.getBlockPos(), newState, 3);
-    }
 
     @Override
     protected void saveAdditional(CompoundTag tag) {
