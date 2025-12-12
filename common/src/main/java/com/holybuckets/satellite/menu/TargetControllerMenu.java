@@ -22,7 +22,7 @@ public class TargetControllerMenu extends AbstractContainerMenu {
         this.blockEntity = blockEntity;
         
         // Single weapon slot in center (slot index 0)
-        this.addSlot(new Slot(blockEntity, 0, 80, 35));
+        this.addSlot(new WeaponSlot(blockEntity, 0, 80, 35));
 
         // Player inventory (3 rows)
         int playerInvStartY = 84;
@@ -79,5 +79,16 @@ public class TargetControllerMenu extends AbstractContainerMenu {
     public void removed(Player player) {
         super.removed(player);
         this.blockEntity.stopOpen(player);
+    }
+
+    private class WeaponSlot extends Slot {
+        public WeaponSlot(Container container, int index, int x, int y) {
+            super(container, index, x, y);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            return TargetControllerBlockEntity.validWeapon(stack.getItem());
+        }
     }
 }

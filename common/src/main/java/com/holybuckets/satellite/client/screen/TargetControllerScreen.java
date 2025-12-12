@@ -34,7 +34,7 @@ public class TargetControllerScreen extends AbstractContainerScreen<TargetContro
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(this.font, Component.translatable("gui." + Constants.MOD_ID + ".weapon_slot"), 8, 6, 0x404040, false);
+        graphics.drawString(this.font, Component.translatable("gui." + Constants.MOD_ID + ".target_controller.title"), 8, 6, 0x404040, false);
         graphics.drawString(this.font, Component.translatable("container.inventory"), 8, this.inventoryLabelY, 0x404040, false);
     }
 

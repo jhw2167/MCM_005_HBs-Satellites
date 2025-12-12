@@ -224,3 +224,7 @@ NEXT:
 
 - The ControllerMenu class will attempt to accepth a block entity, but this must be a "Container" type
 - BlockEntity will have to implement MenuProvider and Container
+- You must define your own nonNulllist items to store items in your blockEntity
+- You must override SaveAdditional and Load to save these items
+
+- Remind the ai to define custom slot classes in __Menu to add to the menu, AI will override the quickMove

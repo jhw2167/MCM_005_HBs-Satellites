@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be.isatelliteblocks;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -18,4 +19,5 @@ public interface ITargetController {
 
     @Nullable
     void setCursorPosition(Vec3 pos);
+
 }

@@ -38,6 +38,8 @@
   "item.hbs_satellites.player_scanner_upgrade": "Player Scanner Upgrade",
   "item.hbs_satellites.player_scanner_upgrade.desc": "Instead of being shown as a Neutral White Ping. Players will be shown as Green if wearing a dyed item  equivalent to the Satellites Wool Color and Red otherwise",
 
+  "gui.hbs_satellites.target_controller.title": "Weapon Slot",
+
   "item.hbs_satellites.upgrade.tooltip": "Upgrade Color: %s",
 
   "itemGroup.hbs_satellites.hbs_satellites": "HB's Satellites"

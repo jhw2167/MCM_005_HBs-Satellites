@@ -17,19 +17,19 @@ import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
-import com.holybuckets.satellite.item.ModItems;
+import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
 import com.holybuckets.satellite.particle.WoolDustHelper;
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.blay09.mods.balm.api.event.TossItemEvent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -38,6 +38,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
@@ -53,6 +54,7 @@ public class SatelliteManager {
     private static final int MAX_DISPLAY_LIFETIME = 300; // 300 seconds
     private static boolean anyControllerOn;
 
+    private static final Map<TargetControllerBlockEntity, Pair<BlockPos,Integer>> waypointDetails = new HashMap<>();
     private static final List<Block> woolIds = new ArrayList<>(64);
     private final Level level;
 
@@ -103,7 +105,7 @@ public class SatelliteManager {
 
     public static void init(EventRegistrar reg) {
 
-        reg.registerOnServerTick(TickType.ON_20_TICKS, SatelliteManager::onServerTick);
+        reg.registerOnServerTick(TickType.ON_20_TICKS, SatelliteManager::onServer20Ticks);
         reg.registerOnTossItem(SatelliteManager::onTossSatellite);
 
         reg.registerOnSimpleMessage(MSG_ID_TARGET_POS, SatelliteManager::handleTargetPosMessage);
@@ -343,9 +345,44 @@ public class SatelliteManager {
         return false;
     }
 
+    //** Weapons
+
+    private static void addDefaultWeapons() {
+        TargetControllerBlockEntity.addWeapon(ItemStack.EMPTY.getItem().asItem(), SatelliteManager::setWayPointFlare );
+        TargetControllerBlockEntity.addWeapon(ModBlocks.satelliteDisplayBlock.asItem(), SatelliteManager::setWayPointFlare );
+    }
+
+    private static void setWayPointFlare(TargetControllerBlockEntity controller, ItemStack s) {
+
+        if(controller == null || controller.getLevel() == null || controller.getLevel().isClientSide) return;
+        if(waypointDetails.containsKey(controller)) waypointDetails.remove(controller);
+        BlockPos targetPos = controller.getUiTargetBlockPos();
+        if(targetPos == null) return;
+        //int color = WoolDustHelper.getIntColor(controller.getTargetColorId());
+        int color = controller.getTargetColorId();
+        waypointDetails.put(controller, Pair.of(targetPos, color));
+    }
+
+    private static void wayPointFlare(BlockPos targetPos, int color)
+    {
+        ServerLevel serverLevel = GeneralConfig.OVERWORLD;
+        int height = serverLevel.getMaxBuildHeight() - targetPos.getY();
+        for (int i = 0; i < height; i++) {
+            serverLevel.sendParticles(
+                WoolDustHelper.getDust(color),
+                targetPos.getX(), targetPos.getY() + i, targetPos.getZ(),
+                0,                      // particle count (0 for colored)
+                Double.longBitsToDouble(color), // Color as "velocity"
+                0.0, 0.0,
+                1.0
+            );
+        }
+    }
+
     //** Events
     public static void onWorldStart() {
         initWoolIds();
+        addDefaultWeapons();
     }
 
     public static void onWorldStop() {
@@ -376,7 +413,7 @@ public class SatelliteManager {
         }
     }
 
-    private static void onServerTick(ServerTickEvent event)
+    private static void onServer20Ticks(ServerTickEvent event)
     {
         //Check lifetime of sources
         Collection<SatelliteManager> managers = SatelliteMain.getAllManagers();
@@ -388,6 +425,9 @@ public class SatelliteManager {
             manager.watchChunkCache();
         }
 
+        for( Pair<BlockPos, Integer> details : waypointDetails.values() ) {
+            wayPointFlare(details.getLeft(), details.getRight());
+        }
 
     }
 

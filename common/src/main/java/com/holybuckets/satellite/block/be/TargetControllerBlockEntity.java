@@ -1,24 +1,39 @@
 package com.holybuckets.satellite.block.be;
 
+import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.satellite.block.TargetControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
 import com.holybuckets.satellite.core.SatelliteManager;
+import com.holybuckets.satellite.menu.TargetControllerMenu;
+import net.blay09.mods.balm.api.menu.BalmMenuProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController, Container
 {
@@ -27,6 +42,15 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     private Vec3 uiCursorPos;
 
     private NonNullList<ItemStack> items;
+    private Player playerFiredWeapon;
+    private static final Map<Item, BiConsumer<TargetControllerBlockEntity, ItemStack>> weapons = new HashMap<>();
+
+    public static void addWeapon(Item item, BiConsumer<TargetControllerBlockEntity, ItemStack> consumer) {
+        weapons.put(item, consumer);
+    }
+    public static boolean validWeapon(Item item) { return weapons.containsKey(item); }
+    public static void removeWeapon(Item item) { weapons.remove(item); }
+
 
     public TargetControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.targetControllerBlockEntity.get(), pos, state);
@@ -74,6 +98,11 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         markUpdated();
     }
 
+    @Nullable
+    public Player getPlayerFiredWeapon() {
+        return playerFiredWeapon;
+    }
+
     @Override
     public void toggleOnOff(boolean toggle) {
         this.uiCursorPos = null;
@@ -109,6 +138,19 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         updateBlockState();
     }
 
+    public void fireWeapon(Player p)
+    {
+        if(this.level==null || level.isClientSide) return;
+        ItemStack stack = this.getItem(0);
+        Item item = stack.getItem();
+        this.playerFiredWeapon = p;
+        BiConsumer<TargetControllerBlockEntity, ItemStack> consumer = weapons.get(item);
+        if(consumer != null) {
+            consumer.accept(this, stack);
+            markUpdated();
+        }
+    }
+
 
     @Override
     protected void saveAdditional(CompoundTag tag) {
@@ -120,6 +162,12 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         } else {
             tag.putString("uiTargetBlockPos", "");
         }
+        //Save item and itemMetadata
+        if(!this.isEmpty()) {
+            CompoundTag itemTag = new CompoundTag();
+            this.items.get(0).save(itemTag);
+            tag.put("itemStack", itemTag);
+        }
     }
 
     @Override
@@ -130,6 +178,12 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
             String str = tag.getString("uiTargetBlockPos");
             uiTargetBlockPos = (str.equals("")) ? null :
                 new BlockPos( HBUtil.BlockUtil.stringToBlockPos(str) );
+        }
+        //Load item and itemMetadata
+        if(tag.contains("itemStack")) {
+            CompoundTag itemTag = tag.getCompound("itemStack");
+            ItemStack stack = ItemStack.of(itemTag);
+            this.items.set(0, stack);
         }
     }
 
@@ -151,6 +205,11 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         return tag;
     }
 
+    //CONTAINER METHODS
+    @Override
+    public boolean canPlaceItem(int slot, ItemStack stack) {
+        return weapons.containsKey(stack);
+    }
 
     @Override
     public int getContainerSize() { return 1; }
@@ -170,7 +229,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     public ItemStack removeItemNoUpdate(int i) {
         if(!this.isEmpty()) {
             ItemStack item = this.items.get(0);
-            items.add(0, ItemStack.EMPTY);
+            items.set(0, ItemStack.EMPTY);
             return item;
         }
         return ItemStack.EMPTY;
@@ -189,5 +248,25 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     @Override
     public void clearContent() {
         this.items.clear();
+    }
+
+    public BalmMenuProvider getMenuProvider() {
+        return new BalmMenuProvider() {
+            @Override
+            public Component getDisplayName() {
+                return Component.translatable("block.hbs_satellites.target_controller_menu");
+            }
+
+            @Override
+            public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+                TargetControllerBlockEntity.this.setLevel(player.level());
+                return new TargetControllerMenu(syncId, playerInventory, TargetControllerBlockEntity.this);
+            }
+
+            @Override
+            public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf buf) {
+                buf.writeBlockPos(worldPosition);
+            }
+        };
     }
 }

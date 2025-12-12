@@ -2,10 +2,12 @@ package com.holybuckets.satellite.block;
 
 import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
+import net.blay09.mods.balm.api.Balm;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -63,10 +65,16 @@ public class TargetControllerBlock extends Block implements EntityBlock {
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         Direction d = hitResult.getDirection();
         Direction front = state.getValue(FACING);
-        if (d != front) { return InteractionResult.PASS; }
 
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof TargetControllerBlockEntity controller) {
+        if (be instanceof TargetControllerBlockEntity controller)
+        {
+            if (d != front) {
+                if(level.isClientSide) return InteractionResult.PASS;
+                MenuProvider menuProvider = controller.getMenuProvider();
+                Balm.getNetworking().openMenu(player, menuProvider);
+                return InteractionResult.CONSUME;
+            }
             controller.use(player, hand, hitResult);
             return InteractionResult.CONSUME;
         }

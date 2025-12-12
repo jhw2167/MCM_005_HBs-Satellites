@@ -29,9 +29,9 @@ public class CommandList {
     private static final String PREFIX = "hbSatellites";
 
     public static void register() {
-        CommandRegistry.register(LocateClusters::noArgs);
-        CommandRegistry.register(LocateClusters::limitCount);
-        CommandRegistry.register(LocateClusters::limitCountSpecifyBlockType);
+        //CommandRegistry.register(LocateClusters::noArgs);
+        //CommandRegistry.register(LocateClusters::limitCount);
+        //CommandRegistry.register(LocateClusters::limitCountSpecifyBlockType);
         CommandRegistry.register(GetAllSatellites::command);
         CommandRegistry.register(GetAllChannels::command);
     }

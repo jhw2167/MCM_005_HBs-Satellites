@@ -5,10 +5,7 @@ import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.TickType;
 import com.holybuckets.satellite.SatelliteMain;
-import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
-import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
-import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
-import com.holybuckets.satellite.block.be.UpgradeControllerBlockEntity;
+import com.holybuckets.satellite.block.be.*;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
@@ -273,7 +270,9 @@ public class SatelliteDisplay {
     }
 
     public void fire(Player p, ITargetController targetingController) {
-
+        if(targetingController instanceof TargetControllerBlockEntity tbe) {
+            tbe.fireWeapon(p);
+        }
     }
 
     //** DISPLAY METHODS
@@ -804,8 +803,12 @@ public class SatelliteDisplay {
             PARTICLE_TYPE_MAP.put(et, ModParticles.basePing);
         }
 
+        for(EntityType et : ModConfig.getVehicleEntities() ) {
+            PARTICLE_TYPE_MAP.put(et, ModParticles.bluePing);
+        }
+
         PARTICLE_TYPE_MAP.put(EntityType.PLAYER, ModParticles.basePing);
-        PARTICLE_TYPE_MAP.put(EntityType.SLIME, ParticleTypes.ITEM_SLIME);
+        //PARTICLE_TYPE_MAP.put(EntityType.SLIME, ParticleTypes.ITEM_SLIME);
     }
     private static void onBlockUsed(UseBlockEvent useBlockEvent)
     {
