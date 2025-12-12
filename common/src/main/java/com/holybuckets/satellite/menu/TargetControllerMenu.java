@@ -10,13 +10,14 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class TargetControllerMenu extends AbstractContainerMenu {
 
-    private final TargetControllerBlockEntity blockEntity;
+    private final Container blockEntity;
     private static final int CONTAINER_COLUMNS = 9;
 
-    public TargetControllerMenu(int syncId, Inventory playerInventory, TargetControllerBlockEntity blockEntity) {
+    public TargetControllerMenu(int syncId, Inventory playerInventory, Container blockEntity) {
         super(ModMenus.targetControllerMenu.get(), syncId);
         this.blockEntity = blockEntity;
         
@@ -39,8 +40,8 @@ public class TargetControllerMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        if (this.blockEntity != null) {
-            BlockPos pos = this.blockEntity.getBlockPos();
+        if (this.blockEntity != null && blockEntity instanceof  BlockEntity be) {
+            BlockPos pos = be.getBlockPos();
             return HBUtil.BlockUtil.inRange(pos, player.blockPosition(), 64);
         }
         return true;

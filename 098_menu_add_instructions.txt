@@ -1,0 +1,226 @@
+# Instructions for Adding Custom Menu and Screen to Block Entity
+
+Follow these steps to add a custom GUI menu and screen for any block entity in your mod.
+
+## 1. Create the Menu Class
+
+**Location:** `<root>/menu/<BlockName>Menu.java`
+
+Create a menu class that extends `AbstractContainerMenu`:
+```java
+package <your.mod.package>.menu;
+
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+
+public class <BlockName>Menu extends AbstractContainerMenu {
+
+    private final <BlockEntity> blockEntity;
+
+    public <BlockName>Menu(int syncId, Inventory playerInventory, <BlockEntity> blockEntity) {
+        super(ModMenus.<menuField>.get(), syncId);
+        this.blockEntity = blockEntity;
+        
+        // Add slots here if needed (container slots, player inventory, hotbar)
+        // See ChallengeChestCountingMenu for examples
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        if (this.blockEntity != null) {
+            BlockPos pos = this.blockEntity.getBlockPos();
+            return HBUtil.BlockUtil.inRange(pos, player.blockPosition(), 64);
+        }
+        return true;
+    }
+
+    @Override
+    public ItemStack quickMoveStack(Player player, int index) {
+        // Implement shift-click behavior if needed
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+        // Cleanup when menu closes
+    }
+}
+```
+
+## 2. Register the Menu in ModMenus
+
+**Location:** `<root>/menu/ModMenus.java`
+
+Add a new DeferredObject field and register the menu in the `initialize` method:
+```java
+public static DeferredObject<MenuType<<BlockName>Menu>> <menuField>;
+
+public static void initialize(BalmMenus menus) {
+    // ... existing registrations ...
+    
+    <menuField> = menus.registerMenu(id("<menu_registry_name>"),
+        (syncId, inventory, buf) -> {
+            BlockPos pos = buf.readBlockPos();
+            Level level = inventory.player.level();
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof <BlockEntity>) {
+                <BlockEntity> entity = (<BlockEntity>) be;
+                entity.setLevel(level);
+                return new <BlockName>Menu(syncId, inventory, entity);
+            }
+            return null;
+        });
+}
+```
+
+## 3. Add Menu Provider to Block Entity
+
+**Location:** `<root>/block/be/<BlockEntity>.java`
+
+Add a method to return a `BalmMenuProvider`:
+```java
+public BalmMenuProvider getMenuProvider() {
+    return new BalmMenuProvider() {
+        @Override
+        public Component getDisplayName() {
+            return Component.translatable("block.<mod_id>.<block_translation_key>");
+        }
+
+        @Override
+        public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+            <BlockEntity>.this.setLevel(player.level());
+            return new <BlockName>Menu(syncId, playerInventory, <BlockEntity>.this);
+        }
+
+        @Override
+        public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf buf) {
+            buf.writeBlockPos(worldPosition);
+        }
+    };
+}
+```
+
+## 4. Handle Block Interaction
+
+**Location:** `<root>/block/<Block>.java`
+
+Override the `use` method to open the GUI:
+```java
+@Override
+public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+                             InteractionHand hand, BlockHitResult hit) {
+    if (!level.isClientSide()) {
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof <BlockEntity>) {
+            <BlockEntity> entity = (<BlockEntity>) blockEntity;
+            MenuProvider menuProvider = entity.getMenuProvider();
+            Balm.getNetworking().openMenu(player, menuProvider);
+        }
+    }
+    return InteractionResult.sidedSuccess(level.isClientSide());
+}
+```
+
+## 5. Create the Screen Class
+
+**Location:** `<root>/client/screen/<BlockName>Screen.java`
+```java
+package <your.mod.package>.client.screen;
+
+import <your.mod.package>.Constants;
+import <your.mod.package>.menu.<BlockName>Menu;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+
+public class <BlockName>Screen extends AbstractContainerScreen<<BlockName>Menu> {
+
+    private static final ResourceLocation TEXTURE =
+        new ResourceLocation(Constants.MOD_ID, "textures/gui/<texture_filename>.png");
+
+    public static int INV_HEIGHT = <height>; // Set to match your texture
+    public static int INV_WIDTH = <width>;   // Set to match your texture
+
+    public <BlockName>Screen(<BlockName>Menu menu, Inventory playerInventory, Component title) {
+        super(menu, playerInventory, title);
+        this.imageHeight = INV_HEIGHT;
+        this.imageWidth = INV_WIDTH;
+        // Adjust label positions as needed
+        this.inventoryLabelY = this.imageHeight - 94;
+    }
+
+    @Override
+    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight) / 2;
+        graphics.blit(TEXTURE, x, y, 0, 0, this.imageWidth, this.imageHeight);
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        graphics.drawString(this.font, this.title, 8, 6, 0x404040, false);
+        graphics.drawString(this.font, this.playerInventoryTitle, 8, this.inventoryLabelY, 0x404040, false);
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(graphics);
+        super.render(graphics, mouseX, mouseY, partialTick);
+        this.renderTooltip(graphics, mouseX, mouseY);
+    }
+}
+```
+
+## 6. Register the Screen
+
+**Location:** `<root>/client/screen/ModScreens.java`
+
+Register the screen in the `clientInitialize` method:
+```java
+public static void clientInitialize(BalmScreens screens) {
+    // ... existing registrations ...
+    
+    screens.registerScreen(
+        ModMenus.<menuField>::get,
+        <BlockName>Screen::new
+    );
+}
+```
+
+## 7. Add GUI Texture
+
+**Location:** `resources/assets/<mod_id>/textures/gui/<texture_filename>.png`
+
+Create your GUI texture file at the specified location. The texture dimensions should match the `INV_HEIGHT` and `INV_WIDTH` values in your screen class.
+
+---
+
+## Specific Implementation: TargetControllerBlockEntity
+
+For the **TargetControllerBlockEntity**, implement the following:
+
+- **Menu class:** `TargetControllerMenu` in `menu/TargetControllerMenu.java`
+- **Screen class:** `TargetControllerScreen` in `client/screen/TargetControllerScreen.java`
+- **Menu field in ModMenus:** `targetControllerMenu`
+- **Menu registry name:** `"target_controller_menu"`
+- **Texture filename:** `"target_controller_gui.png"`
+- **Block entity:** `TargetControllerBlockEntity` (already exists in `block/be/`)
+- **Block:** `TargetControllerBlock` (already exists in `block/`)
+- **Translation key:** `"block.<mod_id>.target_controller"`
+
+Adjust `INV_HEIGHT` and `INV_WIDTH` in `TargetControllerScreen` to match your GUI texture dimensions.
+This inventory consists of the player's inventory at the bottom (as opening a typical Minecraft Chest) and only a single item slot in the center of block inventory. The inventory is the same height and width of a typcical minecraft chest.
+The Inventory Title should Read "Weapon Slot" across the top left of the inventory and "Inventory" across the bottom left.
+
+
+NEXT:
+
+- The ControllerMenu class will attempt to accepth a block entity, but this must be a "Container" type
+- BlockEntity will have to implement MenuProvider and Container

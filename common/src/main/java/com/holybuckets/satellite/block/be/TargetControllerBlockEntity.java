@@ -6,25 +6,31 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerB
 import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
 import com.holybuckets.satellite.core.SatelliteManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController
+public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController, Container
 {
     private int colorId = 0;
     private BlockPos uiTargetBlockPos;
     private Vec3 uiCursorPos;
 
+    private NonNullList<ItemStack> items;
+
     public TargetControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.targetControllerBlockEntity.get(), pos, state);
+        this.items = NonNullList.withSize(1, ItemStack.EMPTY);
     }
 
     @Override
@@ -146,4 +152,42 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     }
 
 
+    @Override
+    public int getContainerSize() { return 1; }
+
+    @Override
+    public boolean isEmpty() { return this.items.get(0).isEmpty(); }
+
+    @Override
+    public ItemStack getItem(int i) { return this.items.get(0) ; }
+
+    @Override
+    public ItemStack removeItem(int i, int i1) {
+     return removeItemNoUpdate(i);
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int i) {
+        if(!this.isEmpty()) {
+            ItemStack item = this.items.get(0);
+            items.add(0, ItemStack.EMPTY);
+            return item;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public void setItem(int i, ItemStack itemStack) {
+        this.items.set(0, itemStack);
+    }
+
+
+    public boolean stillValid(Player $$0) {
+        return Container.stillValidBlockEntity(this, $$0);
+    }
+
+    @Override
+    public void clearContent() {
+        this.items.clear();
+    }
 }
