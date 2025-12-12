@@ -113,6 +113,10 @@ public class SatelliteConfig {
         @Comment("Entity types only produce a white ping when grouped in large quantities")
         public Set<String> herdEntityTypes = Set.of("minecraft:cow", "minecraft:sheep", "minecraft:chicken", "minecraft:pig", "minecraft:horse", "minecraft:donkey", "minecraft:llama", "minecraft:wolf", "minecraft:cat");
 
+        @NestedType(String.class)
+        @Comment("Entity types produce blue ping on the satellite display (vehicles and transportation)")
+        public Set<String> vehicleEntityTypes = Set.of("minecraft:minecart", "minecraft:chest_minecart", "minecraft:furnace_minecart", "minecraft:hopper_minecart", "minecraft:spawner_minecart", "minecraft:tnt_minecart", "minecraft:boat", "minecraft:chest_boat");
+
         @Comment("Minimum count of entities to be considered a herd")
         public int minHerdCountThreshold = 5;
     }

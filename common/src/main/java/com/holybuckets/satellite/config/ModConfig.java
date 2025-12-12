@@ -23,6 +23,7 @@ public class ModConfig {
     private static Set<EntityType<?>> hostileEntities = new HashSet<>();
     private static Set<EntityType<?>> neutralEntities = new HashSet<>();
     private static Set<EntityType<?>> herdEntities = new HashSet<>();
+    private static Set<EntityType<?>> vehicleEntities = new HashSet<>();
 
     private static Set<ResourceLocation> trackedStructures = new HashSet<>();
 
@@ -46,6 +47,7 @@ public class ModConfig {
         hostileEntities.clear();
         neutralEntities.clear();
         herdEntities.clear();
+        vehicleEntities.clear();
 
         Registry<EntityType<?>> registry = reg.registryOrThrow(Registries.ENTITY_TYPE);
         SatelliteConfig config = SatelliteMain.CONFIG;
@@ -66,6 +68,10 @@ public class ModConfig {
         // Convert herd entities
         for (String entityId : config.entityPings.herdEntityTypes) {
             addEntity(entityId, registry, herdEntities);
+        }
+        // Convert vehicle entities
+        for (String entityId : config.entityPings.vehicleEntityTypes) {
+            addEntity(entityId, registry, vehicleEntities);
         }
 
         //STRUCTURES
@@ -127,6 +133,10 @@ public class ModConfig {
 
     public static Set<EntityType<?>> getHerdEntities() {
         return herdEntities;
+    }
+
+    public static Set<EntityType<?>> getVehicleEntities() {
+        return vehicleEntities;
     }
 
     public static Set<ResourceLocation> getTrackedStructures() {
