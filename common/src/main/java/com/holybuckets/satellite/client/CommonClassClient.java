@@ -8,6 +8,7 @@ import com.holybuckets.satellite.CommonProxy;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
+import com.holybuckets.satellite.client.core.SatelliteWeapons;
 import com.holybuckets.satellite.client.render.ModRenderers;
 import com.holybuckets.satellite.client.screen.ModScreens;
 import com.holybuckets.satellite.client.screen.SatelliteScreen;
@@ -15,6 +16,7 @@ import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.core.SatelliteManager;
 import com.holybuckets.foundation.client.ClientEventRegistrar;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.blay09.mods.balm.api.client.BalmClient;
@@ -49,6 +51,7 @@ public class CommonClassClient implements CommonProxy {
         registrar.registerOnDisconnectedFromServer(CommonClassClient::onDisconnectedFromServer, EventPriority.Lowest);
         registrar.registerOnBlockHighlightDraw(CommonClassClient::renderUiSphere, EventPriority.Normal);
         SatelliteDisplayClient.init(registrar);
+        SatelliteWeapons.init(registrar);
 
         ClientBalmEventRegister.registerEvents();
 
@@ -108,8 +111,9 @@ public class CommonClassClient implements CommonProxy {
         BlockHitResult hitResult = CommonClass.getAnyHitResult(level, player, REACH_DIST_BLOCKS*2);
         if( hitResult == null ) return;
 
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance()
-            .renderBuffers().bufferSource();
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(
+            new BufferBuilder(2048)  // Adjust capacity as needed
+        );
 
         VertexConsumer builder = bufferSource.getBuffer(RenderType.lines());
         Vec3 cameraPos = camera.getPosition();

@@ -12,6 +12,7 @@ import com.holybuckets.foundation.event.custom.SimpleMessageEvent;
 import com.holybuckets.foundation.event.custom.TickType;
 import com.holybuckets.foundation.model.ManagedChunk;
 import com.holybuckets.foundation.model.ManagedChunkUtility;
+import com.holybuckets.foundation.networking.SimpleStringMessage;
 import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.ModBlocks;
@@ -348,36 +349,29 @@ public class SatelliteManager {
     //** Weapons
 
     private static void addDefaultWeapons() {
-        TargetControllerBlockEntity.addWeapon(ItemStack.EMPTY.getItem().asItem(), SatelliteManager::setWayPointFlare );
-        TargetControllerBlockEntity.addWeapon(ModBlocks.satelliteDisplayBlock.asItem(), SatelliteManager::setWayPointFlare );
+        TargetControllerBlockEntity.addWeapon(ItemStack.EMPTY.getItem().asItem(), SatelliteManager::fireWaypointMessage );
+        TargetControllerBlockEntity.addWeapon(ModBlocks.satelliteDisplayBlock.asItem(), SatelliteManager::fireWaypointMessage );
     }
 
-    private static void setWayPointFlare(TargetControllerBlockEntity controller, ItemStack s) {
-
+    public static final String MSG_ID_WAYPOINT_FLARE = "satellite_waypoint_flare";
+    private static void fireWaypointMessage(TargetControllerBlockEntity controller, ItemStack stack) {
         if(controller == null || controller.getLevel() == null || controller.getLevel().isClientSide) return;
-        if(waypointDetails.containsKey(controller)) waypointDetails.remove(controller);
         BlockPos targetPos = controller.getUiTargetBlockPos();
         if(targetPos == null) return;
-        //int color = WoolDustHelper.getIntColor(controller.getTargetColorId());
         int color = controller.getTargetColorId();
-        waypointDetails.put(controller, Pair.of(targetPos, color));
+
+        //use GSON to create json with valuies, convert to string and send simpleStringMessage to Client
+        JsonObject json = new JsonObject();
+        //String levelString = HBUtil.LevelUtil.toLevelId(HBUtil.LevelUtil.LevelNameSpace.CLIENT, controller.getLevel());
+        String levelString = HBUtil.LevelUtil.toLevelId(controller.getLevel());
+        json.addProperty("levelId", levelString.replace("SERVER", "CLIENT") );
+        json.addProperty("targetPos", HBUtil.BlockUtil.positionToString(targetPos) );
+        json.addProperty("colorId", color);
+
+        SimpleStringMessage.createAndFire(MSG_ID_WAYPOINT_FLARE, json.toString());
     }
 
-    private static void wayPointFlare(BlockPos targetPos, int color)
-    {
-        ServerLevel serverLevel = GeneralConfig.OVERWORLD;
-        int height = serverLevel.getMaxBuildHeight() - targetPos.getY();
-        for (int i = 0; i < height; i++) {
-            serverLevel.sendParticles(
-                WoolDustHelper.getDust(color),
-                targetPos.getX(), targetPos.getY() + i, targetPos.getZ(),
-                0,                      // particle count (0 for colored)
-                Double.longBitsToDouble(color), // Color as "velocity"
-                0.0, 0.0,
-                1.0
-            );
-        }
-    }
+
 
     //** Events
     public static void onWorldStart() {
@@ -423,10 +417,6 @@ public class SatelliteManager {
 
         for (SatelliteManager manager : managers) {
             manager.watchChunkCache();
-        }
-
-        for( Pair<BlockPos, Integer> details : waypointDetails.values() ) {
-            wayPointFlare(details.getLeft(), details.getRight());
         }
 
     }

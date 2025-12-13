@@ -9,7 +9,6 @@ import org.joml.Vector3f;
 
 public class WoolDustHelper {
     private static final IntObjectHashMap<DustParticleOptions> WOOL_DUST_CACHE = new IntObjectHashMap<>();
-    private static final IntObjectHashMap<DustParticleOptions> WOOL_BEAM_CACHE = new IntObjectHashMap<>();
 
     public static void addDustColorFromWool(Block wool, int id)
     {
@@ -35,5 +34,10 @@ public class WoolDustHelper {
         Vector3f v = getDust(id).getColor();
         //(red << 16) | (green << 8) | blue;
         return ((int)(v.x * 255) << 16) | ((int)(v.y * 255) << 8) | (int)(v.z * 255);
+    }
+
+    public static float[] getWoolColorRGB(int colorId) {
+        Vector3f v = getDust(colorId).getColor();
+        return new float[] {v.x, v.y, v.z};
     }
 }

@@ -26,11 +26,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.holybuckets.satellite.config.ModConfig.MAX_ORE_SCANNER_MAPPINGS;
 import static net.minecraft.world.level.block.Blocks.AIR;
 
 public class ChiselBitsAPIFabric implements ChiselBitsAPI {
 
-    static final IBlockInformation[] HOLO_BLOCKS = new IBlockInformation[16];
+    static final IBlockInformation[] HOLO_BLOCKS = new IBlockInformation[64+ChiselBitsAPI.OREMAP_START_IDX];
 
     private static void initHolo(Level level)
     {
@@ -68,14 +69,13 @@ public class ChiselBitsAPIFabric implements ChiselBitsAPI {
             IStateVariantManager.getInstance().getStateVariant(BLACK, CHISELED)
         );
 
-        //Fill with [4] up to index 6
-        for(int i = 5; i < ChiselBitsAPI.OREMAP_START_IDX; i++) HOLO_BLOCKS[i] = HOLO_BLOCKS[4];
-
-        //Fill with stained glass colors up to 15
-        for(int i = ChiselBitsAPI.OREMAP_START_IDX; i < 16; i++) {
-            BlockState STAINED = ChiselBitsAPI.HOLO_ORE_BLOCK(i-8).defaultBlockState();
-            HOLO_BLOCKS[i] = new BlockInformation( STAINED,
-                IStateVariantManager.getInstance().getStateVariant(STAINED, CHISELED)
+        //Fill with ore maps
+        final int MAX = MAX_ORE_SCANNER_MAPPINGS + ChiselBitsAPI.OREMAP_START_IDX;
+        for(int i = ChiselBitsAPI.OREMAP_START_IDX; i < MAX; i++) {
+            Block HOLO_ORE = ChiselBitsAPI.HOLO_ORE_BLOCK(i);
+            if(HOLO_ORE == null) break;
+            HOLO_BLOCKS[i] = new BlockInformation( HOLO_ORE.defaultBlockState(),
+                IStateVariantManager.getInstance().getStateVariant(HOLO_ORE.defaultBlockState(), CHISELED)
             );
         }
     }

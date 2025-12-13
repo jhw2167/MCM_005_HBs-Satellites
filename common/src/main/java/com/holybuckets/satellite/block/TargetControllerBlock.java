@@ -73,10 +73,10 @@ public class TargetControllerBlock extends Block implements EntityBlock {
                 if(level.isClientSide) return InteractionResult.PASS;
                 MenuProvider menuProvider = controller.getMenuProvider();
                 Balm.getNetworking().openMenu(player, menuProvider);
-                return InteractionResult.CONSUME;
+                return InteractionResult.PASS;
             }
             controller.use(player, hand, hitResult);
-            return InteractionResult.CONSUME;
+            return InteractionResult.PASS;
         }
 
         return InteractionResult.PASS;
