@@ -39,7 +39,7 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
         VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
 
         // Get texture
-        ResourceLocation woolLoc = SatelliteManager.getResourceForColorId(blockEntity.getColorId());
+        ResourceLocation woolLoc = SatelliteManager.getResourceForColorId(blockEntity.getTargetColorId());
         TextureAtlasSprite woolSprite = CommonClassClient.getSprite(woolLoc);
 
         Matrix4f matrix = poseStack.last().pose();

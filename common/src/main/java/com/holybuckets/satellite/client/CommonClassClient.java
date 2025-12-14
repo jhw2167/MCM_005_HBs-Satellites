@@ -3,12 +3,14 @@ package com.holybuckets.satellite.client;
 import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.client.ClientBalmEventRegister;
+import com.holybuckets.foundation.event.custom.RenderLevelEvent;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.CommonProxy;
+import com.holybuckets.satellite.LoggerProject;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
-import com.holybuckets.satellite.client.core.SatelliteWeapons;
+import com.holybuckets.satellite.client.core.SatelliteFlareWeapon;
 import com.holybuckets.satellite.client.render.ModRenderers;
 import com.holybuckets.satellite.client.screen.ModScreens;
 import com.holybuckets.satellite.client.screen.SatelliteScreen;
@@ -51,7 +53,7 @@ public class CommonClassClient implements CommonProxy {
         registrar.registerOnDisconnectedFromServer(CommonClassClient::onDisconnectedFromServer, EventPriority.Lowest);
         registrar.registerOnBlockHighlightDraw(CommonClassClient::renderUiSphere, EventPriority.Normal);
         SatelliteDisplayClient.init(registrar);
-        SatelliteWeapons.init(registrar);
+        SatelliteFlareWeapon.init(registrar);
 
         ClientBalmEventRegister.registerEvents();
 
@@ -96,8 +98,21 @@ public class CommonClassClient implements CommonProxy {
 
 
     //Render
+    private static void tryRenderUiSphere(BlockHighlightDrawEvent event) {
+        try {
+            renderUiSphere(event);
+        } catch (Exception ex) {
+            //If we get an error rendering the beacon, likely due to buffer overflow, reset the buffer
+            bufferBuilder = null;
+            String msg = "CommonClassClient::renderUiSphere: Error rendering waypoint flare visuals, resetting buffer. "+
+                "This is not a critical error but let the author know if it happens repeatedly error:\n" + ex.getMessage();
+            LoggerProject.logWarning("002000",  msg);
+        }
+    }
 
     //Rendering
+    private static BufferBuilder bufferBuilder = null;
+    private static int MAX_UI_SPHERE_VERTICES = 256*1024; //256KB
     public static void renderUiSphere(BlockHighlightDrawEvent event)
     {
         Camera camera = event.getCamera();
@@ -105,15 +120,17 @@ public class CommonClassClient implements CommonProxy {
         if (!(camera.getEntity() instanceof Player player)) {
             return;
         }
+        if(bufferBuilder == null ) {
+            bufferBuilder = new BufferBuilder(MAX_UI_SPHERE_VERTICES); // Capacity for beacon vertices
+        }
 
         Level level = camera.getEntity().level();
         //if( !SatelliteManager.isAnyControllerOn()) return; pending implementation
         BlockHitResult hitResult = CommonClass.getAnyHitResult(level, player, REACH_DIST_BLOCKS*2);
         if( hitResult == null ) return;
 
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(
-            new BufferBuilder(2048)  // Adjust capacity as needed
-        );
+        // Create a FRESH buffer builder each call
+        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(bufferBuilder);
 
         VertexConsumer builder = bufferSource.getBuffer(RenderType.lines());
         Vec3 cameraPos = camera.getPosition();

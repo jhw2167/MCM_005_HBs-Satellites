@@ -346,37 +346,10 @@ public class SatelliteManager {
         return false;
     }
 
-    //** Weapons
-
-    private static void addDefaultWeapons() {
-        TargetControllerBlockEntity.addWeapon(ItemStack.EMPTY.getItem().asItem(), SatelliteManager::fireWaypointMessage );
-        TargetControllerBlockEntity.addWeapon(ModBlocks.satelliteDisplayBlock.asItem(), SatelliteManager::fireWaypointMessage );
-    }
-
-    public static final String MSG_ID_WAYPOINT_FLARE = "satellite_waypoint_flare";
-    private static void fireWaypointMessage(TargetControllerBlockEntity controller, ItemStack stack) {
-        if(controller == null || controller.getLevel() == null || controller.getLevel().isClientSide) return;
-        BlockPos targetPos = controller.getUiTargetBlockPos();
-        if(targetPos == null) return;
-        int color = controller.getTargetColorId();
-
-        //use GSON to create json with valuies, convert to string and send simpleStringMessage to Client
-        JsonObject json = new JsonObject();
-        //String levelString = HBUtil.LevelUtil.toLevelId(HBUtil.LevelUtil.LevelNameSpace.CLIENT, controller.getLevel());
-        String levelString = HBUtil.LevelUtil.toLevelId(controller.getLevel());
-        json.addProperty("levelId", levelString.replace("SERVER", "CLIENT") );
-        json.addProperty("targetPos", HBUtil.BlockUtil.positionToString(targetPos) );
-        json.addProperty("colorId", color);
-
-        SimpleStringMessage.createAndFire(MSG_ID_WAYPOINT_FLARE, json.toString());
-    }
-
-
-
     //** Events
     public static void onWorldStart() {
         initWoolIds();
-        addDefaultWeapons();
+        SatelliteWeaponsManager.onWorldStart();
     }
 
     public static void onWorldStop() {

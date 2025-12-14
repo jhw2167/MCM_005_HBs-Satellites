@@ -1,12 +1,10 @@
 package com.holybuckets.satellite.block.be;
 
-import net.minecraft.world.level.block.entity.BeaconBlockEntity;
-import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import com.holybuckets.foundation.HBUtil;
-import com.holybuckets.satellite.block.TargetControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
 import com.holybuckets.satellite.core.SatelliteManager;
+import com.holybuckets.satellite.core.SatelliteWeaponsManager;
 import com.holybuckets.satellite.menu.TargetControllerMenu;
 import net.blay09.mods.balm.api.menu.BalmMenuProvider;
 import net.minecraft.core.BlockPos;
@@ -37,9 +35,12 @@ import java.util.function.Consumer;
 
 public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController, Container
 {
-    private int colorId = 0;
+    private int colorId;
+    private int targetColorId;
+
     private BlockPos uiTargetBlockPos;
     private Vec3 uiCursorPos;
+    private BlockPos waypointPos;
 
     private NonNullList<ItemStack> items;
     private Player playerFiredWeapon;
@@ -52,9 +53,19 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     public static void removeWeapon(Item item) { weapons.remove(item); }
 
 
-    public TargetControllerBlockEntity(BlockPos pos, BlockState state) {
+    public TargetControllerBlockEntity(BlockPos pos, BlockState state)
+    {
         super(ModBlockEntities.targetControllerBlockEntity.get(), pos, state);
+
+        colorId = 0;
+        targetColorId = 0;
+
+        this.uiTargetBlockPos = null;
+        this.uiCursorPos = null;
+        this.waypointPos = null;
+
         this.items = NonNullList.withSize(1, ItemStack.EMPTY);
+        this.playerFiredWeapon = null;
     }
 
     @Override
@@ -88,13 +99,20 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     }
 
     @Override
-    public int getTargetColorId() {
-        return colorId;
+    public void setColorId(int colorId) {
+        this.colorId = colorId;
+        markUpdated();
     }
 
     @Override
-    public void setColorId(int colorId) {
-        this.colorId = colorId;
+    public int getTargetColorId() {
+        return targetColorId;
+    }
+
+
+    public void setTargetColorId(int colorId) {
+        this.targetColorId = colorId;
+        SatelliteWeaponsManager.fireWaypointMessage(this, ItemStack.EMPTY, false);
         markUpdated();
     }
 
@@ -107,6 +125,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     public void toggleOnOff(boolean toggle) {
         this.uiCursorPos = null;
         this.uiTargetBlockPos = null;
+        this.waypointPos = null;
         super.toggleOnOff(toggle);
     }
 
@@ -125,10 +144,11 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         if (cmd == 16) {
             if( p.getItemInHand(hand).getItem() instanceof BlockItem bi ) {
                 Block b = bi.getBlock();
-                colorId = SatelliteManager.getColorId(b);
+                targetColorId = SatelliteManager.getColorId(b);
             } else {
-                colorId = (colorId + 1) % 16;
+                targetColorId = (targetColorId + 1) % SatelliteManager.totalIds();
             }
+            setTargetColorId(targetColorId);
             cmd = -1;
         }
 
@@ -153,9 +173,11 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
 
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
+    protected void saveAdditional(CompoundTag tag)
+    {
         super.saveAdditional(tag);
         tag.putInt("colorId", colorId);
+        tag.putInt("targetColorId", targetColorId);
         if(uiTargetBlockPos != null) {  //saved to send to client for rendering
             String pos = HBUtil.BlockUtil.positionToString(uiTargetBlockPos);
             tag.putString("uiTargetBlockPos", pos);
@@ -168,12 +190,20 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
             this.items.get(0).save(itemTag);
             tag.put("itemStack", itemTag);
         }
+
+        //save waypoint
+        if(waypointPos != null) {
+            String pos = HBUtil.BlockUtil.positionToString(waypointPos);
+            tag.putString("waypointPos", pos);
+        }
     }
 
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
         colorId = tag.getInt("colorId");
+        targetColorId = tag.getInt("targetColorId");
+
         if(tag.contains("uiTargetBlockPos")) {
             String str = tag.getString("uiTargetBlockPos");
             uiTargetBlockPos = (str.equals("")) ? null :
@@ -184,6 +214,12 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
             CompoundTag itemTag = tag.getCompound("itemStack");
             ItemStack stack = ItemStack.of(itemTag);
             this.items.set(0, stack);
+        }
+
+        if(tag.contains("waypointPos")) {
+            String str = tag.getString("waypointPos");
+            waypointPos = (str.equals("")) ? null :
+                new BlockPos( HBUtil.BlockUtil.stringToBlockPos(str) );
         }
     }
 
