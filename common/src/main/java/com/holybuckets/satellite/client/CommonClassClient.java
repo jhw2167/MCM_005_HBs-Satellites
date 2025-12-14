@@ -130,7 +130,7 @@ public class CommonClassClient implements CommonProxy {
         if( hitResult == null ) return;
 
         // Create a FRESH buffer builder each call
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(bufferBuilder);
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
         VertexConsumer builder = bufferSource.getBuffer(RenderType.lines());
         Vec3 cameraPos = camera.getPosition();
@@ -182,11 +182,11 @@ public class CommonClassClient implements CommonProxy {
         }
 
         poseStack.popPose();
-        bufferSource.endBatch(RenderType.lines());
         RenderSystem.enableDepthTest();
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
         RenderSystem.lineWidth(1.0f);
+        //bufferSource.endBatch(RenderType.lines()); should be called by minecraft only
     }
 
 

@@ -165,9 +165,8 @@ public class SatelliteFlareWeapon {
         Vec3 cameraPos = camera.getPosition();
         long gameTime = Minecraft.getInstance().level.getGameTime();
 
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(
-            bufferBuilder
-        );
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance()
+            .renderBuffers().bufferSource();
 
         for (var waypoints : activeWaypoints.values()) {
             for (var wp : waypoints.values()) {
@@ -211,7 +210,7 @@ public class SatelliteFlareWeapon {
         }
 
         //Must flush the buffer after rendering
-        bufferSource.endBatch();
+        //bufferSource.endBatch();
     }
 
 

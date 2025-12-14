@@ -167,6 +167,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         BiConsumer<TargetControllerBlockEntity, ItemStack> consumer = weapons.get(item);
         if(consumer != null) {
             consumer.accept(this, stack);
+            this.waypointPos = this.getUiTargetBlockPos();
             markUpdated();
         }
     }
@@ -216,10 +217,14 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
             this.items.set(0, stack);
         }
 
-        if(tag.contains("waypointPos")) {
+        if(tag.contains("waypointPos"))
+        {
+            boolean wpIsNull = (waypointPos==null);
             String str = tag.getString("waypointPos");
             waypointPos = (str.equals("")) ? null :
                 new BlockPos( HBUtil.BlockUtil.stringToBlockPos(str) );
+            if( wpIsNull && (this.level!=null) && !this.level.isClientSide)
+                SatelliteWeaponsManager.fireWaypointMessage(this, ItemStack.EMPTY);
         }
     }
 
