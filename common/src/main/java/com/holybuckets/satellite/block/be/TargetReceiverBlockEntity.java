@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -53,7 +54,21 @@ public class TargetReceiverBlockEntity extends BlockEntity
         this.uiTargetBlockPos = null;
         this.playerFiredWeapon = null;
         this.linkedTargetController = null;
-        this.manager = SatelliteManager.get(this.level);
+        this.manager = null;
+    }
+
+    public void tick(Level level, BlockPos pos, BlockState state, TargetReceiverBlockEntity blockEntity) {
+        if (level.isClientSide) return;
+        
+        // Set up manager if not already set
+        if (this.manager == null) {
+            this.manager = SatelliteManager.get(level);
+        }
+        
+        // Attempt to set linkedTargetController if we have a manager and valid color IDs
+        if (this.manager != null && this.linkedTargetController == null && this.colorId >= 0 && this.targetColorId >= 0) {
+            this.linkedTargetController = this.manager.getTargetController(this.colorId, this.targetColorId);
+        }
     }
 
     public BlockPos getUiTargetBlockPos() {
@@ -70,8 +85,9 @@ public class TargetReceiverBlockEntity extends BlockEntity
     }
 
     public void setColorId(int color) {
-        this.colorId = colorId;
-        if(manager != null)
+        this.colorId = color;
+        this.linkedTargetController = null; // Reset link when color changes
+        if(manager != null && colorId >= 0 && targetColorId >= 0)
             this.linkedTargetController = manager.getTargetController(colorId, targetColorId);
         markUpdated();
     }
@@ -82,8 +98,9 @@ public class TargetReceiverBlockEntity extends BlockEntity
 
     public void setTargetColorId(int colorId) {
         this.targetColorId = colorId;
-        if(manager != null)
-            this.linkedTargetController = manager.getTargetController(colorId, targetColorId);
+        this.linkedTargetController = null; // Reset link when target color changes
+        if(manager != null && this.colorId >= 0 && colorId >= 0)
+            this.linkedTargetController = manager.getTargetController(this.colorId, colorId);
         markUpdated();
     }
 
