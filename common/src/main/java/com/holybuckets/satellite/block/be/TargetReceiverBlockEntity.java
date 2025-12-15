@@ -1,9 +1,11 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.core.SatelliteManager;
 import com.holybuckets.satellite.core.SatelliteWeaponsManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.InteractionHand;
@@ -13,27 +15,34 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class TargetReceiverBlockEntity extends BlockEntity
 {
+
     private int colorId;
     private int targetColorId;
     private BlockPos uiTargetBlockPos;
     private Player playerFiredWeapon;
-    
-    private static final Map<Item, BiConsumer<TargetReceiverBlockEntity, ItemStack>> weapons = new HashMap<>();
 
-    public static void addWeapon(Item item, BiConsumer<TargetReceiverBlockEntity, ItemStack> consumer) {
-        weapons.put(item, consumer);
+    private SatelliteManager manager;
+    private TargetControllerBlockEntity linkedTargetController;
+    
+    private static final Map<BlockEntityType, BiConsumer<TargetReceiverBlockEntity, BlockEntity>> neighborWeapons = new HashMap<>();
+
+    public static void addNeighborBlockEntityWeapons(BlockEntityType type, BiConsumer<TargetReceiverBlockEntity, BlockEntity> consumer) {
+        neighborWeapons.put(type, consumer);
     }
-    public static boolean validWeapon(Item item) { return weapons.containsKey(item); }
-    public static void removeWeapon(Item item) { weapons.remove(item); }
+    public static boolean validWeapon(BlockEntityType be) { return neighborWeapons.containsKey(be); }
+    public static void removeWeapon(BlockEntityType be) { neighborWeapons.remove(be); }
 
     public TargetReceiverBlockEntity(BlockPos pos, BlockState state)
     {
@@ -43,6 +52,8 @@ public class TargetReceiverBlockEntity extends BlockEntity
         targetColorId = 0;
         this.uiTargetBlockPos = null;
         this.playerFiredWeapon = null;
+        this.linkedTargetController = null;
+        this.manager = SatelliteManager.get(this.level);
     }
 
     public BlockPos getUiTargetBlockPos() {
@@ -58,8 +69,10 @@ public class TargetReceiverBlockEntity extends BlockEntity
         return colorId;
     }
 
-    public void setColorId(int colorId) {
+    public void setColorId(int color) {
         this.colorId = colorId;
+        if(manager != null)
+            this.linkedTargetController = manager.getTargetController(colorId, targetColorId);
         markUpdated();
     }
 
@@ -69,6 +82,8 @@ public class TargetReceiverBlockEntity extends BlockEntity
 
     public void setTargetColorId(int colorId) {
         this.targetColorId = colorId;
+        if(manager != null)
+            this.linkedTargetController = manager.getTargetController(colorId, targetColorId);
         markUpdated();
     }
 
@@ -81,23 +96,51 @@ public class TargetReceiverBlockEntity extends BlockEntity
         if(this.level == null || level.isClientSide) return;
         
         // Handle target color setting similar to TargetControllerBlockEntity
-        if( p.getItemInHand(hand).getItem() instanceof BlockItem bi ) {
-            Block b = bi.getBlock();
-            targetColorId = SatelliteManager.getColorId(b);
+        int cmd = ISatelliteControllerBE.calculateHitCommandTargetReceiver(hitResult);
+        if(cmd == -1) return;
+
+        if(cmd == 0) {
+            setColorId(-1);
+            setTargetColorId(-1);
+            //turnOff
         } else {
-            targetColorId = (targetColorId + 1) % SatelliteManager.totalIds();
+            int blockId = -1;
+            if( p.getItemInHand(hand).getItem() instanceof BlockItem bi ) {
+                Block b = bi.getBlock();
+                blockId = SatelliteManager.getColorId(b);
+            }
+
+            if(blockId != -1 ) {
+                if(cmd == 1) setColorId(blockId);
+                if(cmd == 2) setTargetColorId(blockId);
+            } else {
+                int total = SatelliteManager.totalIds();
+                if(cmd == 1) setColorId( (getColorId() + 1) % total );
+                if(cmd == 2) setTargetColorId( (getTargetColorId() + 1) % total );
+            }
         }
-        setTargetColorId(targetColorId);
+
     }
 
+    public static final Vec3i[] NEIGHBOR_COORDS = {
+        new Vec3i(1, 0, 0), new Vec3i(-1, 0, 0),
+        new Vec3i(0, 1, 0), new Vec3i(0, -1, 0),
+        new Vec3i(0, 0, 1), new Vec3i(0, 0, -1)
+    };
     public void fireWeapon(Player p)
     {
         if(this.level == null || level.isClientSide) return;
         this.playerFiredWeapon = p;
         
-        // Fire weapon logic - simplified since no inventory
-        // This would need to be adapted based on how weapons work without inventory
-        SatelliteWeaponsManager.fireWaypointMessage(this, ItemStack.EMPTY);
+        //Check if any neigboring block entities are valid weapons
+        for(Vec3i offset : NEIGHBOR_COORDS) {
+            BlockPos neighborPos = this.getBlockPos().offset(offset);
+            BlockEntity neighborBE = this.level.getBlockEntity(neighborPos);
+            if(neighborBE != null && validWeapon(neighborBE.getType())) {
+                var biconsumer = neighborWeapons.get(neighborBE.getType());
+                biconsumer.accept(this, neighborBE);
+            }
+        }
         markUpdated();
     }
 
