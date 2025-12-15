@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.satellite.block.SatelliteDisplayBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.core.SatelliteManager;
 import com.holybuckets.satellite.core.SatelliteWeaponsManager;
@@ -72,6 +73,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
         // Attempt to set linkedTargetController if we have a manager and valid color IDs
         if (this.manager != null && this.linkedTargetController == null) {
             this.linkedTargetController = this.manager.getTargetController(this.colorId, this.targetColorId);
+            this.updateBlockState(this.linkedTargetController != null);
         }
 
         if(this.linkedTargetController != null) {
@@ -95,7 +97,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
     public void setColorId(int color) {
         this.colorId = color;
         this.linkedTargetController = null; // Reset link when color changes
-        markUpdated();
+        this.updateBlockState(false);
     }
 
     public int getTargetColorId() {
@@ -105,7 +107,17 @@ public class TargetReceiverBlockEntity extends BlockEntity
     public void setTargetColorId(int colorId) {
         this.targetColorId = colorId;
         this.linkedTargetController = null; // Reset link when target color changes
-        markUpdated();
+        this.updateBlockState(false);
+    }
+
+
+    protected void updateBlockState(boolean isOn) {
+        if(this.level == null) return;
+        BlockState state = this.getBlockState();
+        BlockState newState = state.setValue(SatelliteDisplayBlock.POWERED, isOn);
+        level.setBlock(this.getBlockPos(), newState, 3);
+        this.setChanged();
+        level.sendBlockUpdated(this.getBlockPos(), state, newState, 3);
     }
 
     public Player getPlayerFiredWeapon() {

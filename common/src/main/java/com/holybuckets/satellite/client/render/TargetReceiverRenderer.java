@@ -49,10 +49,10 @@ public class TargetReceiverRenderer implements BlockEntityRenderer<TargetReceive
         renderWoolChannelTexture(targetChannel, poseStack, bufferSource, facing,light, overlay);
 
         // Same size and Y position as SatelliteControllerRenderer, but offset to the right
-        minX = 0.52f;  // 0.34f + 0.33f offset
-        maxX = 0.85f;  // 0.66f + 0.33f offset
-        minY = 0.08f;  // Same as SatelliteControllerRenderer
-        maxY = 0.22f;  // Same as SatelliteControllerRenderer
+        minX = 0.62f;  // 0.34f + 0.33f offset
+        maxX = 0.95f;  // 0.66f + 0.33f offset
+        minY = 0.05f;  // Same as SatelliteControllerRenderer
+        maxY = 0.20f;  // Same as SatelliteControllerRenderer
         WoolQuad mainChannel = new WoolQuad( blockEntity.getColorId(), minX, maxX, minY, maxY );
         renderWoolChannelTexture(mainChannel, poseStack, bufferSource, facing,light, overlay);
 
@@ -88,14 +88,14 @@ public class TargetReceiverRenderer implements BlockEntityRenderer<TargetReceive
 
         // Transform based on facing direction
         switch (facing) {
-            case NORTH -> {
-                builder.vertex(matrix, quad.maxX, quad.minY, -offset)
+            case NORTH -> { // (0,0,0) in neg X corner to (1,1,0)
+                builder.vertex(matrix, 1-quad.minX, quad.minY, -offset)
                     .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, quad.minX, quad.minY, -offset)
+                builder.vertex(matrix, 1-quad.maxX, quad.minY, -offset)
                     .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, quad.minX, quad.maxY, -offset)
+                builder.vertex(matrix, 1-quad.maxX, quad.maxY, -offset)
                     .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, quad.maxX, quad.maxY, -offset)
+                builder.vertex(matrix, 1-quad.minX, quad.maxY, -offset)
                     .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
             }
             case SOUTH -> {

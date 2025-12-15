@@ -566,7 +566,7 @@ public class SatelliteDisplay {
     }
 
         private boolean entityPredicate(Entity e) {
-            if( !(e instanceof LivingEntity) || !e.isAlive() || e.isRemoved() || displayEntities.contains(e) ) return false;
+            if( e.isRemoved() || displayEntities.contains(e) ) return false;
             if( e instanceof ServerPlayer ) return false;
 
             if(ModConfig.getHostileEntities().contains(e.getType())) {}

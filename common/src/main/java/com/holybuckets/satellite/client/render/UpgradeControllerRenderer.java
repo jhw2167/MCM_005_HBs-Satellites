@@ -49,10 +49,13 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
                                         MultiBufferSource bufferSource, Direction facing, Matrix4f matrix,
                                         Matrix3f normal, int light, int overlay)
     {
+
+        if( blockEntity == null || blockEntity.getColorId() == -1) return;
+
+        poseStack.pushPose();
         VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
 
         // Get wool texture from satellite controller
-        if( blockEntity.getColorId() == -1) return;
         int colorId = blockEntity.getColorId();
         ResourceLocation woolLoc = SatelliteManager.getResourceForColorId(colorId);
         TextureAtlasSprite woolSprite = CommonClassClient.getSprite(woolLoc);
@@ -64,28 +67,29 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         float v1 = woolSprite.getV1();
 
 
-        // Same size and Y position as SatelliteControllerRenderer, but offset to the right
+// Same size and Y position as SatelliteControllerRenderer, but offset to the right
         float minX = 0.52f;  // 0.34f + 0.33f offset
         float maxX = 0.85f;  // 0.66f + 0.33f offset
         float minY = 0.08f;  // Same as SatelliteControllerRenderer
         float maxY = 0.22f;  // Same as SatelliteControllerRenderer
-        float offset = 0.01f; // Small offset from face
+        float offset = 0.001f; // Small offset from face
 
+// Transform based on facing direction
         // Transform based on facing direction
         switch (facing) {
             case NORTH -> {
-                // Face toward negative Z - Flip U coordinates
-                builder.vertex(matrix, maxX, minY, -offset)
+                // Face toward negative Z - Mirror X coordinates (1 - maxX to 1 - minX)
+                builder.vertex(matrix, 1 - minX, minY, -offset)  // Was maxX, now 1-minX
                     .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, minX, minY, -offset)
+                builder.vertex(matrix, 1 - maxX, minY, -offset)  // Was minX, now 1-maxX
                     .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, minX, maxY, -offset)
+                builder.vertex(matrix, 1 - maxX, maxY, -offset)  // Was minX, now 1-maxX
                     .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, maxX, maxY, -offset)
+                builder.vertex(matrix, 1 - minX, maxY, -offset)  // Was maxX, now 1-minX
                     .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
             }
             case SOUTH -> {
-                // Face toward positive Z
+                // Face toward positive Z - Correct as is
                 builder.vertex(matrix, minX, minY, 1 + offset)
                     .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
                 builder.vertex(matrix, maxX, minY, 1 + offset)
@@ -96,7 +100,7 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
                     .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
             }
             case WEST -> {
-                // Face toward negative X
+                // Face toward negative X - Correct as is
                 builder.vertex(matrix, -offset, minY, minX)
                     .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
                 builder.vertex(matrix, -offset, minY, maxX)
@@ -107,17 +111,19 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
                     .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
             }
             case EAST -> {
-                // Face toward positive X
-                builder.vertex(matrix, 1 + offset, minY, maxX)
+                // Face toward positive X - Mirror Z coordinates (1 - maxX to 1 - minX)
+                builder.vertex(matrix, 1 + offset, minY, 1 - minX)  // Was maxX, now 1-minX
                     .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                builder.vertex(matrix, 1 + offset, minY, minX)
+                builder.vertex(matrix, 1 + offset, minY, 1 - maxX)  // Was minX, now 1-maxX
                     .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                builder.vertex(matrix, 1 + offset, maxY, minX)
+                builder.vertex(matrix, 1 + offset, maxY, 1 - maxX)  // Was minX, now 1-maxX
                     .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                builder.vertex(matrix, 1 + offset, maxY, maxX)
+                builder.vertex(matrix, 1 + offset, maxY, 1 - minX)  // Was maxX, now 1-minX
                     .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
             }
         }
+        //END SWITCH
+        poseStack.popPose();
 
     }
 
