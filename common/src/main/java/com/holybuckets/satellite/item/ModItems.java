@@ -20,6 +20,7 @@ public class ModItems {
     public static SatelliteItemUpgrade depthUpgrade;
     public static SatelliteItemUpgrade entityScannerUpgrade;
     public static SatelliteItemUpgrade playerScannerUpgrade;
+    public static SatelliteItemUpgrade entityDetectorUpgrade;
 
     public static void initialize(BalmItems items) {
         creativeModeTab = items.registerCreativeModeTab(id(Constants.MOD_ID), () -> new ItemStack(ModBlocks.satelliteBlock));
@@ -31,6 +32,7 @@ public class ModItems {
         items.registerItem(() -> depthUpgrade = new SatelliteItemUpgrade("depth_upgrade"), id("depth_upgrade"));
         items.registerItem(() -> entityScannerUpgrade = new SatelliteItemUpgrade("entity_scanner_upgrade"), id("entity_scanner_upgrade"));
         items.registerItem(() -> playerScannerUpgrade = new SatelliteItemUpgrade("player_scanner_upgrade"), id("player_scanner_upgrade"));
+        items.registerItem(() -> entityDetectorUpgrade = new SatelliteItemUpgrade("entity_detector_upgrade"), id("entity_detector_upgrade"));
     }
 
     private static ResourceLocation id(String name) {

@@ -29,7 +29,7 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
     public UpgradeControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.upgradeControllerBlockEntity.get(), pos, state);
         upgrades = new SatelliteItemUpgrade[4];
-        colorId = 0;
+        colorId = -1;
     }
 
     @Override
@@ -68,6 +68,7 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         if(source != null) {
             source.sendinput(player, hand, cmd);
             setUpgrades(source.getUpgrades());
+            setColorId(source.getSatelliteController().getColorId());
         }
 
         updateBlockState();

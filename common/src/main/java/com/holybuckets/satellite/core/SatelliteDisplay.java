@@ -126,6 +126,15 @@ public class SatelliteDisplay {
         return controller;
     }
 
+    public Collection<ISatelliteControllerBE> getAllControllers() {
+        return controllerBlocks;
+    }
+
+    public Collection<ISatelliteControllerBE> getAllControllers( Class<? extends ISatelliteControllerBE> type ) {
+        return controllerBlocks.stream().filter( cb -> type.isInstance(cb) ).toList();
+    }
+
+
     /**
      *  Add an upgrade to the satellite display, 4 max slots
      *  returns the previous upgrade in the slot
@@ -304,6 +313,7 @@ public class SatelliteDisplay {
 
     public boolean needsClear() { return needsUpdate; }
     public void setNeedsUpdate(boolean b) { this.needsUpdate = b; }
+    public void setNeedsEntityUpdate(boolean b) { this.needsEntityUpdate = b; }
 
     public void resetDisplayUpdates() {
         INFO_CACHE.values().forEach( info -> {
@@ -467,7 +477,7 @@ public class SatelliteDisplay {
         if(noSource() || this.target == null) return;
 
 
-        if(this.needsUpdate)
+        if(this.needsUpdate || this.needsEntityUpdate)
         {
             this.needsEntityUpdate = true;
             displayEntities.clear();
@@ -563,6 +573,7 @@ public class SatelliteDisplay {
             else if(ModConfig.getFriendlyEntities().contains(e.getType())) {}
             else if(ModConfig.getNeutralEntities().contains(e.getType())) {}
             else if(ModConfig.getHerdEntities().contains(e.getType())) {}
+            else if(ModConfig.getVehicleEntities().contains(e.getType())) {}
             else return false;
 
             if( ModConfig.getHerdEntities().contains(e.getType()) ) {

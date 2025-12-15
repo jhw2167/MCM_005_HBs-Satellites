@@ -12,20 +12,21 @@ import com.holybuckets.foundation.event.custom.SimpleMessageEvent;
 import com.holybuckets.foundation.event.custom.TickType;
 import com.holybuckets.foundation.model.ManagedChunk;
 import com.holybuckets.foundation.model.ManagedChunkUtility;
-import com.holybuckets.foundation.networking.SimpleStringMessage;
+import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
+import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.particle.WoolDustHelper;
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.blay09.mods.balm.api.event.PlayerLoginEvent;
 import net.blay09.mods.balm.api.event.TossItemEvent;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -111,6 +112,7 @@ public class SatelliteManager {
 
         reg.registerOnSimpleMessage(MSG_ID_TARGET_POS, SatelliteManager::handleTargetPosMessage);
 
+        reg.registerOnPlayerLogin(SatelliteManager::onPlayerJoined);
         //SatelliteDisplay
         SatelliteDisplay.init(reg);
     }
@@ -135,6 +137,28 @@ public class SatelliteManager {
 
     public Set<SourceKey> getAllChannels() {
         return displaySources.keySet();
+    }
+
+    public TargetControllerBlockEntity getTargetController(int colorId, int targetColorId)
+    {
+        if(colorId<0 || targetColorId<0) return null;
+        SatelliteBlockEntity satellite = get(colorId);
+        if(satellite == null) return null;
+
+        for(SourceKey key : displaySources.keySet()) {
+            if(key.satellite == satellite) {
+                SatelliteDisplay display = displaySources.get(key);
+                if(display == null) continue;
+                for(ISatelliteControllerBE be : display.getAllControllers(TargetControllerBlockEntity.class)) {
+                    if(be instanceof TargetControllerBlockEntity targetController) {
+                        if(targetController.getTargetColorId() == targetColorId) {
+                            return targetController;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -325,7 +349,7 @@ public class SatelliteManager {
             targetPos = targetPos.above(1);
         }
         if(targetPos.getY() >= level.getMaxBuildHeight()) {
-            Messager.getInstance().sendChat(
+            CommonClass.MESSAGER.sendBottomActionHint(
                 "Satellite " + colorId + " cannot be moved to target position, out of build height!");
             return true; //else it will keep retrying
         }
@@ -346,10 +370,27 @@ public class SatelliteManager {
         return false;
     }
 
+    public static final int START_BUFFER_TICKS = 100; //Satellites start working 200 ticks after server start
+    private static int SATELLITE_SERVER_START_TICK = 0; //calculated tick when satellites will operate again
+    private static Queue<Runnable> satelliteClientCommandQueue = new LinkedList<>();
+    /**
+     * Queues satellite actions to process until after start buffer has been filled
+     * to make sure client-server actions are all processed
+     */
+    public static void queueSatelliteCommands(Runnable r) {
+        satelliteClientCommandQueue.add(r);
+        if(!bufferSatelliteStart()) r.run();
+    }
+
+    public static boolean bufferSatelliteStart() {
+        return GeneralConfig.getInstance().getSessionTickCount() <= START_BUFFER_TICKS;
+    }
+
     //** Events
-    public static void onWorldStart() {
+    public static void onBeforeServerStart() {
+        satelliteClientCommandQueue.clear();
         initWoolIds();
-        SatelliteWeaponsManager.onWorldStart();
+        SatelliteWeaponsManager.onBeforeServerStart();
     }
 
     public static void onWorldStop() {
@@ -438,6 +479,11 @@ public class SatelliteManager {
             }
         }
 
+
+    private static void onPlayerJoined(PlayerLoginEvent playerLoginEvent) {
+        SatelliteWeaponsManager.sendAllActiveWaypoints(playerLoginEvent.getPlayer());
+    }
+
     public void shutdown() {
         satellites.clear();
         // Unforce load all chunks before clearing cache
@@ -450,7 +496,10 @@ public class SatelliteManager {
         chunkCache.clear();
     }
 
+    // **MISC Statics**
+
     public static boolean isAnyControllerOn() {
         return  anyControllerOn;
     }
+
 }

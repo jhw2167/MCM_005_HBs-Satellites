@@ -1,6 +1,7 @@
 package com.holybuckets.satellite;
 
 import com.holybuckets.foundation.GeneralConfig;
+import com.holybuckets.foundation.console.IMessager;
 import com.holybuckets.foundation.event.BalmEventRegister;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.satellite.block.ModBlocks;
@@ -28,6 +29,7 @@ import net.minecraft.world.phys.Vec3;
 public class CommonClass implements CommonProxy {
 
     public static boolean isInitialized = false;
+    public static IMessager MESSAGER;
     public static void init()
     {
         if (isInitialized)
@@ -38,6 +40,7 @@ public class CommonClass implements CommonProxy {
 
         //Initialize Foundations
         com.holybuckets.foundation.FoundationInitializers.commonInitialize();
+        MESSAGER = com.holybuckets.foundation.CommonClass.MESSAGER;
 
         if (Services.PLATFORM.isModLoaded(Constants.MOD_ID)) {
             Constants.LOG.info("Hello to " + Constants.MOD_NAME + "!");

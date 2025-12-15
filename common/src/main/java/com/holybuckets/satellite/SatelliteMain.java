@@ -4,7 +4,6 @@ package com.holybuckets.satellite;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.satellite.api.ChiselBitsAPI;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
-import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.core.SatelliteManager;
 import net.blay09.mods.balm.api.Balm;
@@ -61,7 +60,7 @@ public class SatelliteMain {
 
 
         //register local events
-        reg.registerOnBeforeServerStarted(INSTANCE::onServerStarting, EventPriority.Highest);
+        reg.registerOnBeforeServerStarted(INSTANCE::onBeforeServerStart, EventPriority.Highest);
         reg.registerOnLevelLoad(INSTANCE::onLoadLevel, EventPriority.Normal);
         reg.registerOnServerStopped(INSTANCE::onServerStopped, EventPriority.Lowest);
 
@@ -74,14 +73,12 @@ public class SatelliteMain {
 
     //** EVENTS
 
-
-
     //** Events
-    private void onServerStarting(ServerStartingEvent e) {
+    private void onBeforeServerStart(ServerStartingEvent e) {
         //this.DEV_MODE = CONFIG.devMode;
         this.DEV_MODE = false;
         loadConfig();
-        SatelliteManager.onWorldStart();
+        SatelliteManager.onBeforeServerStart();
 
         //Set Configs Entity blocks
         SatelliteControllerBlockEntity.PLAYER_RANGE = CONFIG.displayConfig.playerRange;

@@ -37,6 +37,13 @@ public class ModRenderers {
             TargetControllerRenderer::new
         );
 
+
+        renderers.registerBlockEntityRenderer(
+            ModBlockEntities.targetReceiverBlockEntity::get,
+            TargetReceiverRenderer::new
+        );
+
+
         renderers.registerBlockEntityRenderer(
             ModBlockEntities.upgradeControllerBlockEntity::get,
             UpgradeControllerRenderer::new

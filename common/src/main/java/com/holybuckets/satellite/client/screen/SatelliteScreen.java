@@ -6,6 +6,7 @@ import com.holybuckets.foundation.console.Messager;
 import com.holybuckets.foundation.networking.SimpleStringMessage;
 import com.holybuckets.foundation.structure.StructureInfo;
 import com.holybuckets.foundation.structure.StructureManager;
+import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
@@ -339,7 +340,7 @@ public class SatelliteScreen extends Screen {
         SimpleStringMessage.createAndFire(SatelliteManager.MSG_ID_TARGET_POS, json.toString());
     }
         private void msg(String s) {
-        Messager.getInstance().sendChat(Minecraft.getInstance().player, s);
+            CommonClass.MESSAGER.sendBottomActionHint(Minecraft.getInstance().player, s);
         }
 
     @Override

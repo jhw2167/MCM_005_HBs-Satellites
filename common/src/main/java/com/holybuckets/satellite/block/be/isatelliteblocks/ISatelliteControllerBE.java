@@ -12,6 +12,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
 
+
+
     BlockPos getUiTargetBlockPos();
 
     int getColorId();
@@ -323,7 +325,6 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
         return cmd;
     }
 
-
     // Upgrade Controller constants
     float UPGRADE_BOTTOM_ROW = 0.3f;
     float UPGRADE_LEFT_BUTTON = 0.25f;
@@ -393,5 +394,56 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
 
         return cmd;
     }
+
+    /**
+     * Returns 0 if the receiver was turned off
+     * returns 1 if the main color channel was set/changed
+     * returns 2 if the target color channel was set/changed
+     * @param res
+     * @return
+     */
+    static int calculateHitCommandTargetReceiver(BlockHitResult res)
+    {
+        int cmd = -1;
+        BlockPos p = res.getBlockPos();
+        Vec3 blockCoord = res.getLocation().subtract(p.getX(), p.getY(), p.getZ());
+        Direction blockFacing = res.getDirection();
+        if(blockFacing == Direction.UP || blockFacing == Direction.DOWN) return cmd;
+
+        double xz;
+        double y = blockCoord.y;
+
+        // Map coordinates correctly based on facing direction
+        if (blockFacing == Direction.NORTH) {
+            xz = 1.0 - blockCoord.x;
+        } else if (blockFacing == Direction.SOUTH) {
+            xz = blockCoord.x;
+        } else if (blockFacing == Direction.WEST) {
+            xz = blockCoord.z;
+        } else { // EAST
+            xz = 1.0 - blockCoord.z;
+        }
+
+
+        // Check bottom row - FROM UPGRADE COMMAND LOGIC
+        if (y < TARGET_BOTTOM_ROW)
+        {
+            // Left button - on/off toggle
+            if (xz > (UPGRADE_LEFT_BUTTON - UPGRADE_BUTTON_WIDTH/2) && xz < (UPGRADE_LEFT_BUTTON + UPGRADE_BUTTON_WIDTH/2)) {
+                cmd = 0; // Toggle on/off
+            }
+            // Right button - wool color
+            else if (xz > (UPGRADE_RIGHT_BUTTON - UPGRADE_BUTTON_WIDTH/2) && xz < (UPGRADE_RIGHT_BUTTON + UPGRADE_BUTTON_WIDTH/2)) {
+                cmd = 1; // Change wool color
+            }
+            //center wool changer
+            else if (xz > (0.5 - TARGET_BUTTON_WIDTH/4) && xz < (0.5 + TARGET_BUTTON_WIDTH/4)) {
+                cmd = 2;
+            }
+        }
+
+        return cmd;
+    }
+
 
 }

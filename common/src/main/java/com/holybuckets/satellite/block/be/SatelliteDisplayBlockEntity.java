@@ -6,6 +6,7 @@ import com.holybuckets.satellite.block.SatelliteDisplayBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.holybuckets.satellite.core.SatelliteDisplay;
+import com.holybuckets.satellite.core.SatelliteManager;
 import com.holybuckets.satellite.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -164,7 +165,9 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     }
 
     @Override
-    public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
+    public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity)
+    {
+        if(SatelliteManager.bufferSatelliteStart()) return;
         ticks++;
         if(this.level.isClientSide) return;
 

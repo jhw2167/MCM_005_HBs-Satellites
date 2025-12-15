@@ -3,7 +3,6 @@ package com.holybuckets.satellite.client;
 import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.client.ClientBalmEventRegister;
-import com.holybuckets.foundation.event.custom.RenderLevelEvent;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.CommonProxy;
 import com.holybuckets.satellite.LoggerProject;
@@ -80,7 +79,7 @@ public class CommonClassClient implements CommonProxy {
     //** EVents
     private static void onConnectedToServer(ConnectedToServerEvent event) {
         SatelliteMain.loadConfig();
-        SatelliteManager.onWorldStart();
+        SatelliteManager.onBeforeServerStart();
         ModConfig.onConnectedToServer(HBUtil.LevelUtil.toLevel(HBUtil.LevelUtil.LevelNameSpace.CLIENT, GeneralConfig.OVERWORLD_LOC) );
     }
 

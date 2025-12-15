@@ -11,6 +11,7 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
 import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteManager;
+import com.holybuckets.satellite.core.SatelliteWeaponsManager;
 import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -101,7 +102,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         List<ServerPlayer> players = HBUtil.PlayerUtil
             .getAllPlayersInBlockRange(getBlockPos(), PLAYER_RANGE );
         for(ServerPlayer player : players) {
-            Messager.getInstance().sendChat(player,
+            CommonClass.MESSAGER.sendBottomActionHint(player,
                 "Targeted: " + HBUtil.BlockUtil.positionToString(blockTarget));
         }
     }
@@ -131,6 +132,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
     @Override
     public void setColorId(int colorId) {
+        SatelliteWeaponsManager.clearWaypoints(this);
         this.colorId = colorId;
         this.markUpdated();
     }
@@ -235,7 +237,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             commands.dSection += (cmd == 5 ? 1 : -1);
         } else if ( cmd < 9) {   //adjust display height 7 - inc, 8 - dec
             commands.dDepth += (cmd == 7 ? 1 : -1);
-        } else if( cmd == 9) {  //select block
+        } else if( cmd == 9) {  //select Satellite block
             if(this.level.isClientSide)
                 CommonClass.clientSideActions(this.level, this.clientCloneLinkedSatellite());
             else
@@ -255,7 +257,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
                 }
             } else if (cmd == 11) {
                 if(tc.getUiTargetBlockPos() == null) {
-                    Messager.getInstance().sendChat(p, "No target selected!");
+                    CommonClass.MESSAGER.sendBottomActionHint(p, "No target selected!");
                 }
                 source.fire(p, (ITargetController) controller);
             }
@@ -359,6 +361,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteBlockEntity)
     {
+        if(SatelliteManager.bufferSatelliteStart()) return;
         ticks++;
         if(manager == null) manager = SatelliteManager.get(level);
 
@@ -498,6 +501,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         source.clear();
         source.addAll(nodes);
 
+        source.setNeedsEntityUpdate(true);
         this.source.collectEntities();
     }
 

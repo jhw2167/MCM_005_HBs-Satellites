@@ -5,7 +5,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.client.ClientEventRegistrar;
+import com.holybuckets.foundation.client.MessagerClient;
 import com.holybuckets.foundation.event.custom.*;
+import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.LoggerProject;
 import com.holybuckets.satellite.core.SatelliteManager;
 import com.holybuckets.satellite.core.SatelliteWeaponsManager;
@@ -55,6 +57,12 @@ public class SatelliteFlareWeapon {
             if(!HBUtil.BlockUtil.inRange(p.blockPosition(), this.targetPos, WAYPOINT_FLARE_MAX_DISTANCE)) return;
             this.isActive = true; activeCount++;
         }
+
+        public static void remove(BlockPos pos) {
+            String msg = "Waypoint at " + HBUtil.BlockUtil.positionToString(pos) + " removed.";
+            CommonClass.MESSAGER.sendBottomActionHint(msg);
+        }
+
     }
 
     public static String CURRENT_LEVEL_ID = "";
@@ -88,6 +96,7 @@ public class SatelliteFlareWeapon {
 
                     if (HBUtil.BlockUtil.inRange(playerPos, wpPos, WAYPOINT_FLARE_MIN_DISTANCE)) {
                         iterator.remove(); // Safe removal during iteration
+                        Waypoint.remove(w.targetPos);
                     }
                 }
             }
@@ -110,9 +119,10 @@ public class SatelliteFlareWeapon {
         || !obj.has("targetControllerOrigin")
         || !obj.has("targetPos"))
         {   //Clear waypoint
-            if(activeWaypoints.containsKey( satControllerOrigin ))
+            if(activeWaypoints.containsKey( satControllerOrigin )) {
+                activeWaypoints.get( satControllerOrigin ).forEach( (pos,w) -> Waypoint.remove(pos));
                 activeWaypoints.get( satControllerOrigin ).clear();
-            //Client message: Waypoints removed
+            }
             return;
         }
 
@@ -127,10 +137,7 @@ public class SatelliteFlareWeapon {
         Map<BlockPos, Waypoint> waypoints = activeWaypoints.get( satControllerOrigin );
         if( colorId == -1 ) {
             Waypoint wp = waypoints.remove( targetControllerOrigin );
-            if(wp != null && wp.isActive) {
-                //ClientMessager.bottomActionHint
-            }
-
+            if(wp != null && wp.isActive) Waypoint.remove( wp.targetPos );
             return;
         }
         waypoints.put( targetControllerOrigin,  w );

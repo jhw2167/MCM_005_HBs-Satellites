@@ -52,8 +52,8 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
 
         // Get wool texture from satellite controller
-        if( !blockEntity.isDisplayOn() || blockEntity.getSatelliteController() == null) return;
-        int colorId = blockEntity.getSatelliteController().getColorId();
+        if( blockEntity.getColorId() == -1) return;
+        int colorId = blockEntity.getColorId();
         ResourceLocation woolLoc = SatelliteManager.getResourceForColorId(colorId);
         TextureAtlasSprite woolSprite = CommonClassClient.getSprite(woolLoc);
 
@@ -137,8 +137,8 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         float[][] quadrants = {
             {0.12f, 0.3f, 0.7f, 0.85f}, // Top-left quadrant
             {0.57f, 0.75f, 0.7f, 0.85f}, // Top-right quadrant
-            {0.12f, 0.3f, 0.35f, 0.50f}, // Bottom-left quadrant
-            {0.57f, 0.75f, 0.35f, 0.50f}  // Bottom-right quadrant
+            {0.12f, 0.3f, 0.42f, 0.57f}, // Bottom-left quadrant
+            {0.57f, 0.75f, 0.42f, 0.57f}  // Bottom-right quadrant
         };
         
         float offset = 0.01f;

@@ -57,17 +57,25 @@ public class TargetReceiverBlockEntity extends BlockEntity
         this.manager = null;
     }
 
-    public void tick(Level level, BlockPos pos, BlockState state, TargetReceiverBlockEntity blockEntity) {
+    private final int REFRESH_TICKS = 20;
+    private int ticks = 0;
+    public void tick(Level level, BlockPos pos, BlockState state, TargetReceiverBlockEntity blockEntity)
+    {
         if (level.isClientSide) return;
-        
+        if(ticks++ < REFRESH_TICKS) return;
+        ticks = 0;
         // Set up manager if not already set
         if (this.manager == null) {
             this.manager = SatelliteManager.get(level);
         }
         
         // Attempt to set linkedTargetController if we have a manager and valid color IDs
-        if (this.manager != null && this.linkedTargetController == null && this.colorId >= 0 && this.targetColorId >= 0) {
+        if (this.manager != null && this.linkedTargetController == null) {
             this.linkedTargetController = this.manager.getTargetController(this.colorId, this.targetColorId);
+        }
+
+        if(this.linkedTargetController != null) {
+            setUiTargetBlockPos(this.linkedTargetController.getUiTargetBlockPos());
         }
     }
 
@@ -87,8 +95,6 @@ public class TargetReceiverBlockEntity extends BlockEntity
     public void setColorId(int color) {
         this.colorId = color;
         this.linkedTargetController = null; // Reset link when color changes
-        if(manager != null && colorId >= 0 && targetColorId >= 0)
-            this.linkedTargetController = manager.getTargetController(colorId, targetColorId);
         markUpdated();
     }
 
@@ -99,8 +105,6 @@ public class TargetReceiverBlockEntity extends BlockEntity
     public void setTargetColorId(int colorId) {
         this.targetColorId = colorId;
         this.linkedTargetController = null; // Reset link when target color changes
-        if(manager != null && this.colorId >= 0 && colorId >= 0)
-            this.linkedTargetController = manager.getTargetController(this.colorId, colorId);
         markUpdated();
     }
 
@@ -147,6 +151,8 @@ public class TargetReceiverBlockEntity extends BlockEntity
     public void fireWeapon(Player p)
     {
         if(this.level == null || level.isClientSide) return;
+        if(this.linkedTargetController == null) return;
+        this.uiTargetBlockPos = this.linkedTargetController.getUiTargetBlockPos();
         this.playerFiredWeapon = p;
         
         //Check if any neigboring block entities are valid weapons

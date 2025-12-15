@@ -109,10 +109,10 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         return targetColorId;
     }
 
-
+    //We won't clear it on color change, but it will be cleared if a new waypoint is set
     public void setTargetColorId(int colorId) {
         this.targetColorId = colorId;
-        SatelliteWeaponsManager.fireWaypointMessage(this, ItemStack.EMPTY, false);
+        //SatelliteWeaponsManager.fireWaypointMessage(this, ItemStack.EMPTY, false);
         markUpdated();
     }
 
