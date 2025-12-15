@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "hbs_satellites:block/target_receiver_block_top_on",
+    "front": "hbs_satellites:block/target_receiver_block_front_on",
+    "side": "hbs_satellites:block/target_receiver_block_side_on"
+  }
+}

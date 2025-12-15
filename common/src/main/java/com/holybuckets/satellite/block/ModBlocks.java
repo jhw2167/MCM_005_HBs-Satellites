@@ -21,6 +21,7 @@ public class ModBlocks {
     public static Block heightControllerBlock;
     public static Block positionControllerBlock;
     public static Block targetControllerBlock;
+    public static Block targetReceiverBlock;
     public static Block upgradeControllerBlock;
     //public static Block[] scopedSharestones = new SharestoneBlock[DyeColor.values().length];
 
@@ -34,9 +35,10 @@ public class ModBlocks {
         blocks.register(() -> satelliteControllerBlock = new SatelliteControllerBlock(), () -> itemBlock(satelliteControllerBlock), id("satellite_controller_block"));
         blocks.register(() -> satelliteDisplayBlock = new SatelliteDisplayBlock(), () -> itemBlock(satelliteDisplayBlock), id("satellite_display_block"));
         blocks.register(() -> emptyControllerBlock = new EmptyControllerBlock(), () -> itemBlock(emptyControllerBlock), id("empty_controller_block"));
-        blocks.register(() -> heightControllerBlock = new HeightControllerBlock(), () -> itemBlock(heightControllerBlock), id("height_controller_block"));
+        blocks.register(() -> heightControllerBlock = new HeightControllerBlock(), ()-> itemBlock(heightControllerBlock), id("height_controller_block"));
         blocks.register(() -> positionControllerBlock = new PositionControllerBlock(), () -> itemBlock(positionControllerBlock), id("position_controller_block"));
         blocks.register(() -> targetControllerBlock = new TargetControllerBlock(), () -> itemBlock(targetControllerBlock), id("target_controller_block"));
+        blocks.register(() -> targetReceiverBlock = new TargetReceiverBlock(), () -> itemBlock(targetReceiverBlock), id("target_receiver_block"));
         blocks.register(() -> upgradeControllerBlock = new UpgradeControllerBlock(), () -> itemBlock(upgradeControllerBlock), id("upgrade_controller_block"));
 
         /*

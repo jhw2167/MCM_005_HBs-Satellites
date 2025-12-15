@@ -17,6 +17,7 @@ public class ModBlockEntities {
     public static DeferredObject<BlockEntityType<HeightControllerBlockEntity>> heightControllerBlockEntity;
     public static DeferredObject<BlockEntityType<PositionControllerBlockEntity>> positionControllerBlockEntity;
     public static DeferredObject<BlockEntityType<TargetControllerBlockEntity>> targetControllerBlockEntity;
+    public static DeferredObject<BlockEntityType<TargetReceiverBlockEntity>> targetReceiverBlockEntity;
     public static DeferredObject<BlockEntityType<UpgradeControllerBlockEntity>> upgradeControllerBlockEntity;
 
     public static void initialize(BalmBlockEntities blockEntities)
@@ -48,6 +49,10 @@ public class ModBlockEntities {
         targetControllerBlockEntity = blockEntities.registerBlockEntity(
             id("target_controller_block_entity"), TargetControllerBlockEntity::new,
             () -> new Block[]{ModBlocks.targetControllerBlock});
+
+        targetReceiverBlockEntity = blockEntities.registerBlockEntity(
+            id("target_receiver_block_entity"), TargetReceiverBlockEntity::new,
+            () -> new Block[]{ModBlocks.targetReceiverBlock});
 
         upgradeControllerBlockEntity = blockEntities.registerBlockEntity(
             id("upgrade_controller_block_entity"), UpgradeControllerBlockEntity::new,

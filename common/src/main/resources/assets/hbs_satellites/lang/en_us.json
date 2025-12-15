@@ -20,6 +20,8 @@
   "block.hbs_satellites.height_controller_block.desc": "Controls height and depth of Satellite Display",
   "block.hbs_satellites.target_controller_block": "Target Controller",
   "block.hbs_satellites.target_controller_block.desc": "Sets target coordinates for Satellite Display",
+  "block.hbs_satellites.target_receiver_block": "Target Receiver",
+  "block.hbs_satellites.target_receiver_block.desc": "Receives targeting information from satellite systems",
   "block.hbs_satellites.position_controller_block": "Position Controller",
   "block.hbs_satellites.position_controller_block.desc": "Adjusts ordinal position for Satellite Display",
   "block.hbs_satellites.empty_controller_block": "Empty Controller",
