@@ -49,8 +49,34 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
     }
 
     public SatelliteItemUpgrade[] getUpgrades() {
-        if(this.source == null) return upgrades;
-        return source.getUpgrades();
+        return upgrades;
+    }
+
+    /**
+     * Add an upgrade to the specified slot
+     * @param upgrade The upgrade to add
+     * @param slot The slot index (0-3)
+     * @return The previous upgrade in that slot, or null if empty
+     */
+    public SatelliteItemUpgrade addUpgrade(SatelliteItemUpgrade upgrade, int slot) {
+        if(slot >= upgrades.length || slot < 0) return null;
+        SatelliteItemUpgrade temp = upgrades[slot];
+        upgrades[slot] = upgrade;
+        markUpdated();
+        return temp;
+    }
+
+    /**
+     * Remove an upgrade from the specified slot
+     * @param slot The slot index (0-3)
+     * @return The upgrade that was removed, or null if slot was empty
+     */
+    public SatelliteItemUpgrade removeUpgrade(int slot) {
+        if(slot >= upgrades.length || slot < 0) return null;
+        SatelliteItemUpgrade temp = upgrades[slot];
+        upgrades[slot] = null;
+        markUpdated();
+        return temp;
     }
 
     @Override
@@ -67,18 +93,10 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
 
         if(source != null) {
             source.sendinput(player, hand, cmd);
-            setUpgrades(source.getUpgrades());
             setColorId(source.getSatelliteController().getColorId());
         }
 
         updateBlockState();
-    }
-
-    private void setUpgrades(SatelliteItemUpgrade[] upgrades) {
-        if(upgrades == null) return;
-        for(int i = 0; i < this.upgrades.length; i++) {
-            this.upgrades[i] = upgrades[i];
-        }
     }
 
     @Override
@@ -112,9 +130,6 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
                continue;
            }
             upgrades[i] = (SatelliteItemUpgrade) BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(upgString));
-            if(source != null) {
-                source.addUpgrade(upgrades[i], i);
-            }
         }
 
     }

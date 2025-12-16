@@ -72,7 +72,6 @@ public class SatelliteDisplay {
     protected int minZ = Integer.MAX_VALUE;
     protected int maxZ = Integer.MIN_VALUE;
 
-    protected SatelliteItemUpgrade[] upgrades;
     protected Set<ISatelliteControllerBE> controllerBlocks;
 
     //rendering
@@ -111,7 +110,6 @@ public class SatelliteDisplay {
 
         displayBlocks = new HashMap<>();
         controllerBlocks = new HashSet<>();
-        upgrades = new SatelliteItemUpgrade[4];
         if(satellite == null) return;
 
         this.target = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
@@ -140,23 +138,19 @@ public class SatelliteDisplay {
      *  returns the previous upgrade in the slot
      */
     public SatelliteItemUpgrade addUpgrade(SatelliteItemUpgrade upgrade, int slot) {
-        if(slot > upgrades.length ) return null;
-        SatelliteItemUpgrade temp = upgrades[slot];
-        upgrades[slot] = upgrade;
-        this.needsUpdate = true;
-        return temp;
-
+        UpgradeControllerBlockEntity upgradeController = getUpgradeController();
+        if(upgradeController == null) return null;
+        return upgradeController.addUpgrade(upgrade, slot);
     }
 
     public SatelliteItemUpgrade removeUpgrade(int slot) {
-        if(slot > upgrades.length ) return null;
-        SatelliteItemUpgrade temp = upgrades[slot];
-        upgrades[slot] = null;
-        this.needsUpdate = true;
-        return temp;
+        UpgradeControllerBlockEntity upgradeController = getUpgradeController();
+        if(upgradeController == null) return null;
+        return upgradeController.removeUpgrade(slot);
     }
 
     public boolean hasUpgrade(SatelliteItemUpgrade upgrade) {
+        SatelliteItemUpgrade[] upgrades = getUpgrades();
         return (upgrades[0]==upgrade
             || upgrades[1]==upgrade
             || upgrades[2]==upgrade
@@ -164,7 +158,21 @@ public class SatelliteDisplay {
     }
 
     public SatelliteItemUpgrade[] getUpgrades() {
-        return upgrades;
+        UpgradeControllerBlockEntity upgradeController = getUpgradeController();
+        if(upgradeController == null) {
+            // Return empty array if no upgrade controller
+            return new SatelliteItemUpgrade[4];
+        }
+        return upgradeController.getUpgrades();
+    }
+
+    private UpgradeControllerBlockEntity getUpgradeController() {
+        for(ISatelliteControllerBE controller : controllerBlocks) {
+            if(controller instanceof UpgradeControllerBlockEntity upgradeController) {
+                return upgradeController;
+            }
+        }
+        return null;
     }
 
 
