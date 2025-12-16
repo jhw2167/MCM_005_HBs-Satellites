@@ -143,6 +143,7 @@ public class SatelliteDisplay {
         if(slot > upgrades.length ) return null;
         SatelliteItemUpgrade temp = upgrades[slot];
         upgrades[slot] = upgrade;
+        this.needsUpdate = true;
         return temp;
 
     }
@@ -151,6 +152,7 @@ public class SatelliteDisplay {
         if(slot > upgrades.length ) return null;
         SatelliteItemUpgrade temp = upgrades[slot];
         upgrades[slot] = null;
+        this.needsUpdate = true;
         return temp;
     }
 
@@ -476,11 +478,17 @@ public class SatelliteDisplay {
 
         if(noSource() || this.target == null) return;
 
-
         if(this.needsUpdate || this.needsEntityUpdate)
         {
             this.needsEntityUpdate = true;
             displayEntities.clear();
+            displayBlocks.forEach( (pos, disp) -> {
+            disp.clearSignalStrength();
+            if( disp.getDisplayInfo()!= null) {
+                for( ChunkDisplayInfo info : disp.getDisplayInfo() ) {
+                    info.clearEntities();
+                }
+            }});
             //for(ISatelliteDisplayBlock displayBlock : displayBlocks.values())
             {
                 BlockPos cntrlPos = controller.getBlockPos();
@@ -565,6 +573,7 @@ public class SatelliteDisplay {
 
     }
 
+        private static TripleInt ENTITY_TRIPLE = new TripleInt(0,0,0);
         private boolean entityPredicate(Entity e) {
             if( e.isRemoved() || displayEntities.contains(e) ) return false;
             if( e instanceof ServerPlayer ) return false;
@@ -576,12 +585,10 @@ public class SatelliteDisplay {
             else if(ModConfig.getVehicleEntities().contains(e.getType())) {}
             else return false;
 
-            if( ModConfig.getHerdEntities().contains(e.getType()) ) {
-                ChunkDisplayInfo info = INFO_CACHE.get(new TripleInt(e.chunkPosition().x, currentSection , e.chunkPosition().z ));
-                if(info == null) return false;
-                return info.acceptLocalEntity(e);
-            }
-            return true;
+            ENTITY_TRIPLE.set(e.chunkPosition().x, currentSection , e.chunkPosition().z) ;
+            ChunkDisplayInfo info = INFO_CACHE.get( ENTITY_TRIPLE );
+            if(info == null) return false;
+            return info.acceptLocalEntity(e);
         }
 
         public void addEntity(Entity e) {
@@ -593,7 +600,8 @@ public class SatelliteDisplay {
             return PARTICLE_TYPE_MAP.getOrDefault(e.getType(), ParticleTypes.ELECTRIC_SPARK );
         }
 
-        private static ParticleOptions getPlayerParticleType(ServerPlayer sp, int colorId) {
+        private static ParticleOptions getPlayerParticleType(ServerPlayer sp, int colorId)
+        {
             Block woolBlock  = SatelliteManager.getWool(colorId);
 
             // Get the target dye color from the wool block
@@ -606,7 +614,6 @@ public class SatelliteDisplay {
             }
 
             if (targetColor == null) return ParticleTypes.ELECTRIC_SPARK;
-
 
             // Search player inventory
             for (ItemStack stack : sp.getInventory().items) {
@@ -649,16 +656,18 @@ public class SatelliteDisplay {
 
 
     final static float RENDER_SCALE = 0.0625f; // 1/16
+    final static BlockPos ENTITY_BLOCKPOS = new BlockPos(0,0,0);
     public void renderEntities(BlockPos cntrlPos)
     {
         if(cntrlPos == null || noSource() || this.target == null) return;
+        if(!hasUpgrade(ModItems.entityScannerUpgrade))
         if(this.needsEntityUpdate) collectEntities();
-        //Obtain an iterator to the entity list
+
         Iterator<Entity> iterator = displayEntities.iterator();
         while (iterator.hasNext())
         {
             Entity e = iterator.next();
-            if(e == null || !e.isAlive() || e.isRemoved()) {
+            if(e == null || e.isRemoved()) {
                 iterator.remove(); continue;
             }
 
@@ -670,12 +679,14 @@ public class SatelliteDisplay {
             int blockOffsetZ = e.blockPosition().getZ() - chunkWorldPos.getZ();
 
             //Check if this block is in displayBlocks using y coord from cntrlPos
-            if(!displayBlocks.containsKey(new BlockPos(
+            BlockPos dispPos = new BlockPos(
                 cntrlPos.getX() + chunkOffsetX,
                 cntrlPos.getY(),
                 cntrlPos.getZ() + chunkOffsetZ
-            ))) continue;
+            );
 
+            ISatelliteDisplayBE displayBE = displayBlocks.get(dispPos);
+            if(displayBE == null) return;
 
             final int Y_MIN = level.getMinBuildHeight();
             int blockOffsetY = e.blockPosition().getY() - (((currentSection) * 16)+Y_MIN) + ((depth-1)*16);
@@ -696,6 +707,7 @@ public class SatelliteDisplay {
 
             // check against Max and min values
             if(x < minX || x > maxX || z < minZ || z > maxZ) continue;
+            displayBE.setSignalStrength( ModConfig.getSignalStrength(particleType));
 
             ((ServerLevel) level).sendParticles (
                 particleType,                     // Particle type
