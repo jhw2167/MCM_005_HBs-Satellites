@@ -86,6 +86,11 @@ public class UpgradeControllerBlock extends Block implements EntityBlock {
     }
 
     @Override
+    public boolean isSignalSource(BlockState state) {
+        return true;
+    }
+
+    @Override
     public void destroy(LevelAccessor $$0, BlockPos $$1, BlockState $$2) {
         super.destroy($$0, $$1, $$2);
         //call destroy on block entity

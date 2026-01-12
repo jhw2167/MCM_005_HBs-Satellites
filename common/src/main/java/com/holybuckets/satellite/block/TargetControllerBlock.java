@@ -82,6 +82,11 @@ public class TargetControllerBlock extends Block implements EntityBlock {
         return InteractionResult.PASS;
     }
 
+    @Override
+    public boolean isSignalSource(BlockState state) {
+        return true;
+    }
+
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {

@@ -84,6 +84,11 @@ public class PositionControllerBlock extends Block implements EntityBlock {
         return 0;
     }
 
+    @Override
+    public boolean isSignalSource(BlockState state) {
+        return true;
+    }
+
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {

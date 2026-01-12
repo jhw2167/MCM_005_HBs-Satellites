@@ -70,6 +70,11 @@ public class HeightControllerBlock extends Block implements EntityBlock {
     }
 
     @Override
+    public boolean isSignalSource(BlockState state) {
+        return true;
+    }
+
+    @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         Direction d = hitResult.getDirection();
         Direction front = state.getValue(FACING);
