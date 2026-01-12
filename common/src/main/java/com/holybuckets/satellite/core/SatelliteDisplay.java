@@ -36,6 +36,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
@@ -502,6 +503,14 @@ public class SatelliteDisplay {
         return INFO_CACHE.get(chunkSelection);
     }
 
+    /** Update all blocks neighboring a display block, for redstone signals and such */
+    public void updateNeighbors() {
+        for(ISatelliteDisplayBE disp : displayBlocks.values()) {
+        if( disp instanceof BlockEntity be ) {
+            this.level.updateNeighborsAt(disp.getBlockPos(), be.getBlockState().getBlock() );
+        }
+        }
+    }
 
 
     //** Render Methods
@@ -709,6 +718,7 @@ public class SatelliteDisplay {
         if(!hasUpgrade(ModItems.entityScannerUpgrade)) return;
         if(this.needsEntityUpdate) collectEntities();
 
+        Set<ISatelliteDisplayBE> entityActiveDisplays = new HashSet<>();
         Iterator<Entity> iterator = displayEntities.iterator();
         while (iterator.hasNext())
         {
@@ -753,6 +763,7 @@ public class SatelliteDisplay {
 
             // check against Max and min values
             if(x < minX || x > maxX || z < minZ || z > maxZ) continue;
+            entityActiveDisplays.add(displayBE);
             displayBE.setSignalStrength( ModConfig.getSignalStrength(particleType));
 
             ((ServerLevel) level).sendParticles (
@@ -762,8 +773,12 @@ public class SatelliteDisplay {
                 0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
                 0.0                               // Speed
             );
-
-
+        }
+        //For all non active displays. clearSignalStrength
+        for(ISatelliteDisplayBE disp : displayBlocks.values()) {
+            if(!entityActiveDisplays.contains(disp)) {
+                disp.clearSignalStrength();
+            }
         }
     }
 

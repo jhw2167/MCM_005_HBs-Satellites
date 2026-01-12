@@ -509,7 +509,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         source.syncUpgradesWithControllers();
 
         source.setNeedsEntityUpdate(true);
-        this.source.collectEntities();
+        source.collectEntities();
+        source.updateNeighbors();
     }
 
     //** Serialization

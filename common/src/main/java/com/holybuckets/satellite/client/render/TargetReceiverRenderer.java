@@ -40,8 +40,8 @@ public class TargetReceiverRenderer implements BlockEntityRenderer<TargetReceive
         int overlay = OverlayTexture.NO_OVERLAY;
         Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 
-        float minX = 0.46f; // Moved left from 0.48f
-        float maxX = 0.53f; // Moved left from 0.54f
+        float minX = 0.465f; // Moved left from 0.48f
+        float maxX = 0.535f; // Moved left from 0.54f
         float minY = 0.15f;
         float maxY = 0.22f; // Made 10% taller: (0.21 - 0.16) * 1.1 + 0.16 = 0.215f
 
@@ -119,13 +119,13 @@ public class TargetReceiverRenderer implements BlockEntityRenderer<TargetReceive
                     .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
             }
             case EAST -> {
-                builder.vertex(matrix, 1 + offset, quad.minY, quad.maxX)
+                builder.vertex(matrix, 1 + offset, quad.minY, 1 - quad.minX)
                     .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                builder.vertex(matrix, 1 + offset, quad.minY, quad.minX)
+                builder.vertex(matrix, 1 + offset, quad.minY, 1 - quad.maxX)
                     .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                builder.vertex(matrix, 1 + offset, quad.maxY, quad.minX)
+                builder.vertex(matrix, 1 + offset, quad.maxY, 1 - quad.maxX)
                     .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                builder.vertex(matrix, 1 + offset, quad.maxY, quad.maxX)
+                builder.vertex(matrix, 1 + offset, quad.maxY, 1 - quad.minX)
                     .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
             }
         } //END SWITCH

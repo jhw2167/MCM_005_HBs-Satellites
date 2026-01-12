@@ -1,10 +1,13 @@
 package com.holybuckets.satellite.block;
 
 import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
+import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -41,6 +44,19 @@ public class SatelliteDisplayBlock extends Block implements EntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new SatelliteDisplayBlockEntity(pos, state);
+    }
+
+    @Override
+    public boolean isSignalSource(BlockState state) {
+        return true;
+    }
+
+    @Override
+    public int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        if (level.getBlockEntity(pos) instanceof SatelliteControllerBlockEntity blockEntity) {
+            return blockEntity.getSignalStrength(); // 0-15
+        }
+        return 0;
     }
 
     //Override block is destroyed

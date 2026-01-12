@@ -56,11 +56,11 @@ public class TargetControllerRenderer implements BlockEntityRenderer<TargetContr
 
         Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 
-        float minX = 0.46f; // Moved left from 0.48f
-        float maxX = 0.53f; // Moved left from 0.54f
+        float minX = 0.465f; // Moved left from 0.48f
+        float maxX = 0.535f; // Moved left from 0.54f
         float minY = 0.15f;
         float maxY = 0.22f; // Made 10% taller: (0.21 - 0.16) * 1.1 + 0.16 = 0.215f
-        float offset = 0.01f; // Small offset from face
+        float offset = 0.001f; // Small offset from face
 
         // Transform based on facing direction
         switch (facing) {

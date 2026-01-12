@@ -67,12 +67,14 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     public void setSignalStrength(int strength) {
         entitySignalStrength = Math.max(entitySignalStrength, strength);
         updateBlockState();
+        this.level.updateNeighborsAt(this.worldPosition, this.getBlockState().getBlock());
     }
 
     @Override
     public void clearSignalStrength() {
         entitySignalStrength = 0;
         updateBlockState();
+        this.level.updateNeighborsAt(this.worldPosition, this.getBlockState().getBlock());
     }
 
     public void setHeight(int height) {
@@ -197,6 +199,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         if(this.level.isClientSide) return;
 
         if( source==null || source.noSource() || !source.contains(this.getBlockPos())) {
+            source = null;
             toggleOnOff(false);
         } else if(displayInfo != null && !displayInfo.isEmpty()) {
             renderDisplay();
