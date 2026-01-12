@@ -88,6 +88,8 @@ public class ChiselBitsAPIFabric implements ChiselBitsAPI {
     @Override
     public BlockEntity build(Level level, int[] bits, BlockPos pos, boolean[] yLevelHasUpdates)
     {
+        if(bits == null) return null;
+
         initHolo(level);
         BlockState above = level.getBlockState(pos);
         BlockEntity aboveBe = level.getBlockEntity(pos);

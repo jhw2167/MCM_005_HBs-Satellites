@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -127,57 +128,56 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
 
     }
 
-    private void renderUpgradeTextures(UpgradeControllerBlockEntity blockEntity, PoseStack poseStack, 
-                                     MultiBufferSource bufferSource, Direction facing, Matrix4f matrix, 
-                                     Matrix3f normal, int light, int overlay) {
-        
+    private void renderUpgradeTextures(UpgradeControllerBlockEntity blockEntity, PoseStack poseStack,
+                                       MultiBufferSource bufferSource, Direction facing, Matrix4f matrix,
+                                       Matrix3f normal, int light, int overlay) {
+
         var upgrades = blockEntity.getUpgrades();
         if (upgrades == null || upgrades.length == 0) return;
 
-        VertexConsumer builder = bufferSource.getBuffer(RenderType.solid());
-
+        VertexConsumer builder = bufferSource.getBuffer(RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS));
         // Define quadrant positions above the bottom row (which is at y=0.05-0.20)
         // 0 1
         // 2 3
         //XZ start, XZ end, Y start, Y end
         float[][] quadrants = {
-            {0.12f, 0.3f, 0.7f, 0.85f}, // Top-left quadrant
-            {0.57f, 0.75f, 0.7f, 0.85f}, // Top-right quadrant
-            {0.12f, 0.3f, 0.42f, 0.57f}, // Bottom-left quadrant
-            {0.57f, 0.75f, 0.42f, 0.57f}  // Bottom-right quadrant
+            {0.12f, 0.44f, 0.65f, 0.95f}, // Top-left quadrant (width: 0.32, height: 0.30)
+            {0.53f, 0.85f, 0.65f, 0.95f}, // Top-right quadrant (moved left by 0.04)
+            {0.12f, 0.44f, 0.35f, 0.65f}, // Bottom-left quadrant
+            {0.53f, 0.85f, 0.35f, 0.65f}  // Bottom-right quadrant (moved left by 0.04)
         };
-        
+
         float offset = 0.01f;
-        
-        // Render up to 4 upgrades in the quadrants
+
         for (int i = 0; i < Math.min(4, upgrades.length); i++)
         {
             if (upgrades[i] == null) continue;
-            
+
             // Get upgrade texture based on the dye color
             TextureAtlasSprite upgradeSprite = CommonClassClient.getSprite(upgrades[i].getUpgradeSpriteLocation());
-            
+
             float u0 = upgradeSprite.getU0();
             float v0 = upgradeSprite.getV0();
             float u1 = upgradeSprite.getU1();
             float v1 = upgradeSprite.getV1();
-            
+
             float[] quad = quadrants[i];
             float minX = quad[0];
             float maxX = quad[1];
             float minY = quad[2];
             float maxY = quad[3];
-            
+
             // Transform based on facing direction
             switch (facing) {
                 case NORTH -> {
-                    builder.vertex(matrix, maxX, minY, -offset)
+                    // Mirror X coordinates - keep original vertex order, just mirror positions
+                    builder.vertex(matrix, 1 - minX, minY, -offset)  // Mirrored minX
                         .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                    builder.vertex(matrix, minX, minY, -offset)
+                    builder.vertex(matrix, 1 - maxX, minY, -offset)  // Mirrored maxX
                         .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                    builder.vertex(matrix, minX, maxY, -offset)
+                    builder.vertex(matrix, 1 - maxX, maxY, -offset)  // Mirrored maxX
                         .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                    builder.vertex(matrix, maxX, maxY, -offset)
+                    builder.vertex(matrix, 1 - minX, maxY, -offset)  // Mirrored minX
                         .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
                 }
                 case SOUTH -> {
@@ -201,16 +201,19 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
                         .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
                 }
                 case EAST -> {
-                    builder.vertex(matrix, 1 + offset, minY, maxX)
+                    // Mirror Z coordinates to fix left/right swapping
+                    builder.vertex(matrix, 1 + offset, minY, 1 - minX)
                         .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                    builder.vertex(matrix, 1 + offset, minY, minX)
-                        .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0,0).endVertex();
-                    builder.vertex(matrix, 1 + offset, maxY, minX)
+                    builder.vertex(matrix, 1 + offset, minY, 1 - maxX)
+                        .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+                    builder.vertex(matrix, 1 + offset, maxY, 1 - maxX)
                         .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                    builder.vertex(matrix, 1 + offset, maxY, maxX)
+                    builder.vertex(matrix, 1 + offset, maxY, 1 - minX)
                         .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
                 }
             }
         }
     }
+    //END METHOD
 }
+//END CLASS

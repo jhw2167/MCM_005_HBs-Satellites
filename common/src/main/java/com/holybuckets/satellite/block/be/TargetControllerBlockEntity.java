@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
 import com.holybuckets.satellite.core.SatelliteManager;
@@ -22,6 +23,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -44,6 +46,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
 
     private NonNullList<ItemStack> items;
     private Player playerFiredWeapon;
+    private int weaponCooldownTicks;
     private static final Map<Item, BiConsumer<TargetControllerBlockEntity, ItemStack>> weapons = new HashMap<>();
 
     public static void addWeapon(Item item, BiConsumer<TargetControllerBlockEntity, ItemStack> consumer) {
@@ -104,6 +107,10 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         markUpdated();
     }
 
+    public void setWeaponCooldownTicks(int ticks) {
+        this.weaponCooldownTicks = ticks;
+    }
+
     @Override
     public int getTargetColorId() {
         return targetColorId;
@@ -136,7 +143,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
 
     public void use(Player p, InteractionHand hand, BlockHitResult hitResult)
     {
-        if(this.level==null || level.isClientSide) return;
+        if(this.level==null) return;
         int cmd = ISatelliteControllerBE.calculateHitCommandTarget(hitResult);
         if (cmd == -1) return;
 
@@ -150,6 +157,22 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
             }
             setTargetColorId(targetColorId);
             cmd = -1;
+        }
+
+        if(!this.isDisplayOn) return;
+
+        if(cmd==10) {
+            if(this.uiCursorPos == null)
+                CommonClass.MESSAGER.sendBottomActionHint(p, "Right click holo display to set target...");
+            else
+                CommonClass.MESSAGER.sendBottomActionHint(p, "Clearing... " );
+        } else if (cmd==11) {
+            if(this.uiTargetBlockPos == null)
+                CommonClass.MESSAGER.sendBottomActionHint(p, "No Target Set ");
+            if(this.weaponCooldownTicks>0) {
+                CommonClass.MESSAGER.sendBottomActionHint(p, "Weapon cooling down... ");
+                cmd = -1;
+            }
         }
 
         if( isDisplayOn && (source!=null) && (cmd>-1))
@@ -172,6 +195,12 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         }
     }
 
+    @Override
+    public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
+        super.tick(level, blockPos, blockState, satelliteDisplayBlockEntity);
+        if(weaponCooldownTicks>0)
+            weaponCooldownTicks--;
+    }
 
     @Override
     protected void saveAdditional(CompoundTag tag)

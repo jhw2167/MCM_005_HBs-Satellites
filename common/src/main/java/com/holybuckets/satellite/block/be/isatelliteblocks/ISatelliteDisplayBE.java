@@ -1,8 +1,12 @@
 package com.holybuckets.satellite.block.be.isatelliteblocks;
 
+import com.holybuckets.satellite.core.ChunkDisplayInfo;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Hologram display blocks understand their chunk display info to display
@@ -37,9 +41,16 @@ public interface ISatelliteDisplayBE {
 
     boolean hasPlayer();
 
+    void setSignalStrength(int strength);
+
+    void clearSignalStrength();
+
+    Collection<ChunkDisplayInfo> getDisplayInfo();
+
     /*
     static final int DIST_THRESHOLD_SQR = 16*16;
-    static void handleClientUpdate(Player player, SatelliteDisplayMessage message) {
+    static void handleClient
+    Update(Player player, SatelliteDisplayMessage message) {
         if( HBUtil.BlockUtil.distanceSqr(player.blockPosition(), message.pos) > DIST_THRESHOLD_SQR)
             return;
         BlockEntity be = player.level().getBlockEntity(message.pos);

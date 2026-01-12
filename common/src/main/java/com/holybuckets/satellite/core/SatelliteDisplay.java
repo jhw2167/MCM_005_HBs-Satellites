@@ -65,6 +65,8 @@ public class SatelliteDisplay {
     int currentSection;
     int maxSection;
     int depth;
+    SatelliteItemUpgrade upgrades[];
+    final static int MAX_UPGRADES = 128;
 
     protected Map<BlockPos, ISatelliteDisplayBE> displayBlocks;
     protected int minX = Integer.MAX_VALUE;
@@ -104,6 +106,7 @@ public class SatelliteDisplay {
         this.xOffset = 0;
         this.depth = 2;
         this.needsUpdate = true;
+        this.upgrades = new SatelliteItemUpgrade[MAX_UPGRADES];
 
         rateLimiter = new HashSet<>();
         displayEntities = new HashSet<>();
@@ -138,32 +141,51 @@ public class SatelliteDisplay {
      *  returns the previous upgrade in the slot
      */
     public SatelliteItemUpgrade addUpgrade(SatelliteItemUpgrade upgrade, int slot) {
-        UpgradeControllerBlockEntity upgradeController = getUpgradeController();
-        if(upgradeController == null) return null;
-        return upgradeController.addUpgrade(upgrade, slot);
+        int nextIndex = upgrades.length;
+        //loop over upgrades array, find first empty slot or matching slot
+        for(int i = 0; i < upgrades.length; i++) {
+            if(upgrades[i] == null) {
+                nextIndex = i;
+                break;
+            }
+        }
+        upgrades[nextIndex] = upgrade;
+        return upgrades[nextIndex];
     }
 
     public SatelliteItemUpgrade removeUpgrade(int slot) {
-        UpgradeControllerBlockEntity upgradeController = getUpgradeController();
-        if(upgradeController == null) return null;
-        return upgradeController.removeUpgrade(slot);
+        if(slot >= upgrades.length || slot < 0) return null;
+        SatelliteItemUpgrade temp = upgrades[slot];
+        upgrades[slot] = null;
+        return temp;
+    }
+
+    public SatelliteItemUpgrade removeUpgrade(SatelliteItemUpgrade upgrade) {
+        //loop through and find it or return null
+        if(upgrade == null) return null;
+        for(int i = 0; i < upgrades.length; i++) {
+            if(upgrades[i] == upgrade) {
+                SatelliteItemUpgrade temp = upgrades[i];
+                upgrades[i] = null;
+                return temp;
+            }
+        }
+        return null;
     }
 
     public boolean hasUpgrade(SatelliteItemUpgrade upgrade) {
-        SatelliteItemUpgrade[] upgrades = getUpgrades();
-        return (upgrades[0]==upgrade
-            || upgrades[1]==upgrade
-            || upgrades[2]==upgrade
-            || upgrades[3]==upgrade);
+        UpgradeControllerBlockEntity upgradeController = getUpgradeController();
+        if(upgradeController == null) {
+            return false;
+        }
+        for(SatelliteItemUpgrade u : getUpgrades()) {
+            if(u == upgrade) return true;
+        }
+        return false;
     }
 
     public SatelliteItemUpgrade[] getUpgrades() {
-        UpgradeControllerBlockEntity upgradeController = getUpgradeController();
-        if(upgradeController == null) {
-            // Return empty array if no upgrade controller
-            return new SatelliteItemUpgrade[4];
-        }
-        return upgradeController.getUpgrades();
+        return upgrades;
     }
 
     private UpgradeControllerBlockEntity getUpgradeController() {

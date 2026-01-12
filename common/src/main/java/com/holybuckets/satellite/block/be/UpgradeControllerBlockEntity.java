@@ -13,6 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -62,6 +64,7 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         if(slot >= upgrades.length || slot < 0) return null;
         SatelliteItemUpgrade temp = upgrades[slot];
         upgrades[slot] = upgrade;
+        if(source != null) source.addUpgrade(upgrade, -1);
         markUpdated();
         return temp;
     }
@@ -75,6 +78,7 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         if(slot >= upgrades.length || slot < 0) return null;
         SatelliteItemUpgrade temp = upgrades[slot];
         upgrades[slot] = null;
+        if(source != null) source.removeUpgrade(temp);
         markUpdated();
         return temp;
     }
@@ -96,7 +100,38 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
             setColorId(source.getSatelliteController().getColorId());
         }
 
+        if( cmd < 16 ) //12-15, upgrade slots
+        {
+            SatelliteItemUpgrade prevItem = null;
+            if(player.getItemInHand(hand).getItem() instanceof SatelliteItemUpgrade item) {
+                prevItem = this.addUpgrade(item, cmd-12);
+                //remove one from player hand
+                player.getItemInHand(hand).shrink(1);
+            } else if(player.getItemInHand(hand).isEmpty() ) {
+                prevItem = this.removeUpgrade(cmd-12);
+            }
+
+            if(prevItem != null) {
+                if (!player.getInventory().add(prevItem.getDefaultInstance())) {
+                    player.drop(prevItem.getDefaultInstance(), false);
+                }
+            }
+        }
+
         updateBlockState();
+    }
+
+    //drop all upgrades into the world
+    public void onDestroy() {
+        if(this.level == null) return;
+        for(SatelliteItemUpgrade upgrade : upgrades) {
+            if(upgrade != null) {
+                BlockPos pos = this.getBlockPos();
+                ItemStack stack = new ItemStack(upgrade);
+                Block.popResource(level, pos, stack);
+                if(source != null) source.removeUpgrade(upgrade);
+            }
+        }
     }
 
     @Override
@@ -160,5 +195,4 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(upgrade);
         return itemId.toString();
     }
-
 }

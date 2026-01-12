@@ -3,6 +3,7 @@ package com.holybuckets.satellite.block.be;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.console.Messager;
 import com.holybuckets.satellite.CommonClass;
+import com.holybuckets.satellite.LoggerProject;
 import com.holybuckets.satellite.block.SatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
@@ -264,6 +265,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             this.commands.hasUpdate = false;
         } else if( cmd < 16 ) //12-15, upgrade slots
         {
+        /* HANDLED IN UPGRADECONTROLLERBLOCK
+
             SatelliteItemUpgrade prevItem = null;
              if(p.getItemInHand(hand).getItem() instanceof SatelliteItemUpgrade item) {
                  prevItem = this.source.addUpgrade(item, cmd-12);
@@ -278,6 +281,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
                     p.drop(prevItem.getDefaultInstance(), false);
                 }
             }
+            */
+
         }
 
     }
@@ -452,6 +457,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     private void recoverSatellite()
     {
         if(this.satelliteTargetPos == null) return;
+        LoggerProject.logInfo("010100", HBUtil.BlockUtil.positionToString(this.getBlockPos()));
         LevelChunk distantChunk = manager.getChunk(level, this.satelliteTargetPos);
         if(distantChunk != null) {
             BlockEntity be = distantChunk.getBlockEntity(this.satelliteTargetPos);

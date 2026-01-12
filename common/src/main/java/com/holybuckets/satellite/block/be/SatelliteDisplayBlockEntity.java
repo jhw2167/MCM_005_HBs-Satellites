@@ -16,7 +16,9 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Collection;
 import java.util.Deque;
+import java.util.List;
 import java.util.Random;
 
 public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelliteDisplayBE, BlockEntityTicker<SatelliteDisplayBlockEntity> {
@@ -27,6 +29,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     protected int ticks;  //tick counter for refresh rate
     private int height; // height of display area to clear
     private int holoLift; //number of blocks above display block holo renders
+    private int entitySignalStrength;
     private boolean hasPlayer;
 
     public SatelliteDisplayBlockEntity(BlockPos pos, BlockState state) {
@@ -40,6 +43,36 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         this.height = 0;
         this.holoLift = 0;
         this.hasPlayer = false;
+    }
+
+    @Override
+    public int getHeight() {
+        return this.height;
+    }
+
+    @Override
+    public boolean isDisplayOn() { return this.isDisplayOn; }
+
+    @Override
+    public boolean hasPlayer() {
+        return this.hasPlayer;
+    }
+
+    @Override
+    public SatelliteDisplay getSource() {
+        return this.source;
+    }
+
+    @Override
+    public void setSignalStrength(int strength) {
+        entitySignalStrength = Math.max(entitySignalStrength, strength);
+        updateBlockState();
+    }
+
+    @Override
+    public void clearSignalStrength() {
+        entitySignalStrength = 0;
+        updateBlockState();
     }
 
     public void setHeight(int height) {
@@ -57,6 +90,10 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
             BlockPos clearPos = pos.above(y);
             SatelliteMain.chiselBitsApi.clear(this.level, clearPos);
         }
+    }
+
+    public Collection<ChunkDisplayInfo> getDisplayInfo() {
+        return this.displayInfo;
     }
 
     @Override
@@ -89,25 +126,6 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         level.sendBlockUpdated(this.getBlockPos(), state, newState, 3);
     }
 
-    @Override
-    public int getHeight() {
-        return this.height;
-    }
-
-    @Override
-    public boolean isDisplayOn() {
-        return this.isDisplayOn;
-    }
-
-    @Override
-    public boolean hasPlayer() {
-        return this.hasPlayer;
-    }
-
-    @Override
-    public SatelliteDisplay getSource() {
-        return this.source;
-    }
 
     @Override
     public void setSource(SatelliteDisplay source, boolean forceUpdate) {
@@ -162,6 +180,13 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
     public void onDestroyed() {
         this.clearDisplay();
+    }
+
+    public int getSignalStrength() {
+        if(!this.isDisplayOn || this.source == null || this.source.noSource()) return 0;
+        if( this.displayInfo == null || this.displayInfo.isEmpty()) return 0;
+
+        return entitySignalStrength;
     }
 
     @Override

@@ -4,6 +4,7 @@ package com.holybuckets.satellite.core;
 import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.api.ChiselBitsAPI;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
+import com.holybuckets.satellite.config.ModConfig;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -164,6 +165,11 @@ public class ChunkDisplayInfo {
      */
     public boolean acceptLocalEntity(Entity e)
     {
+
+        if( !ModConfig.getHerdEntities().contains(e.getType()) ) {
+            return true;
+        }
+
         EntityInfo info = localEntities.get(e.getType());
         if(info == null) {
             info = new EntityInfo();
@@ -178,7 +184,9 @@ public class ChunkDisplayInfo {
             info.target = e;
             return false;
         }
-        return info.others.size() == SatelliteMain.CONFIG.entityPings.minHerdCountThreshold;
+
+        return info.others.size() == SatelliteMain.CONFIG.
+            entityPings.minHerdCountThreshold;
     }
 
     public void clearEntities() {
@@ -188,6 +196,7 @@ public class ChunkDisplayInfo {
             if( !(e instanceof LivingEntity) || !e.isAlive() || e.isRemoved() )
                 info.target = null;
         }
+
     }
 
 

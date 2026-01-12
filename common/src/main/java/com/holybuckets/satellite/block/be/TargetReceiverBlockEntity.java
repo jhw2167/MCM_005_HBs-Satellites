@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.block.SatelliteDisplayBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.core.SatelliteManager;
@@ -73,7 +74,10 @@ public class TargetReceiverBlockEntity extends BlockEntity
         // Attempt to set linkedTargetController if we have a manager and valid color IDs
         if (this.manager != null && this.linkedTargetController == null) {
             this.linkedTargetController = this.manager.getTargetController(this.colorId, this.targetColorId);
-            this.updateBlockState(this.linkedTargetController != null);
+            if(this.linkedTargetController != null) {
+                this.updateBlockState(true);
+            }
+
         }
 
         if(this.linkedTargetController != null) {

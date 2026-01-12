@@ -94,6 +94,7 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
         boolean aboveIsAir = above.equals(AIR.defaultBlockState());
         boolean aboveIsChiseled = aboveBe instanceof IMultiStateBlockEntity;
         if(!aboveIsAir && !aboveIsChiseled) { return null; }
+        if(bits == null) { return null; }
 
         ChiselAdaptingWorldMutator mutator = new ChiselAdaptingWorldMutator(level, pos);
         try(IBatchMutation m = mutator.batch() )

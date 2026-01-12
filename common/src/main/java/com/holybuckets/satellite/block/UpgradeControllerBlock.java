@@ -9,6 +9,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -72,6 +73,16 @@ public class UpgradeControllerBlock extends Block implements EntityBlock {
         }
 
         return InteractionResult.PASS;
+    }
+
+    @Override
+    public void destroy(LevelAccessor $$0, BlockPos $$1, BlockState $$2) {
+        super.destroy($$0, $$1, $$2);
+        //call destroy on block entity
+        BlockEntity be = $$0.getBlockEntity($$1);
+        if (be instanceof UpgradeControllerBlockEntity controller) {
+            controller.onDestroy();
+        }
     }
 
     @Nullable

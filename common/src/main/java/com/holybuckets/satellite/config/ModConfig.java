@@ -4,14 +4,19 @@ import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.satellite.LoggerProject;
 import com.holybuckets.satellite.SatelliteMain;
+import com.holybuckets.satellite.particle.ModParticles;
 import net.blay09.mods.balm.api.event.EventPriority;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.StructureType;
@@ -145,5 +150,20 @@ public class ModConfig {
 
     public static Map<Block, Block> getOreScannerBlocks() {
         return Collections.unmodifiableMap(oreScannerBlockMap);
+    }
+
+    public static int getSignalStrength(ParticleOptions particles) {
+
+        if (particles == ModParticles.greenPing.getType()) {
+            return 3;
+        } else if (particles == ModParticles.basePing.getType()) {
+            return 6;
+        } else if (particles == ModParticles.bluePing.getType()) {
+            return 9;
+        } else if (particles == ModParticles.redPing.getType()) {
+            return 12;
+        }
+
+        return -1;
     }
 }
