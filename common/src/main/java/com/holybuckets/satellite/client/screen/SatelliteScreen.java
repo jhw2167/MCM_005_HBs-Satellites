@@ -159,27 +159,27 @@ public class SatelliteScreen extends Screen {
         int buttonSectionHeight = (int)(guiHeight * BUTTON_SECTION_HEIGHT);
         int buttonSpacing = buttonSectionHeight / 3;
 
-        // Exit button
-        this.exitButton = Button.builder(Component.literal("Exit"), button -> {
-            this.onClose();
+        // Launch button
+        this.launchButton = Button.builder(Component.literal("Move"), button -> {
+            this.onLaunch();
         }).bounds(
             leftColumnX,
             buttonSectionY + buttonSpacing / 2,
             leftColumnWidth,
             20
         ).build();
-        this.addRenderableWidget(this.exitButton);
+        this.addRenderableWidget(this.launchButton);
 
-        // Launch button
-        this.launchButton = Button.builder(Component.literal("Move"), button -> {
-            this.onLaunch();
+        // Exit button
+        this.exitButton = Button.builder(Component.literal("Exit"), button -> {
+            this.onClose();
         }).bounds(
             leftColumnX,
             buttonSectionY + buttonSpacing + buttonSpacing / 2,
             leftColumnWidth,
             20
         ).build();
-        this.addRenderableWidget(this.launchButton);
+        this.addRenderableWidget(this.exitButton);
     }
 
     private void initRightColumn() {

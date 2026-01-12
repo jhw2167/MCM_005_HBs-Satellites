@@ -188,6 +188,22 @@ public class SatelliteDisplay {
         return upgrades;
     }
 
+    public void syncUpgradesWithControllers()
+    {
+        Arrays.fill(upgrades, null);
+        int c = 0;
+        for(ISatelliteControllerBE controller : controllerBlocks)
+        {
+            if(controller instanceof UpgradeControllerBlockEntity upgradeController) {
+                SatelliteItemUpgrade[] cUpgrades = upgradeController.getUpgrades();
+                for(int i = 0; i < cUpgrades.length; i++) {
+                    upgrades[c++] = cUpgrades[i];
+                }
+                if(c>=MAX_UPGRADES-1) break;
+            }
+        }
+    }
+
     private UpgradeControllerBlockEntity getUpgradeController() {
         for(ISatelliteControllerBE controller : controllerBlocks) {
             if(controller instanceof UpgradeControllerBlockEntity upgradeController) {
@@ -690,7 +706,7 @@ public class SatelliteDisplay {
     public void renderEntities(BlockPos cntrlPos)
     {
         if(cntrlPos == null || noSource() || this.target == null) return;
-        if(!hasUpgrade(ModItems.entityScannerUpgrade))
+        if(!hasUpgrade(ModItems.entityScannerUpgrade)) return;
         if(this.needsEntityUpdate) collectEntities();
 
         Iterator<Entity> iterator = displayEntities.iterator();

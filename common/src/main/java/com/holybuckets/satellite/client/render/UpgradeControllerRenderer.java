@@ -141,10 +141,10 @@ public class UpgradeControllerRenderer implements BlockEntityRenderer<UpgradeCon
         // 2 3
         //XZ start, XZ end, Y start, Y end
         float[][] quadrants = {
-            {0.12f, 0.44f, 0.65f, 0.95f}, // Top-left quadrant (width: 0.32, height: 0.30)
-            {0.53f, 0.85f, 0.65f, 0.95f}, // Top-right quadrant (moved left by 0.04)
-            {0.12f, 0.44f, 0.35f, 0.65f}, // Bottom-left quadrant
-            {0.53f, 0.85f, 0.35f, 0.65f}  // Bottom-right quadrant (moved left by 0.04)
+            {0.14f, 0.46f, 0.60f, 0.91f}, // Top-left quadrant (width: 0.32, height: 0.30)
+            {0.56f, 0.88f, 0.60f, 0.91f}, // Top-right quadrant (moved left by 0.04)
+            {0.14f, 0.46f, 0.36f, 0.67f}, // Bottom-left quadrant
+            {0.56f, 0.88f, 0.36f, 0.67f}  // Bottom-right quadrant (moved left by 0.04)
         };
 
         float offset = 0.01f;

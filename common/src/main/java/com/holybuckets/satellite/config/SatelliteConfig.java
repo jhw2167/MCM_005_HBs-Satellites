@@ -107,7 +107,7 @@ public class SatelliteConfig {
 
         @NestedType(String.class)
         @Comment("Entity types produce a white ping")
-        public Set<String> neutralEntityTypes = Set.of("minecraft:iron_golem");
+        public Set<String> neutralEntityTypes = Set.of("minecraft:iron_golem", "minecraft:wandering_trader");
 
         @NestedType(String.class)
         @Comment("Entity types only produce a white ping when grouped in large quantities")
