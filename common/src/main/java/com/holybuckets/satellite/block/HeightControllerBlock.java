@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block;
 
 import com.holybuckets.satellite.block.be.HeightControllerBlockEntity;
+import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -8,6 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -57,6 +59,14 @@ public class HeightControllerBlock extends Block implements EntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new HeightControllerBlockEntity(pos, state);
+    }
+
+    @Override
+    public int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        if (level.getBlockEntity(pos) instanceof SatelliteControllerBlockEntity blockEntity) {
+            return blockEntity.getSignalStrength(); // 0-15
+        }
+        return 0;
     }
 
     @Override

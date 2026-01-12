@@ -69,7 +69,7 @@ public class TargetControllerBlock extends Block implements EntityBlock {
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof TargetControllerBlockEntity controller)
         {
-            if (d != front) {
+            if (d != front || player.isShiftKeyDown()) {
                 if(level.isClientSide) return InteractionResult.PASS;
                 MenuProvider menuProvider = controller.getMenuProvider();
                 Balm.getNetworking().openMenu(player, menuProvider);
