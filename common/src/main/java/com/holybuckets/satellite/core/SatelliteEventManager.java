@@ -131,6 +131,9 @@ public class SatelliteEventManager {
     
     // Fire methods
     public static void fireTargetReceiverLinked(BlockEntity receiver, BlockEntity targetController) {
+        if (receiver != null && receiver.getLevel() != null && receiver.getLevel().isClientSide) {
+            return;
+        }
         TargetReceiverLinkedEvent event = new TargetReceiverLinkedEvent(receiver, targetController);
         for (Consumer<TargetReceiverLinkedEvent> listener : targetReceiverLinkedListeners) {
             listener.accept(event);
@@ -138,6 +141,9 @@ public class SatelliteEventManager {
     }
     
     public static void fireTargetReceiverUnlinked(BlockEntity receiver, BlockEntity oldController) {
+        if (receiver != null && receiver.getLevel() != null && receiver.getLevel().isClientSide) {
+            return;
+        }
         TargetReceiverUnlinkedEvent event = new TargetReceiverUnlinkedEvent(receiver, oldController);
         for (Consumer<TargetReceiverUnlinkedEvent> listener : targetReceiverUnlinkedListeners) {
             listener.accept(event);
@@ -145,6 +151,9 @@ public class SatelliteEventManager {
     }
     
     public static void fireTargetReceiverTargetSet(BlockEntity receiver, BlockEntity targetController, BlockPos oldPos, BlockPos targetPos) {
+        if (receiver != null && receiver.getLevel() != null && receiver.getLevel().isClientSide) {
+            return;
+        }
         TargetReceiverTargetSetEvent event = new TargetReceiverTargetSetEvent(receiver, targetController, oldPos, targetPos);
         for (Consumer<TargetReceiverTargetSetEvent> listener : targetReceiverTargetSetListeners) {
             listener.accept(event);
@@ -152,6 +161,9 @@ public class SatelliteEventManager {
     }
     
     public static void fireTargetReceiverFire(BlockEntity receiver, BlockEntity targetController, Player player, BlockPos targetPos) {
+        if (receiver != null && receiver.getLevel() != null && receiver.getLevel().isClientSide) {
+            return;
+        }
         TargetReceiverFireEvent event = new TargetReceiverFireEvent(receiver, targetController, player, targetPos);
         for (Consumer<TargetReceiverFireEvent> listener : targetReceiverFireListeners) {
             listener.accept(event);
