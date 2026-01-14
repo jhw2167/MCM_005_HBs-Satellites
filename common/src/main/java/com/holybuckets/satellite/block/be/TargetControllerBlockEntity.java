@@ -5,7 +5,7 @@ import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
 import com.holybuckets.satellite.core.SatelliteManager;
-import com.holybuckets.satellite.core.SatelliteWeaponsManager;
+import com.holybuckets.satellite.core.SatelliteWeaponManager;
 import com.holybuckets.satellite.menu.TargetControllerMenu;
 import net.blay09.mods.balm.api.menu.BalmMenuProvider;
 import net.minecraft.core.BlockPos;
@@ -33,7 +33,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController, Container
 {
@@ -253,7 +252,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
             waypointPos = (str.equals("")) ? null :
                 new BlockPos( HBUtil.BlockUtil.stringToBlockPos(str) );
             if( wpIsNull && (this.level!=null) && !this.level.isClientSide)
-                SatelliteWeaponsManager.fireWaypointMessage(this, ItemStack.EMPTY);
+                SatelliteWeaponManager.fireWaypointMessage(this, ItemStack.EMPTY);
         }
     }
 
