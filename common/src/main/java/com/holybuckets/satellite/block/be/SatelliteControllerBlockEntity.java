@@ -1,10 +1,8 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
-import com.holybuckets.foundation.console.Messager;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.LoggerProject;
-import com.holybuckets.satellite.block.SatelliteControllerBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
@@ -12,7 +10,7 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
 import com.holybuckets.satellite.client.core.SatelliteDisplayClient;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteManager;
-import com.holybuckets.satellite.core.SatelliteWeaponsManager;
+import com.holybuckets.satellite.core.SatelliteWeaponManager;
 import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -133,7 +131,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
     @Override
     public void setColorId(int colorId) {
-        SatelliteWeaponsManager.clearWaypoints(this);
+        SatelliteWeaponManager.clearWaypoints(this);
         this.colorId = colorId;
         this.markUpdated();
     }
