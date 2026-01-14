@@ -42,6 +42,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     BlockPos satelliteTravelPos;
     SatelliteBlockEntity linkedSatellite;
     boolean forceDisplayUpdates;
+    String satelliteDisplayError;
     final Commands commands;
 
     public static int PLAYER_RANGE = 64;
@@ -74,6 +75,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         this.linkedSatellite = null;
         this.satelliteTargetPos = null;
         this.satelliteTravelPos = null;
+        this.satelliteDisplayError = "";
 
         commands = new Commands();
     }
@@ -517,6 +519,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putInt("colorId", colorId);
+        tag.putString("satelliteDisplayError", satelliteDisplayError);
         if(uiTargetBlockPos != null) {  //saved to send to client for rendering
             String pos = HBUtil.BlockUtil.positionToString(uiTargetBlockPos);
             tag.putString("uiTargetBlockPos", pos);
@@ -535,6 +538,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void load(CompoundTag tag) {
         super.load(tag);
         colorId = tag.getInt("colorId");
+        satelliteDisplayError = tag.getString("satelliteDisplayError");
 
         if(tag.contains("uiTargetBlockPos")) {
             String targetPosStr = tag.getString("uiTargetBlockPos");
