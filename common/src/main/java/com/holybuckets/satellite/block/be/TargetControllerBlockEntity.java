@@ -31,7 +31,9 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController, Container
@@ -47,6 +49,8 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     private Player playerFiredWeapon;
     private int weaponCooldownTicks;
     private static final Map<Item, BiConsumer<TargetControllerBlockEntity, ItemStack>> weapons = new HashMap<>();
+
+    private final Set<TargetReceiverBlockEntity> linkedReceivers = new HashSet<>();
 
     public static void addWeapon(Item item, BiConsumer<TargetControllerBlockEntity, ItemStack> consumer) {
         weapons.put(item, consumer);
@@ -78,7 +82,12 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     @Override
     public void setUiTargetBlockPos(BlockPos blockPos) {
         this.uiTargetBlockPos = blockPos;
+        this.linkedReceivers.clear();
         markUpdated();
+    }
+
+    public void addTargetReceiver(TargetReceiverBlockEntity receiver) {
+        this.linkedReceivers.add(receiver);
     }
 
     @Nullable
@@ -132,6 +141,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         this.uiCursorPos = null;
         this.uiTargetBlockPos = null;
         this.waypointPos = null;
+        this.linkedReceivers.clear();
         super.toggleOnOff(toggle);
     }
 
