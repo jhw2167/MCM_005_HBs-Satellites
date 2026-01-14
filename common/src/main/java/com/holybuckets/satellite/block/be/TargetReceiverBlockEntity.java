@@ -1,11 +1,10 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
-import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.block.SatelliteDisplayBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
+import com.holybuckets.satellite.core.SatelliteEventManager;
 import com.holybuckets.satellite.core.SatelliteManager;
-import com.holybuckets.satellite.core.SatelliteWeaponsManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -13,20 +12,16 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class TargetReceiverBlockEntity extends BlockEntity
 {
@@ -90,7 +85,12 @@ public class TargetReceiverBlockEntity extends BlockEntity
     }
 
     public void setUiTargetBlockPos(BlockPos blockPos) {
+        if(blockPos == uiTargetBlockPos) return;
+        SatelliteEventManager.fireTargetReceiverTargetSet(this, this.linkedTargetController,
+         this.uiTargetBlockPos, blockPos);
         this.uiTargetBlockPos = blockPos;
+        if(this.linkedTargetController != null)
+            this.linkedTargetController.addTargetReceiver(this);
         markUpdated();
     }
 
@@ -119,6 +119,14 @@ public class TargetReceiverBlockEntity extends BlockEntity
         if(this.level == null) return;
         BlockState state = this.getBlockState();
         BlockState newState = state.setValue(SatelliteDisplayBlock.POWERED, isOn);
+
+        //fire TargetReceiver linked or unlinked
+        if(isOn) {
+            SatelliteEventManager.fireTargetReceiverLinked(this, this.linkedTargetController);
+        } else {
+            SatelliteEventManager.fireTargetReceiverUnlinked(this, this.linkedTargetController );
+        }
+
         level.setBlock(this.getBlockPos(), newState, 3);
         this.setChanged();
         level.sendBlockUpdated(this.getBlockPos(), state, newState, 3);
@@ -180,6 +188,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
                 biconsumer.accept(this, neighborBE);
             }
         }
+
         markUpdated();
     }
 
