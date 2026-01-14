@@ -30,6 +30,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
     private int targetColorId;
     private BlockPos uiTargetBlockPos;
     private Player playerFiredWeapon;
+    private int signalTicksRemaining;
 
     private SatelliteManager manager;
     private TargetControllerBlockEntity linkedTargetController;
@@ -52,6 +53,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
         this.playerFiredWeapon = null;
         this.linkedTargetController = null;
         this.manager = null;
+        this.signalTicksRemaining = 0;
     }
 
     private final int REFRESH_TICKS = 20;
@@ -61,6 +63,12 @@ public class TargetReceiverBlockEntity extends BlockEntity
         if (level.isClientSide) return;
         if(ticks++ < REFRESH_TICKS) return;
         ticks = 0;
+        
+        // Decrement signal ticks
+        if (signalTicksRemaining > 0) {
+            signalTicksRemaining--;
+        }
+        
         // Set up manager if not already set
         if (this.manager == null) {
             this.manager = SatelliteManager.get(level);
@@ -78,6 +86,10 @@ public class TargetReceiverBlockEntity extends BlockEntity
         if(this.linkedTargetController != null) {
             setUiTargetBlockPos(this.linkedTargetController.getUiTargetBlockPos());
         }
+    }
+
+    public int getSignalStrength() {
+        return signalTicksRemaining > 0 ? 15 : 0;
     }
 
     public BlockPos getUiTargetBlockPos() {
@@ -178,6 +190,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
         if(this.linkedTargetController == null) return;
         this.uiTargetBlockPos = this.linkedTargetController.getUiTargetBlockPos();
         this.playerFiredWeapon = p;
+        this.signalTicksRemaining = 20;
         
         //Check if any neigboring block entities are valid weapons
         for(Vec3i offset : NEIGHBOR_COORDS) {
@@ -198,6 +211,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
         super.saveAdditional(tag);
         tag.putInt("colorId", colorId);
         tag.putInt("targetColorId", targetColorId);
+        tag.putInt("signalTicksRemaining", signalTicksRemaining);
         if(uiTargetBlockPos != null) {
             String pos = HBUtil.BlockUtil.positionToString(uiTargetBlockPos);
             tag.putString("uiTargetBlockPos", pos);
@@ -211,6 +225,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
         super.load(tag);
         colorId = tag.getInt("colorId");
         targetColorId = tag.getInt("targetColorId");
+        signalTicksRemaining = tag.getInt("signalTicksRemaining");
 
         if(tag.contains("uiTargetBlockPos")) {
             String str = tag.getString("uiTargetBlockPos");
