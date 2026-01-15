@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.HashMap;
@@ -35,13 +36,19 @@ public class TargetReceiverBlockEntity extends BlockEntity
     private SatelliteManager manager;
     private TargetControllerBlockEntity linkedTargetController;
     
-    private static final Map<BlockEntityType, BiConsumer<TargetReceiverBlockEntity, BlockEntity>> neighborWeapons = new HashMap<>();
+    private static final Map<BlockEntityType, BiConsumer<TargetReceiverBlockEntity, BlockEntity>> neighborWeaponsFire = new HashMap<>();
+    private static final Map<BlockEntityType, BiConsumer<TargetReceiverBlockEntity, BlockEntity>> neighborWeaponsTargetSet = new HashMap<>();
 
-    public static void addNeighborBlockEntityWeapons(BlockEntityType type, BiConsumer<TargetReceiverBlockEntity, BlockEntity> consumer) {
-        neighborWeapons.put(type, consumer);
+    public static void addNeighborBlockEntityWeapons(BlockEntityType type, BiConsumer<TargetReceiverBlockEntity, BlockEntity> consumerFire,
+                                                     BiConsumer<TargetReceiverBlockEntity, BlockEntity> consumerTargetSet) {
+        neighborWeaponsFire.put(type, consumerFire);
+        neighborWeaponsTargetSet.put(type, consumerTargetSet);
     }
-    public static boolean validWeapon(BlockEntityType be) { return neighborWeapons.containsKey(be); }
-    public static void removeWeapon(BlockEntityType be) { neighborWeapons.remove(be); }
+    public static boolean validWeapon(BlockEntityType be) { return neighborWeaponsFire.containsKey(be); }
+    public static void removeWeapon(BlockEntityType be) {
+        neighborWeaponsFire.remove(be);
+        neighborWeaponsTargetSet.remove(be);
+     }
 
     public TargetReceiverBlockEntity(BlockPos pos, BlockState state)
     {
@@ -56,7 +63,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
         this.signalTicksRemaining = 0;
     }
 
-    private final int REFRESH_TICKS = 20;
+    private final int REFRESH_TICKS = 5;
     private int ticks = 0;
     public void tick(Level level, BlockPos pos, BlockState state, TargetReceiverBlockEntity blockEntity)
     {
@@ -67,6 +74,9 @@ public class TargetReceiverBlockEntity extends BlockEntity
         // Decrement signal ticks
         if (signalTicksRemaining > 0) {
             signalTicksRemaining--;
+        } else if(signalTicksRemaining == 0) {
+            signalTicksRemaining = -1;
+            markUpdated();
         }
         
         // Set up manager if not already set
@@ -103,6 +113,14 @@ public class TargetReceiverBlockEntity extends BlockEntity
         this.uiTargetBlockPos = blockPos;
         if(this.linkedTargetController != null)
             this.linkedTargetController.addTargetReceiver(this);
+
+        for(BlockEntityType type : neighborWeaponsTargetSet.keySet()) {
+            BlockEntity neighborBE = this.level.getBlockEntity(blockPos);
+            if(neighborBE != null && neighborBE.getType() == type) {
+                var biconsumer = neighborWeaponsTargetSet.get(type);
+                biconsumer.accept(this, neighborBE);
+            }
+        }
         markUpdated();
     }
 
@@ -190,14 +208,14 @@ public class TargetReceiverBlockEntity extends BlockEntity
         if(this.linkedTargetController == null) return;
         this.uiTargetBlockPos = this.linkedTargetController.getUiTargetBlockPos();
         this.playerFiredWeapon = p;
-        this.signalTicksRemaining = 20;
+        this.signalTicksRemaining = 2;
         
         //Check if any neigboring block entities are valid weapons
         for(Vec3i offset : NEIGHBOR_COORDS) {
             BlockPos neighborPos = this.getBlockPos().offset(offset);
             BlockEntity neighborBE = this.level.getBlockEntity(neighborPos);
             if(neighborBE != null && validWeapon(neighborBE.getType())) {
-                var biconsumer = neighborWeapons.get(neighborBE.getType());
+                var biconsumer = neighborWeaponsFire.get(neighborBE.getType());
                 biconsumer.accept(this, neighborBE);
             }
         }
@@ -211,7 +229,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
         super.saveAdditional(tag);
         tag.putInt("colorId", colorId);
         tag.putInt("targetColorId", targetColorId);
-        tag.putInt("signalTicksRemaining", signalTicksRemaining);
+        //tag.putInt("signalTicksRemaining", signalTicksRemaining);
         if(uiTargetBlockPos != null) {
             String pos = HBUtil.BlockUtil.positionToString(uiTargetBlockPos);
             tag.putString("uiTargetBlockPos", pos);
@@ -225,7 +243,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
         super.load(tag);
         colorId = tag.getInt("colorId");
         targetColorId = tag.getInt("targetColorId");
-        signalTicksRemaining = tag.getInt("signalTicksRemaining");
+        //signalTicksRemaining = tag.getInt("signalTicksRemaining");
 
         if(tag.contains("uiTargetBlockPos")) {
             String str = tag.getString("uiTargetBlockPos");
@@ -234,11 +252,18 @@ public class TargetReceiverBlockEntity extends BlockEntity
         }
     }
 
-    private void markUpdated() {
-        this.setChanged();
-        if (this.level == null) return;
-        level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+    public void markUpdated()
+    {
+        BlockPos pos = getBlockPos();
+        BlockState state = level.getBlockState(pos);
+        int newPower = getSignalStrength();
+
+        BlockState newState = state.setValue(BlockStateProperties.POWER, newPower);
+        level.setBlock(pos, newState, Block.UPDATE_ALL);
+        level.updateNeighborsAt(pos, this.getBlockState().getBlock());
+        //level.sendBlockUpdated(pos, state, newState, Block.UPDATE_ALL );
     }
+
 
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
