@@ -115,10 +115,13 @@ public class TargetReceiverBlockEntity extends BlockEntity
             this.linkedTargetController.addTargetReceiver(this);
 
         for(BlockEntityType type : neighborWeaponsTargetSet.keySet()) {
-            BlockEntity neighborBE = this.level.getBlockEntity(blockPos);
-            if(neighborBE != null && neighborBE.getType() == type) {
-                var biconsumer = neighborWeaponsTargetSet.get(type);
-                biconsumer.accept(this, neighborBE);
+            for(Vec3i offset : NEIGHBOR_COORDS) {
+                BlockPos neighborPos = this.getBlockPos().offset(offset);
+                BlockEntity neighborBE = this.level.getBlockEntity(neighborPos);
+                if(neighborBE != null && neighborBE.getType() == type) {
+                    var biconsumer = neighborWeaponsTargetSet.get(type);
+                    biconsumer.accept(this, neighborBE);
+                }
             }
         }
         markUpdated();
