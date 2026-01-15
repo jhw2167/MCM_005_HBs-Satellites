@@ -1,7 +1,6 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.satellite.SatelliteMain;
-import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.SatelliteDisplayBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
@@ -18,7 +17,6 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Collection;
 import java.util.Deque;
-import java.util.List;
 import java.util.Random;
 
 public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelliteDisplayBE, BlockEntityTicker<SatelliteDisplayBlockEntity> {
@@ -215,7 +213,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
 
         if(source.needsClear() ) {
             this.clearAboveArea(this.height);
-            height = this.source.getDepth();
+            height = this.source.getDispHeight();
         }
 
         if(displayInfo == null || displayInfo.isEmpty()) return;

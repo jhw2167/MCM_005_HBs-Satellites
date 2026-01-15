@@ -2,23 +2,27 @@ package com.holybuckets.satellite.core;
 
 import com.google.gson.JsonObject;
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.foundation.console.Messager;
 import com.holybuckets.foundation.networking.SimpleStringMessage;
+import com.holybuckets.satellite.SatelliteMain;
 import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.RedstoneTorchBlock;
 
-public class SatelliteWeaponsManager {
+public class SatelliteWeaponManager {
 
     static void onBeforeServerStart() {
         addDefaultWeapons();
     }
 
     private static void addDefaultWeapons() {
-        TargetControllerBlockEntity.addWeapon(ItemStack.EMPTY.getItem().asItem(), SatelliteWeaponsManager::fireWaypointMessage );
-        TargetControllerBlockEntity.addWeapon(ModBlocks.satelliteDisplayBlock.asItem(), SatelliteWeaponsManager::fireWaypointMessage );
+        TargetControllerBlockEntity.addWeapon(Items.REDSTONE_TORCH, SatelliteWeaponManager::fireWaypointMessage );
+        //TargetControllerBlockEntity.addWeapon(ModBlocks.satelliteDisplayBlock.asItem(), SatelliteWeaponManager::fireWaypointMessage );
     }
 
     public static final String MSG_ID_WAYPOINT_FLARE = "satellite_waypoint_flare";
@@ -51,8 +55,13 @@ public class SatelliteWeaponsManager {
         json.addProperty("levelId", levelString.replace("SERVER", "CLIENT") );
         json.addProperty("satelliteControllerOrigin", HBUtil.BlockUtil.positionToString(satelliteControllerOrigin) );
         json.addProperty("targetControllerOrigin", HBUtil.BlockUtil.positionToString(targetControllerOrigin) );
-        if(targetPos != null)
-            json.addProperty("targetPos", HBUtil.BlockUtil.positionToString(targetPos) );
+        if(targetPos != null) {
+            String target = HBUtil.BlockUtil.positionToString(targetPos);
+            json.addProperty("targetPos", target);
+            Messager.getInstance().sendBottomActionHint(controller.getPlayerFiredWeapon(),
+                "Waypoint flare fired at " + target);
+        }
+
         json.addProperty("colorId", color);
 
         SimpleStringMessage.createAndFire(MSG_ID_WAYPOINT_FLARE, json.toString());

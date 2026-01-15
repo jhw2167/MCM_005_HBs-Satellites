@@ -1,5 +1,6 @@
 package com.holybuckets.satellite.block;
 
+import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import net.blay09.mods.balm.api.Balm;
@@ -10,6 +11,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -85,6 +87,14 @@ public class TargetControllerBlock extends Block implements EntityBlock {
     @Override
     public boolean isSignalSource(BlockState state) {
         return true;
+    }
+
+    @Override
+    public int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        if (level.getBlockEntity(pos) instanceof SatelliteDisplayBlockEntity blockEntity) {
+            return blockEntity.getSignalStrength(); // 0-15
+        }
+        return 0;
     }
 
     @Nullable

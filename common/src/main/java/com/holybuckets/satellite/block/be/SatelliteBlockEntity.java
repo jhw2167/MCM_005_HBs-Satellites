@@ -98,7 +98,9 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
     }
 
     @Override
-    public void launch(BlockPos pos) {
+    public void launch(BlockPos pos)
+    {
+        if(this.level.isClientSide) return;
         if(pos != null) setTargetPos(pos);
         this.traveling = true;
         this.ticks = (TICKS_PER_MINUTE-1);

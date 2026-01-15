@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.HBUtil;
-import com.holybuckets.foundation.console.Messager;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.SimpleMessageEvent;
@@ -390,7 +389,7 @@ public class SatelliteManager {
     public static void onBeforeServerStart() {
         satelliteClientCommandQueue.clear();
         initWoolIds();
-        SatelliteWeaponsManager.onBeforeServerStart();
+        SatelliteWeaponManager.onBeforeServerStart();
     }
 
     public static void onWorldStop() {
@@ -481,7 +480,7 @@ public class SatelliteManager {
 
 
     private static void onPlayerJoined(PlayerLoginEvent playerLoginEvent) {
-        SatelliteWeaponsManager.sendAllActiveWaypoints(playerLoginEvent.getPlayer());
+        SatelliteWeaponManager.sendAllActiveWaypoints(playerLoginEvent.getPlayer());
     }
 
     public void shutdown() {

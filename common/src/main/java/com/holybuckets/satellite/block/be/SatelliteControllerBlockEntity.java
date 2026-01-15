@@ -108,6 +108,11 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         }
     }
 
+    public void setError(String error) {
+        this.satelliteDisplayError = error;
+        this.markUpdated();
+    }
+
     @Override
     public int getColorId() {
         return colorId;

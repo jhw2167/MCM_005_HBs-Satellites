@@ -40,7 +40,7 @@
   "item.hbs_satellites.player_scanner_upgrade": "Player Scanner Upgrade",
   "item.hbs_satellites.player_scanner_upgrade.desc": "Instead of being shown as a Neutral White Ping. Players will be shown as Green if wearing a dyed item equivalent to the Satellite's Wool Color and Red otherwise",
   "item.hbs_satellites.entity_detector_upgrade": "Entity Detector Upgrade",
-  "item.hbs_satellites.entity_detector_upgrade.desc": "Display blocks emit a redstone signal when an entity is within their range. The strength of the signal is determined by the ping type",
+  "item.hbs_satellites.entity_detector_upgrade.desc": "Display blocks emit a redstone signal when an entity is within their range. The strength of the signal is determined by the ping color",
 
   "gui.hbs_satellites.target_controller.title": "Weapon Slot",
 

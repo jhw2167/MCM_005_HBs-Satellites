@@ -1,5 +1,6 @@
 package com.holybuckets.satellite.block;
 
+import com.holybuckets.satellite.block.be.SatelliteDisplayBlockEntity;
 import com.holybuckets.satellite.block.be.TargetReceiverBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -7,6 +8,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -32,20 +34,24 @@ public class TargetReceiverBlock extends Block implements EntityBlock {
             .destroyTime(0.6f)
             .explosionResistance(6f));
         registerDefaultState(this.stateDefinition.any()
-            .setValue(FACING, Direction.NORTH).setValue(POWERED, false));
+            .setValue(FACING, Direction.NORTH)
+            .setValue(POWERED, false)
+            .setValue(BlockStateProperties.POWER, 0));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
         builder.add(POWERED);
+        builder.add(BlockStateProperties.POWER);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.defaultBlockState()
             .setValue(FACING, context.getHorizontalDirection().getOpposite())
-            .setValue(POWERED, false);
+            .setValue(POWERED, false)
+            .setValue(BlockStateProperties.POWER, 0);
     }
 
     @Override
@@ -73,6 +79,14 @@ public class TargetReceiverBlock extends Block implements EntityBlock {
     @Override
     public boolean isSignalSource(BlockState state) {
         return true;
+    }
+
+    @Override
+    public int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
+        if (level.getBlockEntity(pos) instanceof TargetReceiverBlockEntity blockEntity) {
+            return blockEntity.getSignalStrength(); // 0-15
+        }
+        return 0;
     }
 
     @Nullable

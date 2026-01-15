@@ -79,7 +79,7 @@ public class UpgradeControllerBlock extends Block implements EntityBlock {
 
     @Override
     public int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        if (level.getBlockEntity(pos) instanceof SatelliteControllerBlockEntity blockEntity) {
+        if (level.getBlockEntity(pos) instanceof SatelliteDisplayBlockEntity blockEntity) {
             return blockEntity.getSignalStrength(); // 0-15
         }
         return 0;

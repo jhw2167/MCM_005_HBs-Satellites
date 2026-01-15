@@ -24,13 +24,11 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.ChunkPos;
@@ -64,9 +62,14 @@ public class SatelliteDisplay {
     ChunkPos target;
 
     int currentSection;
+    int surfaceSection;
     int maxSection;
-    int depth;
-    SatelliteItemUpgrade upgrades[];
+    int dispHeight;
+    private static int MAX_DISPLAY_HEIGHT = 4;
+
+    int chunkRange;
+    int minSection;
+    SatelliteItemUpgrade upgrades[]; //SatelliteUpgrades
     final static int MAX_UPGRADES = 128;
 
     protected Map<BlockPos, ISatelliteDisplayBE> displayBlocks;
@@ -105,7 +108,7 @@ public class SatelliteDisplay {
 
         this.zOffset = 0;
         this.xOffset = 0;
-        this.depth = 2;
+        this.dispHeight = 2;
         this.needsUpdate = true;
         this.upgrades = new SatelliteItemUpgrade[MAX_UPGRADES];
 
@@ -115,6 +118,8 @@ public class SatelliteDisplay {
         displayBlocks = new HashMap<>();
         controllerBlocks = new HashSet<>();
         if(satellite == null) return;
+
+        chunkRange = SatelliteMain.CONFIG.satelliteConfig.satelliteOperationalDistChunksDefault;
 
         this.target = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
         resetChunkSection();
@@ -203,6 +208,34 @@ public class SatelliteDisplay {
                 if(c>=MAX_UPGRADES-1) break;
             }
         }
+
+        int sectionDepth = SatelliteMain.CONFIG.satelliteConfig.maxSatelliteDepthSectionDefault;
+        if( hasUpgrade( ModItems.depthUpgrade ) )
+            sectionDepth = SatelliteMain.CONFIG.satelliteConfig.maxSatelliteDepthSectionUpgraded;
+        this.minSection = this.surfaceSection - sectionDepth;
+
+        chunkRange = SatelliteMain.CONFIG.satelliteConfig.satelliteOperationalDistChunksDefault;
+        if( hasUpgrade( ModItems.rangeUpgrade ) )
+            this.chunkRange = SatelliteMain.CONFIG.satelliteConfig.satelliteOperationalDistChunksUpgraded;
+
+        if( satellite == null ) {
+            controller.setError( "No Satellite Connected" );
+            return;
+        }
+
+        double dist = HBUtil.ChunkUtil.chunkDistSquared( new ChunkPos(satellite.getBlockPos()), new ChunkPos(controller.getBlockPos()) );
+        if( dist > (chunkRange * chunkRange) ) {
+            this.controller.setError( "Satellite out of Operation Range of " + chunkRange + " chunks");
+            return;
+        }
+
+        //if currentSeciton == minsection, note that they are at the lowest section
+        if( currentSection == minSection ) {
+            this.controller.setError( "At Minimum Display Depth" );
+            return;
+        }
+
+        this.controller.setError( "" );
     }
 
     private UpgradeControllerBlockEntity getUpgradeController() {
@@ -215,8 +248,8 @@ public class SatelliteDisplay {
     }
 
 
-    public int getDepth() {
-        return this.depth;
+    public int getDispHeight() {
+        return this.dispHeight;
     }
 
     public int getCurrentSection() {
@@ -236,21 +269,26 @@ public class SatelliteDisplay {
         this.refreshUiPositions();
     }
 
-    private static int MAX_DEPTH = 4;
     public void adjDisplayDepth(int dDepth) {
         if(noSource() || this.satellite == null) return;
         if(dDepth == 0) return;
-        this.depth += dDepth;
-        setDepth( this.depth );
+        this.dispHeight += dDepth;
+        setDispHeight( this.dispHeight);
         this.needsUpdate = true;
     }
 
-    public void setDepth(int newDepth) {
+    public void setDispHeight(int newDepth)
+    {
         if(noSource() || this.satellite == null) return;
-        if(newDepth == this.depth) return;
-        if(newDepth <= 1)             { depth = 1; }
-        else if(newDepth > MAX_DEPTH) { depth = MAX_DEPTH; }
-        else                          { this.depth = newDepth; }
+        if(newDepth <= 1) {
+            dispHeight = 1;
+        }
+        else if(newDepth > MAX_DISPLAY_HEIGHT) {
+            dispHeight = MAX_DISPLAY_HEIGHT;
+        }
+        else {
+            this.dispHeight = newDepth;
+        }
         this.needsUpdate = true;
         this.refreshUiPositions();
     }
@@ -265,7 +303,8 @@ public class SatelliteDisplay {
     }
 
     public void setCurrentSection(int section) {
-        if( section < depth ||  section > maxSection ) return;
+        if( section < dispHeight ||  section > maxSection ) return;
+        if( section < minSection+dispHeight ) return;
         if( section == this.currentSection ) return;
         this.currentSection = section;
         this.needsUpdate = true;
@@ -299,7 +338,7 @@ public class SatelliteDisplay {
         //Calculate chunk offset from satellite position considering controller offset and any ordinal shifts
         Vec3i chunkSecOffset = new Vec3i(
             target.x + controllerOffset.getX(),
-            ( currentSection - depth ) + controllerOffset.getY(),
+            ( currentSection - dispHeight) + controllerOffset.getY(),
             target.z + controllerOffset.getZ()
         );
 
@@ -347,6 +386,8 @@ public class SatelliteDisplay {
             this.currentSection = i;
             break;
         }
+        this.surfaceSection = this.currentSection;
+        this.minSection = this.surfaceSection - (SatelliteMain.CONFIG.satelliteConfig.maxSatelliteDepthSectionDefault);
         this.needsUpdate = true;
         this.refreshUiPositions();
     }
@@ -382,7 +423,16 @@ public class SatelliteDisplay {
     }
 
     public boolean noSource() {
-        if( satellite == null ) return true;
+
+        if( satellite == null ) {
+            return true;
+        }
+
+        double dist = HBUtil.ChunkUtil.chunkDistSquared( new ChunkPos(satellite.getBlockPos()), new ChunkPos(controller.getBlockPos()) );
+        if( dist > (chunkRange * chunkRange) ) {
+            return true;
+        }
+
         return !controller.isDisplayOn();
     }
 
@@ -422,7 +472,7 @@ public class SatelliteDisplay {
         double adjustedMaxZ = maxZ + 1.0 + epsilon;
 
         double adjustedMinY = controller.getBlockPos().getY() + 1.0 - epsilon;
-        double adjustedMaxY = controller.getBlockPos().getY() + depth + 1.0 + epsilon;
+        double adjustedMaxY = controller.getBlockPos().getY() + dispHeight + 1.0 + epsilon;
 
         if (hit.x < adjustedMinX || hit.x > adjustedMaxX
             || hit.z < adjustedMinZ || hit.z > adjustedMaxZ
@@ -469,10 +519,11 @@ public class SatelliteDisplay {
         return blockPos.subtract( controller.getBlockPos() );
     }
 
-    public Deque<ChunkDisplayInfo> initDisplayInfo(SatelliteDisplayBlockEntity displayblock) {
-
+    public Deque<ChunkDisplayInfo> initDisplayInfo(SatelliteDisplayBlockEntity displayblock)
+    {
+        //check range first
         Deque<ChunkDisplayInfo> infoList = new ArrayDeque<>();
-        for(int i = currentSection; i > currentSection - depth; i--) {
+        for(int i = currentSection; i > currentSection - dispHeight; i--) {
             if(i < 0) break;
             ChunkDisplayInfo info = getDisplayInfo(displayblock, i);
             if(info == null) break;
@@ -601,13 +652,13 @@ public class SatelliteDisplay {
 
                   */
 
-                int yTop = cntrlPos.getY();
-                int sectionTop = (16*currentSection+1) + level.getMinBuildHeight();
-                int yStart = sectionTop - (16*(depth+1));
+                int yMax = satellite.getBlockPos().getY();
+                //y min is display height + 2 *16 subtracted from top
+                int yMin = Math.max(level.getMinBuildHeight(), yMax - (dispHeight+2)*16 );
 
                 AABB aabb = new AABB(
-                    minX, yStart, minZ,
-                    maxX, yTop,   maxZ
+                    minX, yMin, minZ,
+                    maxX, yMax,   maxZ
                 );
 
                 // Query entities in this AABB (living entities only)
@@ -745,12 +796,12 @@ public class SatelliteDisplay {
             if(displayBE == null) return;
 
             final int Y_MIN = level.getMinBuildHeight();
-            int blockOffsetY = e.blockPosition().getY() - (((currentSection) * 16)+Y_MIN) + ((depth-1)*16);
+            int blockOffsetY = e.blockPosition().getY() - (((currentSection) * 16)+Y_MIN) + ((dispHeight -1)*16);
             if(blockOffsetY < 0 ) { //under the table
                 continue;
-            } else if( blockOffsetY > (16*depth) ) { //above the table
+            } else if( blockOffsetY > (16* dispHeight) ) { //above the table
                 if(!(e instanceof ServerPlayer)) continue; //only show players above the table
-                blockOffsetY = 16*(depth+1);
+                blockOffsetY = 16*(dispHeight +1);
             }
 
             ParticleOptions particleType = getBasicParticleType(e);
@@ -912,7 +963,7 @@ public class SatelliteDisplay {
 
         BlockPos displayBlockPos = pos.below();
         int dDepth = 0;
-        while( dDepth++ < MAX_DEPTH ) {
+        while( dDepth++ < MAX_DISPLAY_HEIGHT) {
             if(level.getBlockEntity(displayBlockPos) instanceof ISatelliteDisplayBE)
                 break;
             displayBlockPos = displayBlockPos.below();

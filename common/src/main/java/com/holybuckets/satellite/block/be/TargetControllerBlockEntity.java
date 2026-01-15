@@ -202,6 +202,11 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
             this.waypointPos = this.getUiTargetBlockPos();
             markUpdated();
         }
+        //loop over all receivers
+        for(TargetReceiverBlockEntity receiver : linkedReceivers) {
+        if(receiver==null || !level.isLoaded( receiver.getBlockPos() )) continue;
+            receiver.fireWeapon(p);
+        }
     }
 
     @Override

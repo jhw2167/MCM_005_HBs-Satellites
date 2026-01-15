@@ -5,17 +5,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.client.ClientEventRegistrar;
-import com.holybuckets.foundation.client.MessagerClient;
 import com.holybuckets.foundation.event.custom.*;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.LoggerProject;
-import com.holybuckets.satellite.core.SatelliteManager;
-import com.holybuckets.satellite.core.SatelliteWeaponsManager;
+import com.holybuckets.satellite.core.SatelliteWeaponManager;
 import com.holybuckets.satellite.particle.WoolDustHelper;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.netty.util.collection.IntObjectHashMap;
-import io.netty.util.collection.IntObjectMap;
 import net.blay09.mods.balm.api.event.client.ConnectedToServerEvent;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -69,7 +65,7 @@ public class SatelliteFlareWeapon {
     public static void init(ClientEventRegistrar reg) {
         reg.registerOnConnectedToServer( SatelliteFlareWeapon::onConnectedToServer);
         reg.registerOnClientLevelTick(TickType.ON_120_TICKS, SatelliteFlareWeapon::onClient120Ticks);
-        reg.registerOnSimpleMessage(SatelliteWeaponsManager.MSG_ID_WAYPOINT_FLARE, SatelliteFlareWeapon::setWayPointFlare);
+        reg.registerOnSimpleMessage(SatelliteWeaponManager.MSG_ID_WAYPOINT_FLARE, SatelliteFlareWeapon::setWayPointFlare);
         reg.registerOnRenderLevel(RenderLevelEvent.RenderStage.AFTER_PARTICLES, SatelliteFlareWeapon::tryRenderWaypointFlare);
     }
 
