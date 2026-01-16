@@ -1,5 +1,6 @@
 package com.holybuckets.satellite.core;
 
+import com.google.gson.JsonObject;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
@@ -139,6 +140,79 @@ public class SatelliteDisplay {
 
     public Collection<ISatelliteControllerBE> getAllControllers( Class<? extends ISatelliteControllerBE> type ) {
         return controllerBlocks.stream().filter( cb -> type.isInstance(cb) ).toList();
+    }
+
+    /**
+     * Returns all display state information as a JsonObject
+     */
+    public JsonObject getDisplayInfo() {
+        JsonObject info = new JsonObject();
+        
+        // Basic position and target information
+        if (satellite != null) {
+            info.addProperty("satelliteX", satellite.getBlockPos().getX());
+            info.addProperty("satelliteY", satellite.getBlockPos().getY());
+            info.addProperty("satelliteZ", satellite.getBlockPos().getZ());
+            info.addProperty("colorId", satellite.getColorId());
+        }
+        
+        if (controller != null) {
+            info.addProperty("controllerX", controller.getBlockPos().getX());
+            info.addProperty("controllerY", controller.getBlockPos().getY());
+            info.addProperty("controllerZ", controller.getBlockPos().getZ());
+            info.addProperty("displayOn", controller.isDisplayOn());
+        }
+        
+        if (target != null) {
+            info.addProperty("targetChunkX", target.x);
+            info.addProperty("targetChunkZ", target.z);
+        }
+        
+        // Display configuration
+        info.addProperty("xOffset", xOffset);
+        info.addProperty("zOffset", zOffset);
+        info.addProperty("currentSection", currentSection);
+        info.addProperty("surfaceSection", surfaceSection);
+        info.addProperty("maxSection", maxSection);
+        info.addProperty("minSection", minSection);
+        info.addProperty("dispHeight", dispHeight);
+        info.addProperty("chunkRange", chunkRange);
+        
+        // Status flags
+        info.addProperty("needsUpdate", needsUpdate);
+        info.addProperty("needsEntityUpdate", needsEntityUpdate);
+        info.addProperty("noSource", noSource());
+        
+        // Display bounds
+        info.addProperty("minX", minX == Integer.MAX_VALUE ? null : minX);
+        info.addProperty("maxX", maxX == Integer.MIN_VALUE ? null : maxX);
+        info.addProperty("minZ", minZ == Integer.MAX_VALUE ? null : minZ);
+        info.addProperty("maxZ", maxZ == Integer.MIN_VALUE ? null : maxZ);
+        
+        // Block counts
+        info.addProperty("displayBlockCount", displayBlocks.size());
+        info.addProperty("controllerBlockCount", controllerBlocks.size());
+        info.addProperty("displayEntityCount", displayEntities.size());
+        
+        // Upgrades
+        int upgradeCount = 0;
+        for (SatelliteItemUpgrade upgrade : upgrades) {
+            if (upgrade != null) upgradeCount++;
+        }
+        info.addProperty("upgradeCount", upgradeCount);
+        
+        // Specific upgrade flags
+        info.addProperty("hasDepthUpgrade", hasUpgrade(ModItems.depthUpgrade));
+        info.addProperty("hasRangeUpgrade", hasUpgrade(ModItems.rangeUpgrade));
+        info.addProperty("hasOreScannerUpgrade", hasUpgrade(ModItems.oreScannerUpgrade));
+        info.addProperty("hasEntityScannerUpgrade", hasUpgrade(ModItems.entityScannerUpgrade));
+        info.addProperty("hasPlayerScannerUpgrade", hasUpgrade(ModItems.playerScannerUpgrade));
+        
+        // Lifetime and cache info
+        info.addProperty("lifetime", lifetime);
+        info.addProperty("cacheSize", INFO_CACHE.size());
+        
+        return info;
     }
 
 

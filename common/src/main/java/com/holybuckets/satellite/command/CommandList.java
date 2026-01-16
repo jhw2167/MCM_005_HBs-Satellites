@@ -2,6 +2,7 @@ package com.holybuckets.satellite.command;
 
 //Project imports
 
+import com.google.gson.JsonObject;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.event.CommandRegistry;
 import com.holybuckets.satellite.LoggerProject;
@@ -34,6 +35,7 @@ public class CommandList {
         //CommandRegistry.register(LocateClusters::limitCountSpecifyBlockType);
         CommandRegistry.register(GetAllSatellites::command);
         CommandRegistry.register(GetAllChannels::command);
+        CommandRegistry.register(DisplayInfo::command);
     }
 
     //**** STATIC UTILITY ****//
@@ -188,6 +190,53 @@ public class CommandList {
                 return channels.size();
             } catch (Exception e) {
                 source.sendFailure(Component.literal("Error executing getAllChannels: " + e.getMessage()));
+                return 0;
+            }
+        }
+    }
+    //END COMMAND
+
+    //4. Display Info
+    private static class DisplayInfo
+    {
+        private static LiteralArgumentBuilder<CommandSourceStack> command() {
+            return Commands.literal(PREFIX)
+                .then(Commands.literal("displayInfo")
+                    .then(Commands.argument("colorId", IntegerArgumentType.integer(0))
+                        .executes(context -> {
+                            int colorId = IntegerArgumentType.getInteger(context, "colorId");
+                            return execute(context.getSource(), colorId);
+                        })
+                    )
+                );
+        }
+
+        private static int execute(CommandSourceStack source, int colorId)
+        {
+            try {
+                if (source.getLevel() == null) {
+                    source.sendFailure(Component.literal("Command must be executed in a world"));
+                    return 0;
+                }
+
+                SatelliteManager manager = SatelliteManager.get(source.getLevel());
+                JsonObject[] displayInfoArray = manager.getDisplayInfo(colorId);
+
+                if (displayInfoArray == null || displayInfoArray.length == 0) {
+                    source.sendSuccess(() -> Component.literal("No displays found for colorId " + colorId), false);
+                    return 0;
+                }
+
+                source.sendSuccess(() -> Component.literal("Found " + displayInfoArray.length + " display(s) for colorId " + colorId + ":"), false);
+                
+                for (int i = 0; i < displayInfoArray.length; i++) {
+                    JsonObject displayInfo = displayInfoArray[i];
+                    source.sendSuccess(() -> Component.literal("  Display " + (i + 1) + ": " + displayInfo.toString()), false);
+                }
+
+                return displayInfoArray.length;
+            } catch (Exception e) {
+                source.sendFailure(Component.literal("Error executing displayInfo: " + e.getMessage()));
                 return 0;
             }
         }
