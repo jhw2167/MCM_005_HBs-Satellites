@@ -978,6 +978,7 @@ public class SatelliteDisplay {
         if( level.getBlockEntity(displayBlockPos) instanceof SatelliteDisplayBlockEntity displayBlockEntity ) {
             SatelliteDisplay source = displayBlockEntity.getSource();
             if(source != null) { source.setPosition( useBlockEvent.getPlayer(), res ); }
+            displayBlockEntity.forceUpdate();
         }
 
     }
