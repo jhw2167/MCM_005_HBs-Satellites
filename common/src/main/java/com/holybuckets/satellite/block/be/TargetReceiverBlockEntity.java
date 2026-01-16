@@ -68,6 +68,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
     public void tick(Level level, BlockPos pos, BlockState state, TargetReceiverBlockEntity blockEntity)
     {
         if (level.isClientSide) return;
+        if(SatelliteManager.bufferSatelliteStart()) return;
         if(ticks++ < REFRESH_TICKS) return;
         ticks = 0;
         
@@ -85,10 +86,13 @@ public class TargetReceiverBlockEntity extends BlockEntity
         }
         
         // Attempt to set linkedTargetController if we have a manager and valid color IDs
-        if (this.manager != null && this.linkedTargetController == null) {
+        if (this.manager != null && this.linkedTargetController == null)
+        {
             this.linkedTargetController = this.manager.getTargetController(this.colorId, this.targetColorId);
             if(this.linkedTargetController != null) {
+                setUiTargetBlockPos(this.linkedTargetController.getUiTargetBlockPos());
                 this.updateBlockState(true);
+                return;
             }
 
         }
@@ -264,7 +268,7 @@ public class TargetReceiverBlockEntity extends BlockEntity
         BlockState newState = state.setValue(BlockStateProperties.POWER, newPower);
         level.setBlock(pos, newState, Block.UPDATE_ALL);
         level.updateNeighborsAt(pos, this.getBlockState().getBlock());
-        //level.sendBlockUpdated(pos, state, newState, Block.UPDATE_ALL );
+        level.sendBlockUpdated(pos, state, newState, Block.UPDATE_ALL );
     }
 
 

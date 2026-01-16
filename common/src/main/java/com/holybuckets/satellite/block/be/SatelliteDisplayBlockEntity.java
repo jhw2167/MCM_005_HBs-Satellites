@@ -29,6 +29,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     private int holoLift; //number of blocks above display block holo renders
     private int entitySignalStrength;
     private boolean hasPlayer;
+    private boolean forceDisplayRefresh;
 
     public SatelliteDisplayBlockEntity(BlockPos pos, BlockState state) {
         this(ModBlockEntities.satelliteDisplayBlockEntity.get(), pos, state);
@@ -41,6 +42,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         this.height = 0;
         this.holoLift = 0;
         this.hasPlayer = false;
+        this.forceDisplayRefresh = false;
     }
 
     @Override
@@ -101,6 +103,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         //Set ticks equal to -x + -z offset
         BlockPos offset = this.source.getOffset(this.getBlockPos());
         this.ticks = -(Math.abs(offset.getX()) + Math.abs(offset.getZ()));
+        this.forceDisplayRefresh = true;
     }
 
 
@@ -200,6 +203,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
             source = null;
             toggleOnOff(false);
         } else if(displayInfo != null && !displayInfo.isEmpty()) {
+            this.hasPlayer = displayInfo.getFirst().hasPlayer;
             renderDisplay();
         }
 
@@ -220,7 +224,12 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         boolean stdRefresh = ticks % REFRESH_RATE==0;
         boolean playerRefresh = this.hasPlayer && ticks % PLAYER_REFRESH_RATE==0;
 
-        if(playerRefresh && stdRefresh) {
+        if(forceDisplayRefresh) {
+            this.displayInfo.forEach( info -> info.refreshBits(true) );
+            this.clearAboveArea(this.height);
+            this.forceDisplayRefresh = false;
+        }
+        else if(playerRefresh && stdRefresh) {
             this.displayInfo.forEach( info -> info.refreshBits(true) );
             this.clearAboveArea(this.height);
         } else if(playerRefresh) {

@@ -61,7 +61,7 @@ public class SatelliteDisplay {
     int xOffset;
     ChunkPos target;
 
-    int currentSection;
+    int currentSection; //always references the highest holo section on the display
     int surfaceSection;
     int maxSection;
     int dispHeight;
@@ -212,7 +212,7 @@ public class SatelliteDisplay {
         int sectionDepth = SatelliteMain.CONFIG.satelliteConfig.maxSatelliteDepthSectionDefault;
         if( hasUpgrade( ModItems.depthUpgrade ) )
             sectionDepth = SatelliteMain.CONFIG.satelliteConfig.maxSatelliteDepthSectionUpgraded;
-        this.minSection = this.surfaceSection - sectionDepth;
+        setMinSection( this.surfaceSection - sectionDepth );
 
         chunkRange = SatelliteMain.CONFIG.satelliteConfig.satelliteOperationalDistChunksDefault;
         if( hasUpgrade( ModItems.rangeUpgrade ) )
@@ -380,14 +380,16 @@ public class SatelliteDisplay {
 
         maxSection = HBUtil.WorldPos.yToSectionIndex(
             satellite.getBlockPos().getY(), level.getMinBuildHeight()) - 1;
-        for (int i = maxSection; i >= 1; i--) {
+        this.currentSection = 0;
+        for (int i = maxSection; i > 0; i--) {
             LevelChunkSection section = sections[i];
             if (section == null || section.hasOnlyAir()) continue;
             this.currentSection = i;
             break;
         }
+        this.dispHeight = (currentSection==0) ? 1 : 2;
         this.surfaceSection = this.currentSection;
-        this.minSection = this.surfaceSection - (SatelliteMain.CONFIG.satelliteConfig.maxSatelliteDepthSectionDefault);
+        setMinSection( this.surfaceSection - (SatelliteMain.CONFIG.satelliteConfig.maxSatelliteDepthSectionDefault) );
         this.needsUpdate = true;
         this.refreshUiPositions();
     }
@@ -493,6 +495,10 @@ public class SatelliteDisplay {
             }
             updateBounds(pos);
         }
+    }
+
+    public Set<BlockPos> getDisplayPositions() {
+        return displayBlocks.keySet();
     }
 
     public void remove(BlockPos blockPos) {
@@ -985,6 +991,10 @@ public class SatelliteDisplay {
         if(controller != null) {
             controller.processInput(p, hand, cmd, block);
         }
+    }
+
+    public void setMinSection(int minSection) {
+        this.minSection = Math.min(minSection, 0);
     }
 
 }

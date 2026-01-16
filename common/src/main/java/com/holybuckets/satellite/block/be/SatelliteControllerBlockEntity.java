@@ -474,6 +474,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         }
     }
 
+    private static int MAX_DISPLAYS_RAND_UPDATE = 16;
     //pathToNeighbors
     public void propagateToNeighbors()
     {

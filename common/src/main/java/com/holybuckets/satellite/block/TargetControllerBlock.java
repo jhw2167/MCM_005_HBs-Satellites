@@ -64,15 +64,16 @@ public class TargetControllerBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+    {
+        if(level.isClientSide) return InteractionResult.CONSUME;
         Direction d = hitResult.getDirection();
         Direction front = state.getValue(FACING);
 
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof TargetControllerBlockEntity controller)
+        if (be instanceof TargetControllerBlockEntity controller && hand == InteractionHand.MAIN_HAND)
         {
             if (d != front || player.isShiftKeyDown()) {
-                if(level.isClientSide) return InteractionResult.PASS;
                 MenuProvider menuProvider = controller.getMenuProvider();
                 Balm.getNetworking().openMenu(player, menuProvider);
                 return InteractionResult.CONSUME;

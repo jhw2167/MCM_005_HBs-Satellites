@@ -38,6 +38,11 @@ import java.util.function.BiConsumer;
 
 public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController, Container
 {
+    private static String MSG_CLEAR_TARGET = "Clearing... ";
+    private static String MSG_SET_TARGET = "Right click holo display to set target...";
+    private static String MSG_MISFIRE = "No target set.";
+    private static String MSG_COOLDOWN = "Weapon cooling down... ";
+
     private int colorId;
     private int targetColorId;
 
@@ -153,6 +158,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     public void use(Player p, InteractionHand hand, BlockHitResult hitResult)
     {
         if(this.level==null) return;
+        if(this.level.isClientSide) return;
         int cmd = ISatelliteControllerBE.calculateHitCommandTarget(hitResult);
         if (cmd == -1) return;
 
@@ -209,11 +215,15 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         }
     }
 
+    private static final int REFRESH_TICKS=5;
     @Override
     public void tick(Level level, BlockPos blockPos, BlockState blockState, SatelliteDisplayBlockEntity satelliteDisplayBlockEntity) {
         super.tick(level, blockPos, blockState, satelliteDisplayBlockEntity);
-        if(weaponCooldownTicks>0)
-            weaponCooldownTicks--;
+        if(ticks % REFRESH_TICKS == 0)
+        {
+            if(weaponCooldownTicks>0)
+                weaponCooldownTicks-=REFRESH_TICKS;
+        }
     }
 
     @Override

@@ -99,10 +99,11 @@ public class ChunkDisplayInfo {
         if( force  || chunk.isUnsaved())
         {
             if(useOreScan) {
-                updateBits(holoBits, this, false);
-            } else {
                 if(oreScanBits == null) oreScanBits = new int[4096];
                 updateBits(oreScanBits, this, true);
+            } else {
+                updateBits(holoBits, this, false);
+
             }
         }
 

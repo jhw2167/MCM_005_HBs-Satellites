@@ -33,15 +33,17 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
     BlockPos travelPos;
     boolean traveling;
     private int ticks;
+    public boolean dimensionHint;
 
     private static final int HEXCODE_MAX = 0xFFFFFF;
 
     public SatelliteBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.satelliteBlockEntity.get(), pos, state);
         //this.setColorId( (int) (Math.random() * HEXCODE_MAX));
-        this.colorId = -1;
+        this.colorId = 0;
         this.targetPos = pos;
         traveling = false;
+        dimensionHint = false;
     }
 
     public void use(Player p, InteractionHand hand, BlockHitResult res) {

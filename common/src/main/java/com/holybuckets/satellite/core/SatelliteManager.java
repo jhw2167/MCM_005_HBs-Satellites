@@ -145,7 +145,7 @@ public class SatelliteManager {
         if(satellite == null) return null;
 
         for(SourceKey key : displaySources.keySet()) {
-            if(key.satellite == satellite) {
+            if(satellite == key.satellite) {
                 SatelliteDisplay display = displaySources.get(key);
                 if(display == null) continue;
                 for(ISatelliteControllerBE be : display.getAllControllers(TargetControllerBlockEntity.class)) {
@@ -168,6 +168,15 @@ public class SatelliteManager {
     public void put(int colorId, SatelliteBlockEntity be)
     {
         if(be == null) return;
+
+        if(be.getLevel()!=GeneralConfig.OVERWORLD) {
+            if(!be.dimensionHint) {
+                CommonClass.MESSAGER.sendChat("Satellite is only supported in the Overworld Dimension");
+                be.dimensionHint = true;
+            }
+            return;
+        }
+
         satellitePositions.add(be);
         if(colorId < 0 || satellites.containsKey(colorId)) return;
 
