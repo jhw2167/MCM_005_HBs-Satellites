@@ -24,6 +24,8 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import javax.annotation.Nullable;
 
+import static net.minecraft.world.level.block.RedStoneWireBlock.POWER;
+
 public class SatelliteControllerBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -35,20 +37,22 @@ public class SatelliteControllerBlock extends Block implements EntityBlock {
             .destroyTime(0.6f)  // Makes it break faster
             .explosionResistance(6f));
         registerDefaultState(this.stateDefinition.any()
-            .setValue(FACING, Direction.NORTH).setValue(POWERED, false));
+            .setValue(FACING, Direction.NORTH).setValue(POWERED, false).setValue(POWER, 0));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
         builder.add(POWERED);
+        builder.add(POWER);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.defaultBlockState()
             .setValue(FACING, context.getHorizontalDirection().getOpposite())
-            .setValue(POWERED, false);
+            .setValue(POWERED, false)
+            .setValue(POWER, 0);
     }
 
     // In your Block class
@@ -88,10 +92,7 @@ public class SatelliteControllerBlock extends Block implements EntityBlock {
 
     @Override
     public int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        if (level.getBlockEntity(pos) instanceof SatelliteDisplayBlockEntity blockEntity) {
-            return blockEntity.getSignalStrength(); // 0-15
-        }
-        return 0;
+        return state.getValue(POWER);
     }
 
     @Override
