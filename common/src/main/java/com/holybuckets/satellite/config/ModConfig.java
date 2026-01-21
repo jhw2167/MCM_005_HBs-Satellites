@@ -166,4 +166,26 @@ public class ModConfig {
 
         return -1;
     }
+
+    public static int getmaxSatelliteDepthSectionDefaults(boolean upgraded) {
+        int defaultVal = SatelliteMain.CONFIG.displayUpgrades.maxSatelliteDepthSectionDefault;
+        if(defaultVal<1) return Integer.MAX_VALUE;
+        if(upgraded) {
+            int upgradedVal = SatelliteMain.CONFIG.displayUpgrades.maxSatelliteDepthSectionUpgraded;
+            if(upgradedVal<1) return Integer.MAX_VALUE;
+            return upgradedVal;
+        }
+        return defaultVal;
+    }
+
+    public static int getSatelliteOperationalDistChunks(boolean upgraded) {
+        int defaultVal = SatelliteMain.CONFIG.displayUpgrades.satelliteOperationalDistChunksDefault;
+        if(defaultVal<1) return Integer.MAX_VALUE;
+        if(upgraded) {
+            int upgradedVal = SatelliteMain.CONFIG.displayUpgrades.satelliteOperationalDistChunksUpgraded;
+            if(upgradedVal<1) return Integer.MAX_VALUE;
+            return upgradedVal;
+        }
+        return defaultVal;
+    }
 }

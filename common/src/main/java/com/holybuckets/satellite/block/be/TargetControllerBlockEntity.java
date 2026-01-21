@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.foundation.console.IMessager;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
@@ -30,11 +31,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
+
+import static com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity.PLAYER_RANGE;
 
 public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity implements ISatelliteControllerBE, ITargetController, Container
 {
@@ -88,6 +88,12 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     public void setUiTargetBlockPos(BlockPos blockPos) {
         this.uiTargetBlockPos = blockPos;
         this.linkedReceivers.clear();
+        List<ServerPlayer> players = HBUtil.PlayerUtil
+            .getAllPlayersInBlockRange(getBlockPos(), PLAYER_RANGE/4 );
+        for(ServerPlayer player : players) {
+            if(blockPos == null) break;
+            IMessager.getInstance().sendBottomActionHint(player, "Targeted: " + HBUtil.BlockUtil.positionToString(blockPos));
+        }
         markUpdated();
     }
 
@@ -178,14 +184,14 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
 
         if(cmd==10) {
             if(this.uiCursorPos == null)
-                CommonClass.MESSAGER.sendBottomActionHint(p, "Right click holo display to set target...");
+                IMessager.getInstance().sendBottomActionHint(p, "Right click holo display to set target...");
             else
-                CommonClass.MESSAGER.sendBottomActionHint(p, "Clearing... " );
+                IMessager.getInstance().sendBottomActionHint(p, "Clearing... " );
         } else if (cmd==11) {
             if(this.uiTargetBlockPos == null)
-                CommonClass.MESSAGER.sendBottomActionHint(p, "No Target Set ");
+                IMessager.getInstance().sendBottomActionHint(p, "No Target Set ");
             if(this.weaponCooldownTicks>0) {
-                CommonClass.MESSAGER.sendBottomActionHint(p, "Weapon cooling down... ");
+                IMessager.getInstance().sendBottomActionHint(p, "Weapon cooling down... ");
                 cmd = -1;
             }
         }

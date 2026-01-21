@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.foundation.console.IMessager;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.LoggerProject;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
@@ -101,10 +102,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         //message local players
         List<ServerPlayer> players = HBUtil.PlayerUtil
-            .getAllPlayersInBlockRange(getBlockPos(), PLAYER_RANGE );
+            .getAllPlayersInBlockRange(getBlockPos(), PLAYER_RANGE/4 );
         for(ServerPlayer player : players) {
-            CommonClass.MESSAGER.sendBottomActionHint(player,
-                "Targeted: " + HBUtil.BlockUtil.positionToString(blockTarget));
+            String msg = "Targeted: " + HBUtil.BlockUtil.positionToString(blockTarget);
+            IMessager.getInstance().sendBottomActionHint(player, msg);
         }
     }
 
@@ -263,7 +264,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
                 }
             } else if (cmd == 11) {
                 if(tc.getUiTargetBlockPos() == null) {
-                    CommonClass.MESSAGER.sendBottomActionHint(p, "No target selected!");
+                    IMessager.getInstance().sendBottomActionHint(p, "No target selected!");
                 }
                 source.fire(p, (ITargetController) controller);
             }
@@ -302,7 +303,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             this.satelliteTravelPos,
             this.getSatelliteTargetPos(),
             this.satelliteTravelPos != null,
-            this.level
+            this.level,
+            this.satelliteDisplayError
         );
         return clone;
     }

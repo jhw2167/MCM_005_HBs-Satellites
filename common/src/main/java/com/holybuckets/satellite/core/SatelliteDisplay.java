@@ -120,7 +120,7 @@ public class SatelliteDisplay {
         controllerBlocks = new HashSet<>();
         if(satellite == null) return;
 
-        chunkRange = SatelliteMain.CONFIG.satelliteConfig.satelliteOperationalDistChunksDefault;
+        chunkRange = ModConfig.getSatelliteOperationalDistChunks(false);
 
         this.target = HBUtil.ChunkUtil.getChunkPos( satellite.getBlockPos() );
         resetChunkSection();
@@ -145,7 +145,8 @@ public class SatelliteDisplay {
     /**
      * Returns all display state information as a JsonObject
      */
-    public JsonObject getDisplayInfo() {
+    public JsonObject getSourceDisplayInfo()
+    {
         JsonObject info = new JsonObject();
         
         // Basic position and target information
@@ -209,8 +210,8 @@ public class SatelliteDisplay {
         info.addProperty("hasPlayerScannerUpgrade", hasUpgrade(ModItems.playerScannerUpgrade));
         
         // Lifetime and cache info
-        info.addProperty("lifetime", lifetime);
-        info.addProperty("cacheSize", INFO_CACHE.size());
+        //info.addProperty("lifetime", lifetime);
+        //info.addProperty("cacheSize", INFO_CACHE.size());
         
         return info;
     }
@@ -283,14 +284,10 @@ public class SatelliteDisplay {
             }
         }
 
-        int sectionDepth = SatelliteMain.CONFIG.satelliteConfig.maxSatelliteDepthSectionDefault;
-        if( hasUpgrade( ModItems.depthUpgrade ) )
-            sectionDepth = SatelliteMain.CONFIG.satelliteConfig.maxSatelliteDepthSectionUpgraded;
+        int sectionDepth = ModConfig.getmaxSatelliteDepthSectionDefaults(hasUpgrade( ModItems.depthUpgrade ));
         setMinSection( this.surfaceSection - sectionDepth );
 
-        chunkRange = SatelliteMain.CONFIG.satelliteConfig.satelliteOperationalDistChunksDefault;
-        if( hasUpgrade( ModItems.rangeUpgrade ) )
-            this.chunkRange = SatelliteMain.CONFIG.satelliteConfig.satelliteOperationalDistChunksUpgraded;
+        this.chunkRange = ModConfig.getSatelliteOperationalDistChunks(hasUpgrade( ModItems.rangeUpgrade ));
 
         if( satellite == null ) {
             controller.setError( "No Satellite Connected" );
@@ -299,7 +296,7 @@ public class SatelliteDisplay {
 
         double dist = HBUtil.ChunkUtil.chunkDistSquared( new ChunkPos(satellite.getBlockPos()), new ChunkPos(controller.getBlockPos()) );
         if( dist > (chunkRange * chunkRange) ) {
-            this.controller.setError( "Satellite out of Operation Range of " + chunkRange + " chunks");
+            this.controller.setError( "Satellite out of Operational Range of " + chunkRange + " chunks");
             return;
         }
 
@@ -378,7 +375,7 @@ public class SatelliteDisplay {
 
     public void setCurrentSection(int section) {
         if( section < dispHeight ||  section > maxSection ) return;
-        if( section < minSection+dispHeight ) return;
+        if( section < (minSection+dispHeight)-1 ) return;
         if( section == this.currentSection ) return;
         this.currentSection = section;
         this.needsUpdate = true;
@@ -463,7 +460,8 @@ public class SatelliteDisplay {
         }
         this.dispHeight = (currentSection==0) ? 1 : 2;
         this.surfaceSection = this.currentSection;
-        setMinSection( this.surfaceSection - (SatelliteMain.CONFIG.satelliteConfig.maxSatelliteDepthSectionDefault) );
+        int maxDepth = ModConfig.getmaxSatelliteDepthSectionDefaults(false);
+        setMinSection( this.surfaceSection - maxDepth );
         this.needsUpdate = true;
         this.refreshUiPositions();
     }
@@ -878,7 +876,7 @@ public class SatelliteDisplay {
             final int Y_MIN = level.getMinBuildHeight();
             int blockOffsetY = e.blockPosition().getY() - (((currentSection) * 16)+Y_MIN) + ((dispHeight -1)*16);
             if(blockOffsetY < 0 ) { //under the table
-                continue;
+                //continue;
             } else if( blockOffsetY > (16* dispHeight) ) { //above the table
                 if(!(e instanceof ServerPlayer)) continue; //only show players above the table
                 blockOffsetY = 16*(dispHeight +1);
@@ -1069,7 +1067,7 @@ public class SatelliteDisplay {
     }
 
     public void setMinSection(int minSection) {
-        this.minSection = Math.min(minSection, 0);
+        this.minSection = Math.max(minSection, 0);
     }
 
 }

@@ -10,6 +10,7 @@ import com.holybuckets.satellite.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RedStoneWireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -67,14 +68,12 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     public void setSignalStrength(int strength) {
         entitySignalStrength = Math.max(entitySignalStrength, strength);
         updateBlockState();
-        this.level.updateNeighborsAt(this.worldPosition, this.getBlockState().getBlock());
     }
 
     @Override
     public void clearSignalStrength() {
         entitySignalStrength = 0;
         updateBlockState();
-        this.level.updateNeighborsAt(this.worldPosition, this.getBlockState().getBlock());
     }
 
     public void setHeight(int height) {
@@ -120,13 +119,17 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         }
     }
 
-    protected void updateBlockState() {
+    protected void updateBlockState()
+    {
         if(this.level == null) return;
-        BlockState state = this.getBlockState();
-        BlockState newState = state.setValue(SatelliteDisplayBlock.POWERED, this.isDisplayOn);
-        level.setBlock(this.getBlockPos(), newState, 3);
-        this.setChanged();
-        level.sendBlockUpdated(this.getBlockPos(), state, newState, 3);
+        if(level.isClientSide) return;
+        BlockState state = this.level.getBlockState(this.getBlockPos());
+        if(!(level.getBlockEntity(getBlockPos()) instanceof  ISatelliteDisplayBE)) return;
+        level.setBlock(this.getBlockPos(),
+        state.setValue(SatelliteDisplayBlock.POWERED, this.isDisplayOn)
+            .setValue(RedStoneWireBlock.POWER, entitySignalStrength) , 3);
+        level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+        level.updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
     }
 
 

@@ -220,21 +220,21 @@ public class CommandList {
                 }
 
                 SatelliteManager manager = SatelliteManager.get(source.getLevel());
-                JsonObject[] displayInfoArray = manager.getDisplayInfo(colorId);
+                List<JsonObject> displayInfoArray = manager.getDisplayInfo(colorId);
 
-                if (displayInfoArray == null || displayInfoArray.length == 0) {
-                    source.sendSuccess(() -> Component.literal("No displays found for colorId " + colorId), false);
+                if (displayInfoArray.isEmpty()) {
+                    source.sendSuccess(() -> Component.literal("No display info found for colorId " + colorId), false);
                     return 0;
                 }
 
-                source.sendSuccess(() -> Component.literal("Found " + displayInfoArray.length + " display(s) for colorId " + colorId + ":"), false);
-                
-                for (int i = 0; i < displayInfoArray.length; i++) {
-                    JsonObject displayInfo = displayInfoArray[i];
-                    source.sendSuccess(() -> Component.literal("  Display " + (i + 1) + ": " + displayInfo.toString()), false);
+                source.sendSuccess(() -> Component.literal("Display info for colorId " + colorId + ":"), false);
+                for (int i = 0; i < displayInfoArray.size(); i++) {
+                    JsonObject displayInfo = displayInfoArray.get(i);
+                    final int n = i;
+                    source.sendSuccess(() -> Component.literal("  [" + n + "] " + displayInfo.toString()), false);
                 }
 
-                return displayInfoArray.length;
+                return displayInfoArray.size();
             } catch (Exception e) {
                 source.sendFailure(Component.literal("Error executing displayInfo: " + e.getMessage()));
                 return 0;

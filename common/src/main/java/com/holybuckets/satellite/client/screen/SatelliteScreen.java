@@ -2,6 +2,7 @@ package com.holybuckets.satellite.client.screen;
 
 import com.google.gson.JsonObject;
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.foundation.console.IMessager;
 import com.holybuckets.foundation.console.Messager;
 import com.holybuckets.foundation.networking.SimpleStringMessage;
 import com.holybuckets.foundation.structure.StructureInfo;
@@ -150,12 +151,13 @@ public class SatelliteScreen extends Screen {
         this.addRenderableWidget(this.zEdit);
 
         // Inventory section (middle 30% - left empty for now)
-        int inventoryY = yStart + sectionHeight;
-        int inventoryHeight = (int)(guiHeight * INVENTORY_SECTION_HEIGHT);
-        // TODO: Add inventory rendering here later
+        int errorStart = yStart + sectionHeight;
+        int errorMsgHeight = (int)(guiHeight * INVENTORY_SECTION_HEIGHT);
+
+
 
         // Button section (bottom 30%)
-        int buttonSectionY = inventoryY + inventoryHeight;
+        int buttonSectionY = errorStart + errorMsgHeight;
         int buttonSectionHeight = (int)(guiHeight * BUTTON_SECTION_HEIGHT);
         int buttonSpacing = buttonSectionHeight / 3;
 
@@ -298,6 +300,15 @@ public class SatelliteScreen extends Screen {
         graphics.fill(rightColumnX - 2, listTop - 2, rightColumnX + rightColumnWidth - 18, listTop + listHeight + 2, 0x80000000);
         graphics.renderOutline(rightColumnX - 2, listTop - 2, rightColumnWidth - 16, listHeight + 4, 0xFFFFFFFF);
 
+        String errorMsg = satelliteBlock.getSatelliteDisplayError();
+        if(errorMsg != null) {
+            int listCenterX = rightColumnX + (rightColumnWidth - 18) / 2;
+            int errorY = listTop + listHeight + 6;
+            graphics.drawCenteredString(this.font, Component.literal(errorMsg),
+                listCenterX, errorY, 0xFFFF5555); // Red text (or use 0xFFAA0000 for darker red)
+        }
+
+
         // Render all widgets
         super.render(graphics, mouseX, mouseY, partialTick);
     }
@@ -340,7 +351,7 @@ public class SatelliteScreen extends Screen {
         SimpleStringMessage.createAndFire(SatelliteManager.MSG_ID_TARGET_POS, json.toString());
     }
         private void msg(String s) {
-            CommonClass.MESSAGER.sendBottomActionHint(Minecraft.getInstance().player, s);
+            IMessager.getInstance().sendBottomActionHint(Minecraft.getInstance().player, s);
         }
 
     @Override

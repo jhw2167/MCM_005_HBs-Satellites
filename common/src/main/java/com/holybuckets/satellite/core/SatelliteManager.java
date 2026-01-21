@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.holybuckets.foundation.GeneralConfig;
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.foundation.console.IMessager;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.SimpleMessageEvent;
@@ -43,6 +44,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
+import static com.holybuckets.foundation.HBUtil.ChunkUtil;
+
 public class SatelliteManager {
 
     /** Maps colorId to satellite block entity */
@@ -60,6 +63,22 @@ public class SatelliteManager {
     private final Level level;
 
     private static SatelliteManager CLIENT_MANAGER;
+
+    public List<JsonObject> getDisplayInfo(int colorId)
+    {
+        SatelliteBlockEntity satellite = get(colorId);
+        if(satellite == null) return Collections.emptyList();
+
+        List<JsonObject> infoList = new ArrayList<>();
+        for(SourceKey key : displaySources.keySet()) {
+            if(satellite == key.satellite) {
+                SatelliteDisplay display = displaySources.get(key);
+                if(display == null) continue;
+                infoList.add(display.getSourceDisplayInfo());
+            }
+        }
+        return infoList;
+    }
 
     public static class SourceKey {
         public SatelliteBlockEntity satellite;
@@ -171,7 +190,7 @@ public class SatelliteManager {
 
         if(be.getLevel()!=GeneralConfig.OVERWORLD) {
             if(!be.dimensionHint) {
-                CommonClass.MESSAGER.sendChat("Satellite is only supported in the Overworld Dimension");
+                IMessager.getInstance().sendChat("Satellite is only supported in the Overworld Dimension");
                 be.dimensionHint = true;
             }
             return;
@@ -187,6 +206,7 @@ public class SatelliteManager {
             }
         }
         satellites.putIfAbsent(colorId, be);
+        CachedChunkInfo chunkInfo = forceLoadChunk(be.getLevel(), be.getBlockPos());
         be.setLevelChunk(getChunk(be.getLevel(), be.getBlockPos()));
     }
 
@@ -304,6 +324,34 @@ public class SatelliteManager {
         return null;
     }
 
+    public static CachedChunkInfo forceLoadChunk(Level level, BlockPos pos) {
+        return forceLoadChunk(level, ChunkUtil.getChunkPos(pos));
+    }
+
+    public static CachedChunkInfo forceLoadChunk(Level level, ChunkPos chunkPos)
+     {
+        if(!(level instanceof ServerLevel serverLevel)) return null;
+        SatelliteManager manager = SatelliteMain.getManager(level);
+        if(manager == null) return null;
+        var chunkCache = manager.chunkCache;
+        long posKey = ChunkUtil.getChunkPos1DMap(chunkPos);
+        CachedChunkInfo cachedInfo = chunkCache.get(posKey);
+        if (cachedInfo != null) {
+            cachedInfo.forceLoaded = true;
+        }
+
+        // Try force loading
+        ChunkUtil.forceLoadChunk(serverLevel, chunkPos, Constants.MOD_ID);
+        LevelChunk chunk = level.getChunk(chunkPos.x, chunkPos.z);
+        if (chunk != null) {
+            CachedChunkInfo info = new CachedChunkInfo(chunk, true);
+            chunkCache.put(posKey, info);
+            return info;
+        }
+
+        return null;
+    }
+
     public static void flagChunkForUnload(Level level, ChunkPos pos) {
 
         if(level == null) return;
@@ -357,7 +405,7 @@ public class SatelliteManager {
             targetPos = targetPos.above(1);
         }
         if(targetPos.getY() >= level.getMaxBuildHeight()) {
-            CommonClass.MESSAGER.sendBottomActionHint(
+            IMessager.getInstance().sendBottomActionHint(
                 "Satellite " + colorId + " cannot be moved to target position, out of build height!");
             return true; //else it will keep retrying
         }
@@ -391,6 +439,7 @@ public class SatelliteManager {
     }
 
     public static boolean bufferSatelliteStart() {
+        if(!GeneralConfig.getInstance().isServerSide()) return false;
         return GeneralConfig.getInstance().getSessionTickCount() <= START_BUFFER_TICKS;
     }
 

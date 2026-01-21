@@ -24,4 +24,8 @@ public interface ISatelliteBE {
     void launch(BlockPos targetPos);
     
     Level getLevel();
+
+    default String getSatelliteDisplayError() {
+        return null;
+    }
 }

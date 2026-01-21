@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.client.ClientEventRegistrar;
+import com.holybuckets.foundation.console.IMessager;
 import com.holybuckets.foundation.event.custom.*;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.LoggerProject;
@@ -55,8 +56,8 @@ public class SatelliteFlareWeapon {
         }
 
         public static void remove(BlockPos pos) {
-            String msg = "Waypoint at " + HBUtil.BlockUtil.positionToString(pos) + " removed.";
-            CommonClass.MESSAGER.sendBottomActionHint(msg);
+            String msg = "Waypoint at " + HBUtil.BlockUtil.positionToString(pos) + " removed";
+            IMessager.getInstance().sendBottomActionHint(msg);
         }
 
     }

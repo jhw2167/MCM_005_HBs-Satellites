@@ -209,13 +209,15 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         private BlockPos blockPos;
         private boolean traveling;
         private Level level;
+        private String error;
         
-        ScreenSatelliteWrapper(int colorId, BlockPos targetPos, BlockPos blockPos, boolean traveling, Level level) {
+        ScreenSatelliteWrapper(int colorId, BlockPos targetPos, BlockPos blockPos, boolean traveling, Level level, String error) {
             this.colorId = colorId;
             this.targetPos = targetPos;
             this.blockPos = blockPos;
             this.traveling = traveling;
             this.level = level;
+            this.error = error;
         }
         
         @Override
@@ -259,6 +261,11 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         @Override
         public Level getLevel() {
             return level;
+        }
+
+        @Override
+        public String getSatelliteDisplayError() {
+            return error;
         }
     }
 

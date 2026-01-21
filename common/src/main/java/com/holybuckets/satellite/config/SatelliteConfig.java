@@ -15,21 +15,6 @@ public class SatelliteConfig {
         @Comment("Satellite will not operate below this y level")
         public int minSatelliteWorkingHeight = 256;
 
-        @Comment("Maximum chunk sections below surface that a satellite can view by default, each section is 16 blocks tall, larger number indicates deeper reach")
-        public int maxSatelliteDepthSectionDefault = 4;
-
-        @Comment("Maximum chunk sections below surface that a satellite can view by default, each section is 16 blocks tall, larger number indicates deeper reach")
-        public int maxSatelliteDepthSectionUpgraded = 12;
-
-        //@Comment("Maximum number of chunks away from Satellite Block players may view blocks, -1 for no limit")
-        //public int satelliteReachDistChunksDefault = -1;
-
-        @Comment("Maximum number of chunks away from launch station satellite may operate, -1 for no limit")
-        public int satelliteOperationalDistChunksDefault = 256;
-
-        @Comment("Maximum number of chunks away from launch station satellite may operate, -1 for no limit")
-        public int satelliteOperationalDistChunksUpgraded = 1024;
-
         @Comment("Satellite travel rate")
         public int satelliteTravelRateChunksPerSecond = 8;
 
@@ -43,14 +28,21 @@ public class SatelliteConfig {
     }
 
     public static class SatelliteDisplayUpgrades {
-        @Comment("Maximum chunk sections below surface that a satellite can view with the depth upgrade, should be at least maxSatelliteDepthSectionDefault")
-        public int maxSatelliteDepthSectionUpgraded = 16;
 
-        @Comment("Maximum number of chunks away from Satellite Block players may view blocks per upgrade, -1 for no limit")
-        public int satelliteReachDistChunksUpgraded = -1;
+        @Comment("Maximum chunk sections below surface that a satellite can view by default, each section is 16 blocks tall, larger number indicates deeper reach")
+        public int maxSatelliteDepthSectionDefault = 4;
 
-        @Comment("Maximum number of chunks away from launch station satellite may operate per upgrade, -1 for no limit")
-        public int satelliteOperationalDistChunksUpgraded = -1;
+        @Comment("Maximum chunk sections below surface that a satellite can view by default, each section is 16 blocks tall, larger number indicates deeper reach")
+        public int maxSatelliteDepthSectionUpgraded = 12;
+
+        //@Comment("Maximum number of chunks away from Satellite Block players may view blocks, -1 for no limit")
+        //public int satelliteReachDistChunksDefault = -1;
+
+        @Comment("Maximum number of chunks away from launch station satellite may operate, -1 for no limit")
+        public int satelliteOperationalDistChunksDefault = 2048;
+
+        @Comment("Maximum number of chunks away from launch station satellite may operate, -1 for no limit")
+        public int satelliteOperationalDistChunksUpgraded = 65536;
 
         @Comment("Pairs ore blocks with chiseled block representations on the Satellite Display. NOTE: the block after '=' MUST be Chiselable with the chisel & bits mod or it will crash the game. Safest to use Vanilla Blocks.")
         @NestedType(String.class)
@@ -113,7 +105,7 @@ public class SatelliteConfig {
 
         @NestedType(String.class)
         @Comment("Entity types produce a white ping")
-        public Set<String> neutralEntityTypes = Set.of("minecraft:iron_golem", "minecraft:wandering_trader");
+        public Set<String> neutralEntityTypes = Set.of("minecraft:iron_golem","minecraft:wandering_trader");
 
         @NestedType(String.class)
         @Comment("Entity types only produce a white ping when grouped in large quantities")

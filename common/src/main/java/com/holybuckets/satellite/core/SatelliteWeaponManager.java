@@ -64,7 +64,7 @@ public class SatelliteWeaponManager {
 
         json.addProperty("colorId", color);
 
-        SimpleStringMessage.createAndFire(MSG_ID_WAYPOINT_FLARE, json.toString());
+        SimpleStringMessage.createAndFireToAll(MSG_ID_WAYPOINT_FLARE, json.toString());
     }
 
     // Send currently active waypoints in the world to newly joined players

@@ -7,6 +7,8 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -25,6 +27,8 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 import javax.annotation.Nullable;
 
+import static net.minecraft.world.level.block.RedStoneWireBlock.POWER;
+
 public class SatelliteDisplayBlock extends Block implements EntityBlock {
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     
@@ -34,12 +38,16 @@ public class SatelliteDisplayBlock extends Block implements EntityBlock {
             .sound(SoundType.METAL)
             .destroyTime(0.6f)  // Makes it break faster
             .explosionResistance(6f));
-        registerDefaultState(this.stateDefinition.any().setValue(POWERED, false));
+        registerDefaultState(this.stateDefinition.any()
+            .setValue(POWERED, false)
+            .setValue(POWER, 0)
+            );
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(POWERED);
+        builder.add(POWERED)
+                .add(POWER);
     }
 
     @Override
@@ -54,10 +62,7 @@ public class SatelliteDisplayBlock extends Block implements EntityBlock {
 
     @Override
     public int getSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
-        if (level.getBlockEntity(pos) instanceof SatelliteDisplayBlockEntity blockEntity) {
-            return blockEntity.getSignalStrength(); // 0-15
-        }
-        return 0;
+        return state.getValue(POWER);
     }
 
     //Override block is destroyed
@@ -76,9 +81,18 @@ public class SatelliteDisplayBlock extends Block implements EntityBlock {
         super.playerWillDestroy(level, pos, state, p);
     }
 
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource rand) {
+        int signal =  this.getSignal(state, level, pos, null);
+        if (signal != state.getValue(POWER)) {
+            level.setBlock(pos, state.setValue(POWER, signal), 3);
+            level.updateNeighborsAt(pos, this);
+        }
+    }
+
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+
         return level.isClientSide ? null : (l, pos, s, blockEntity) -> ((SatelliteDisplayBlockEntity) blockEntity).tick(l, pos, state, (SatelliteDisplayBlockEntity) blockEntity);
     }
 }
