@@ -6,13 +6,12 @@ import com.holybuckets.satellite.api.ChiselBitsAPI;
 import com.holybuckets.satellite.block.HoloBlock;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteDisplayBE;
 import com.holybuckets.satellite.core.ChunkDisplayInfo;
-import mod.chiselsandbits.api.block.entity.IMultiStateBlockEntity;
-import mod.chiselsandbits.api.blockinformation.IBlockInformation;
 import mod.chiselsandbits.api.util.IBatchMutation;
 import mod.chiselsandbits.api.variant.state.IStateVariantManager;
 import mod.chiselsandbits.block.ChiseledBlock;
 import mod.chiselsandbits.block.entities.ChiseledBlockEntity;
-import mod.chiselsandbits.blockinformation.BlockInformation;
+import mod.chiselsandbits.api.block.entity.IMultiStateBlockEntity;
+import mod.chiselsandbits.api.blockinformation.BlockInformation;
 import mod.chiselsandbits.multistate.mutator.ChiselAdaptingWorldMutator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -31,7 +30,7 @@ import static net.minecraft.world.level.block.Blocks.AIR;
 
 public class ChiselBitsAPIForge implements ChiselBitsAPI {
 
-    static final IBlockInformation[] HOLO_BLOCKS = new IBlockInformation[64+ChiselBitsAPI.OREMAP_START_IDX];
+    static final BlockInformation[] HOLO_BLOCKS = new BlockInformation[64+ChiselBitsAPI.OREMAP_START_IDX];
 
     private static void initHolo(Level level)
     {
@@ -41,7 +40,7 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
         /*
         ChiseledBlockEntity CHISELED = level.registryAccess()
             .registryOrThrow(Registries.BLOCK_ENTITY_TYPE)
-            .get(new ResourceLocation(Constants.MOD_ID_CHISELED_BITS, "chiseled_block")).
+            .get(HBUtil.LOC(Constants.MOD_ID_CHISELED_BITS, "chiseled_block")).
         */
         Optional<BlockEntity> CHISELED = Optional.empty();
         BlockState AIR = ChiselBitsAPI.HOLO_EMPTY().defaultBlockState();
@@ -197,7 +196,7 @@ public class ChiselBitsAPIForge implements ChiselBitsAPI {
         Vec3 target = ChiselBitsAPI.clamp(loc, pos );
         if(!(cbe.isInside(target))) return false;
         BlockState internalState = cbe.getInAreaTarget(target)
-            .get().getBlockInformation().getBlockState();
+            .get().getBlockInformation().blockState();
 
         return (internalState.getBlock() instanceof HoloBlock);
     }

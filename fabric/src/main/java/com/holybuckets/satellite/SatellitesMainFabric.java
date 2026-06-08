@@ -1,6 +1,7 @@
 package com.holybuckets.satellite;
 
 import net.blay09.mods.balm.api.Balm;
+import net.blay09.mods.balm.api.EmptyLoadContext;
 import net.fabricmc.api.ModInitializer;
 
 //YOU NEED TO UPDATE NAME OF MAIN CLASS IN fabric.mod.json
@@ -15,6 +16,6 @@ public class SatellitesMainFabric implements ModInitializer {
         // project.
 
         // Use Fabric to bootstrap the Common mod.
-        Balm.initialize(Constants.MOD_ID, CommonClass::init);
+        Balm.initialize(Constants.MOD_ID, EmptyLoadContext.INSTANCE, CommonClass::init);
     }
 }

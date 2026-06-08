@@ -1,6 +1,7 @@
 
 package com.holybuckets.satellite.block.be;
 
+import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.block.ModBlocks;
 import net.blay09.mods.balm.api.DeferredObject;
@@ -61,6 +62,6 @@ public class ModBlockEntities {
     }
 
     private static ResourceLocation id(String name) {
-        return new ResourceLocation(Constants.MOD_ID, name);
+        return HBUtil.LOC(Constants.MOD_ID, name);
     }
 }

@@ -35,7 +35,7 @@ public class SatelliteMain {
         super();
         INSTANCE = this;
         INSTANCE.chiselBitsApi = (ChiselBitsAPI) Balm.platformProxy()
-            .withForge("com.holybuckets.satellite.externalapi.ChiselBitsAPIForge")
+            .withNeoForge("com.holybuckets.satellite.externalapi.ChiselBitsAPIForge")
             .withFabric("com.holybuckets.satellite.externalapi.ChiselBitsAPIFabric")
             .build();
 

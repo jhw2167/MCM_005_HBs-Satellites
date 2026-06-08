@@ -1,5 +1,6 @@
 package com.holybuckets.satellite.client.screen;
 
+import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.menu.TargetControllerMenu;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -11,7 +12,7 @@ import net.minecraft.world.entity.player.Inventory;
 public class TargetControllerScreen extends AbstractContainerScreen<TargetControllerMenu> {
 
     private static final ResourceLocation TEXTURE =
-        new ResourceLocation(Constants.MOD_ID, "textures/gui/target_controller_gui.png");
+        HBUtil.LOC(Constants.MOD_ID, "textures/gui/target_controller_gui.png");
 
     public static int INV_HEIGHT = 166; // Same as chest
     public static int INV_WIDTH = 176;  // Same as chest
@@ -40,7 +41,7 @@ public class TargetControllerScreen extends AbstractContainerScreen<TargetContro
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
         this.renderTooltip(graphics, mouseX, mouseY);
     }

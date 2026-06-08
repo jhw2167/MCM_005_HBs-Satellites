@@ -185,7 +185,6 @@ public class SatelliteScreen extends Screen {
             rightColumnWidth - 20,
             listHeight,
             listTop,
-            listTop + listHeight,
             25, // Item height
             rightColumnX,  // Pass X position to widget
             this
@@ -224,10 +223,6 @@ public class SatelliteScreen extends Screen {
         if(!this.zEdit.isFocused())
             this.zEdit.setValue(String.valueOf( currentZ ));
 
-        this.xEdit.tick();
-        this.yEdit.tick();
-        this.zEdit.tick();
-
         try { this.currentX = Integer.parseInt(this.xEdit.getValue()); } catch (NumberFormatException e) {}
         try { this.currentY = Integer.parseInt(this.yEdit.getValue()); } catch (NumberFormatException e) {}
         try { this.currentZ = Integer.parseInt(this.zEdit.getValue()); } catch (NumberFormatException e) {}
@@ -235,8 +230,9 @@ public class SatelliteScreen extends Screen {
 }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    {
+        this.renderBackground(graphics, mouseX, mouseY, partialTick);
 
         // Render title
         graphics.pose().pushPose();
@@ -300,6 +296,7 @@ public class SatelliteScreen extends Screen {
 
 
         // Render all widgets
+        // x, y, z edit boxes no longer ticking, rendered through here I suppose!
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 

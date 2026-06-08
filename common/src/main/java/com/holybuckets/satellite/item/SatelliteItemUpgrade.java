@@ -1,5 +1,6 @@
 package com.holybuckets.satellite.item;
 
+import com.holybuckets.foundation.HBUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -19,7 +20,7 @@ public class SatelliteItemUpgrade extends Item {
     public SatelliteItemUpgrade(String id) {
         super(Balm.getItems().itemProperties());
         this.id = id;
-        this.spriteRef = new ResourceLocation("hbs_satellites", "item/" + id);
+        this.spriteRef = HBUtil.LOC("hbs_satellites", "item/" + id);
     }
 
     public ResourceLocation getUpgradeSpriteLocation() {
@@ -27,7 +28,7 @@ public class SatelliteItemUpgrade extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
         //super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
         tooltipComponents.add( Component.translatable("item.hbs_satellites."+id+".desc"));
     }

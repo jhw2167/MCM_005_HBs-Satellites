@@ -6,11 +6,12 @@ import com.google.gson.JsonParser;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.client.ClientEventRegistrar;
 import com.holybuckets.foundation.console.IMessager;
+import com.holybuckets.foundation.core.WoolColorHelper;
 import com.holybuckets.foundation.event.custom.*;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.LoggerProject;
 import com.holybuckets.satellite.core.SatelliteWeaponManager;
-import com.holybuckets.satellite.particle.WoolDustHelper;
+import com.holybuckets.foundation.core.WoolColorHelper;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.blay09.mods.balm.api.event.client.ConnectedToServerEvent;
@@ -160,11 +161,7 @@ public class SatelliteFlareWeapon {
     {
         if(activeWaypoints.isEmpty()) return;
 
-        if(bufferBuilder == null ) {
-            bufferBuilder = new BufferBuilder(MAX_BEACON_VERTICES);
-        }
-
-        PoseStack poseStack = event.getPoseStack();
+        PoseStack poseStack = new PoseStack();
         Camera camera = event.getCamera();
         Vec3 cameraPos = camera.getPosition();
         long gameTime = Minecraft.getInstance().level.getGameTime();
@@ -193,7 +190,7 @@ public class SatelliteFlareWeapon {
                     targetPos.getZ() - cameraPos.z + 0.5   // Center of block
                 );
 
-                float[] colors = WoolDustHelper.getWoolColorRGB(wp.colorId);
+                int colorInt = WoolColorHelper.getWoolColorRGBInt(wp.colorId);
 
                 BeaconRenderer.renderBeaconBeam(
                     poseStack,
@@ -201,10 +198,10 @@ public class SatelliteFlareWeapon {
                     BeaconRenderer.BEAM_LOCATION,
                     event.getPartialTick(),
                     1.0f,
-                    gameTime,                              // FIXED: Use gameTime, not finishNanoTime
-                    0,                                      // FIXED: Start at 0 (already translated)
-                    Minecraft.getInstance().level.getMaxBuildHeight() - targetPos.getY(), // FIXED: Height to sky
-                    colors,
+                    gameTime,
+                    0,
+                    Minecraft.getInstance().level.getMaxBuildHeight() - targetPos.getY(),
+                    colorInt,
                     0.2f,
                     0.25f
                 );

@@ -1,21 +1,21 @@
 package com.holybuckets.satellite;
 
 import com.holybuckets.satellite.client.CommonClassClient;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.blay09.mods.balm.api.client.BalmClient;
+import net.blay09.mods.balm.neoforge.NeoForgeLoadContext;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
 
-@OnlyIn(Dist.CLIENT)
+@Mod(value = Constants.MOD_ID, dist = Dist.CLIENT)
 public class SatellitesMainForgeClient {
 
 
-    public static void clientInitializeForge() {
-        CommonClassClient.initClient();
-        //Item challengeChest = ModBlocks.challengeChest.asItem();
-       // setBlockEntityRender( challengeChest, ChallengeItemBlockRenderer.CHEST_RENDERER);
+    public static void clientInitializeForge(IEventBus modEventBus) {
+        final var context = new NeoForgeLoadContext(modEventBus);
+        BalmClient.initialize(Constants.MOD_ID, context, CommonClassClient::initClient);
     }
 
-//        private static void setBlockEntityRender(Object item, BlockEntityWithoutLevelRenderer renderer) {
-//            ((IBewlrRenderer) item).setBlockEntityWithoutLevelRenderer(renderer);
-//        }
 
 }

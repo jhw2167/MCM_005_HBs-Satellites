@@ -1,5 +1,6 @@
 package com.holybuckets.satellite.block;
 
+import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.satellite.Constants;
 import net.blay09.mods.balm.api.Balm;
 import net.blay09.mods.balm.api.block.BalmBlocks;
@@ -55,7 +56,7 @@ public class ModBlocks {
     }
 
     private static ResourceLocation id(String name) {
-        return new ResourceLocation(Constants.MOD_ID, name);
+        return HBUtil.LOC(Constants.MOD_ID, name);
     }
 
 }

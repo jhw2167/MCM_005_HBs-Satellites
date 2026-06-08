@@ -1,6 +1,7 @@
 package com.holybuckets.satellite.config;
 
 import com.holybuckets.foundation.GeneralConfig;
+import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.satellite.LoggerProject;
 import com.holybuckets.satellite.SatelliteMain;
@@ -85,7 +86,7 @@ public class ModConfig {
         //Registry<StructureType<?>> structureRegistry = reg.registryOrThrow(Registries.STRUCTURE_TYPE);
         for (String structId : config.satelliteConfig.satelliteStructureTargetOptions ) {
             //StructureType<?> type = structureRegistry.get(loc);
-            ResourceLocation loc = new ResourceLocation(structId);
+            ResourceLocation loc = HBUtil.LOC(structId);
             if (loc != null) trackedStructures.add(loc);
             else LoggerProject.logWarning("010001", "Satellite Config: Could not find structure type for id: " + structId);
         }
@@ -103,8 +104,8 @@ public class ModConfig {
                 LoggerProject.logWarning("010002", "Satellite Config: Invalid ore scanner block mapping: " + pair);
                 continue;
             }
-            Block oreBlock = blockRegistry.get(new ResourceLocation(parts[0]));
-            Block storageBlock = blockRegistry.get(new ResourceLocation(parts[1]));
+            Block oreBlock = blockRegistry.get(HBUtil.LOC(parts[0]));
+            Block storageBlock = blockRegistry.get(HBUtil.LOC(parts[1]));
             if (oreBlock == null) {
                 LoggerProject.logWarning("010003", "Satellite Config: Could not find ore block for id: " + parts[0]);
                 continue;
@@ -119,7 +120,7 @@ public class ModConfig {
     }
 
     private static void addEntity(String entityId, Registry<EntityType<?>> registry, Set<EntityType<?>> targetSet) {
-        EntityType<?>  type = registry.get(new ResourceLocation(entityId));
+        EntityType<?>  type = registry.get(HBUtil.LOC(entityId));
         if (type != null) targetSet.add(type);
         else LoggerProject.logWarning("010000", "Satellite Config: Could not find entity type for id: " + entityId);
     }

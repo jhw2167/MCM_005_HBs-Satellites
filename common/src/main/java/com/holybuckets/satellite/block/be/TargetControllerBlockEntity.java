@@ -10,10 +10,13 @@ import com.holybuckets.satellite.core.SatelliteWeaponManager;
 import com.holybuckets.satellite.menu.TargetControllerMenu;
 import net.blay09.mods.balm.api.menu.BalmMenuProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -233,9 +236,9 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag)
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
-        super.saveAdditional(tag);
+        super.saveAdditional(tag, registries);
         tag.putInt("colorId", colorId);
         tag.putInt("targetColorId", targetColorId);
         if(uiTargetBlockPos != null) {  //saved to send to client for rendering
@@ -246,8 +249,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         }
         //Save item and itemMetadata
         if(!this.isEmpty()) {
-            CompoundTag itemTag = new CompoundTag();
-            this.items.get(0).save(itemTag);
+            Tag itemTag = this.items.get(0).save(registries);
             tag.put("itemStack", itemTag);
         }
 
@@ -259,8 +261,8 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         colorId = tag.getInt("colorId");
         targetColorId = tag.getInt("targetColorId");
 
@@ -270,10 +272,11 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
                 new BlockPos( HBUtil.BlockUtil.stringToBlockPos(str) );
         }
         //Load item and itemMetadata
-        if(tag.contains("itemStack")) {
-            CompoundTag itemTag = tag.getCompound("itemStack");
-            ItemStack stack = ItemStack.of(itemTag);
-            this.items.set(0, stack);
+        if (tag.contains("itemStack")) {
+            Tag itemTag = tag.get("itemStack");
+            ItemStack.parse(registries, itemTag).ifPresent(stack ->
+                this.items.set(0, stack)
+            );
         }
 
         if(tag.contains("waypointPos"))
@@ -299,9 +302,9 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        this.saveAdditional(tag);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        this.saveAdditional(tag, registries);
         return tag;
     }
 
@@ -353,6 +356,16 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     public BalmMenuProvider getMenuProvider() {
         return new BalmMenuProvider() {
             @Override
+            public Object getScreenOpeningData(ServerPlayer serverPlayer) {
+                return worldPosition;
+            }
+
+            @Override
+            public StreamCodec getScreenStreamCodec() {
+                return null;
+            }
+
+            @Override
             public Component getDisplayName() {
                 return Component.translatable("block.hbs_satellites.target_controller_menu");
             }
@@ -363,10 +376,6 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
                 return new TargetControllerMenu(syncId, playerInventory, TargetControllerBlockEntity.this);
             }
 
-            @Override
-            public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf buf) {
-                buf.writeBlockPos(worldPosition);
-            }
         };
     }
 }

@@ -20,7 +20,7 @@ import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
-import com.holybuckets.satellite.particle.WoolDustHelper;
+import com.holybuckets.foundation.core.WoolColorHelper;
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -276,7 +276,7 @@ public class SatelliteManager {
         Block wool = getWool(colorId);
         if(wool == null) return null;
         ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(wool);
-        ResourceLocation woolLoc = new ResourceLocation( blockId.getNamespace(),
+        ResourceLocation woolLoc = HBUtil.LOC( blockId.getNamespace(),
             "block/" + blockId.getPath() );
 
         return woolLoc;
@@ -397,7 +397,7 @@ public class SatelliteManager {
         int colorId = be.getColorId();
         remove(colorId, be);
 
-        CompoundTag nbt = be.saveWithFullMetadata();
+        CompoundTag nbt = be.saveWithFullMetadata(be.getLevel().registryAccess());
         BlockState state = level.getBlockState(oldPos);
 
         //While there is an existing satellite in the targetPos, move up 16 blocks
@@ -416,7 +416,7 @@ public class SatelliteManager {
         BlockEntity newBE = level.getBlockEntity(targetPos);
         if(newBE instanceof SatelliteBlockEntity newSatellite) {
 
-            newSatellite.load(nbt);
+            newSatellite.loadAdditional(nbt, be.getLevel().registryAccess());
             newSatellite.setChanged();
             ((ServerLevel) level).getChunkSource().blockChanged(targetPos);
             put(colorId, newSatellite);
@@ -446,7 +446,6 @@ public class SatelliteManager {
     //** Events
     public static void onBeforeServerStart() {
         satelliteClientCommandQueue.clear();
-        initWoolIds();
         SatelliteWeaponManager.onBeforeServerStart();
     }
 
@@ -454,29 +453,6 @@ public class SatelliteManager {
         CLIENT_MANAGER = null;
     }
 
-    public static void initWoolIds() {
-        woolIds.clear();
-        woolIds.add(Blocks.RED_WOOL);
-        woolIds.add(Blocks.ORANGE_WOOL);
-        woolIds.add(Blocks.YELLOW_WOOL);
-        woolIds.add(Blocks.LIME_WOOL);
-        woolIds.add(Blocks.GREEN_WOOL);
-        woolIds.add(Blocks.CYAN_WOOL);
-        woolIds.add(Blocks.LIGHT_BLUE_WOOL);
-        woolIds.add(Blocks.BLUE_WOOL);
-        woolIds.add(Blocks.PURPLE_WOOL);
-        woolIds.add(Blocks.MAGENTA_WOOL);
-        woolIds.add(Blocks.PINK_WOOL);
-        woolIds.add(Blocks.WHITE_WOOL);
-        woolIds.add(Blocks.LIGHT_GRAY_WOOL);
-        woolIds.add(Blocks.GRAY_WOOL);
-        woolIds.add(Blocks.BROWN_WOOL);
-        woolIds.add(Blocks.BLACK_WOOL);
-
-        for(int i = 0; i < 16; i++) {
-            WoolDustHelper.addDustColorFromWool(getWool(i), i);
-        }
-    }
 
     private static void onServer20Ticks(ServerTickEvent event)
     {

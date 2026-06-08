@@ -15,13 +15,14 @@ import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.item.ModItems;
 import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import com.holybuckets.satellite.particle.ModParticles;
-import com.holybuckets.satellite.particle.WoolDustHelper;
+import com.holybuckets.foundation.core.WoolColorHelper;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.blay09.mods.balm.api.event.EventPriority;
 import net.blay09.mods.balm.api.event.UseBlockEvent;
 import net.blay09.mods.balm.api.event.server.ServerStartingEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -816,20 +818,16 @@ public class SatelliteDisplay {
                     }
                 }
 
-                //If it has color tag, check dyed armor item
-                if(stack.getTagElement("display") != null)
+                /// Check if stack has dye color component
+                DyedItemColor dyedColor = stack.get(DataComponents.DYED_COLOR);
+                if (dyedColor != null)
                 {
-                    CompoundTag compoundTag = stack.getTagElement("display");
-                    if(!compoundTag.contains("color", 99)) continue;
+                    int stackColor = dyedColor.rgb();
+                    int targetRgb = targetColor.getTextureDiffuseColor();  // DyeColor -> int RGB
 
-                    ItemStack leatherTunic = Items.LEATHER_CHESTPLATE.getDefaultInstance();
-                    ItemStack testDyedArmor = DyeableLeatherItem.dyeArmor(leatherTunic, List.of(DyeItem.byColor(targetColor)));
-                    if(testDyedArmor == null || testDyedArmor.isEmpty() ) continue;
-                    if(testDyedArmor.getItem() instanceof DyeableLeatherItem dyedItem) {
-                        if(dyedItem.getColor(testDyedArmor) == compoundTag.getInt("color") )
-                            return ModParticles.greenPing;
+                    if (stackColor == targetRgb) {
+                        return ModParticles.greenPing;
                     }
-
                 }
 
             }
@@ -936,7 +934,7 @@ public class SatelliteDisplay {
             {
                 Vec3 hitLoc = tc.getCursorPosition();
                 ((ServerLevel) level).sendParticles(
-                    WoolDustHelper.getDust(tc.getTargetColorId()),                     // Particle type
+                    WoolColorHelper.getDust(tc.getTargetColorId()),                     // Particle type
                     hitLoc.x, hitLoc.y, hitLoc.z,
                     2,                                // Particle count
                     0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread

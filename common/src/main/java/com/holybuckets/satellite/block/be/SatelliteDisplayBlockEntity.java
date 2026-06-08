@@ -8,6 +8,7 @@ import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.core.SatelliteManager;
 import com.holybuckets.satellite.item.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RedStoneWireBlock;
@@ -251,16 +252,16 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     //** ENITIY OVERRIDES
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putInt("height", height);
         tag.putInt("holoLift", holoLift);
         tag.putBoolean("isDisplayOn", isDisplayOn);
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         this.height = tag.getInt("height");
         this.holoLift = tag.getInt("holoLift");
         this.isDisplayOn = tag.getBoolean("isDisplayOn");
@@ -268,9 +269,9 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        this.saveAdditional(tag);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        this.saveAdditional(tag, registries);
         return tag;
     }
 

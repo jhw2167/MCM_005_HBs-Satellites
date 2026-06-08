@@ -87,46 +87,47 @@ public class TargetReceiverRenderer implements BlockEntityRenderer<TargetReceive
         float offset = 0.01f;
 
         // Transform based on facing direction
+            PoseStack.Pose pose = poseStack.last();
         switch (facing) {
             case NORTH -> { // (0,0,0) in neg X corner to (1,1,0)
-                builder.vertex(matrix, 1-quad.minX, quad.minY, -offset)
-                    .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, 1-quad.maxX, quad.minY, -offset)
-                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, 1-quad.maxX, quad.maxY, -offset)
-                    .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
-                builder.vertex(matrix, 1-quad.minX, quad.maxY, -offset)
-                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, -1).endVertex();
+                builder.addVertex(matrix, 1-quad.minX, quad.minY, -offset)
+                    .setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(pose, 0, 0, -1);
+                builder.addVertex(matrix, 1-quad.maxX, quad.minY, -offset)
+                    .setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(pose, 0, 0, -1);
+                builder.addVertex(matrix, 1-quad.maxX, quad.maxY, -offset)
+                    .setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(pose, 0, 0, -1);
+                builder.addVertex(matrix, 1-quad.minX, quad.maxY, -offset)
+                    .setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(pose, 0, 0, -1);
             }
             case SOUTH -> {
-                builder.vertex(matrix, quad.minX, quad.minY, 1 + offset)
-                    .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
-                builder.vertex(matrix, quad.maxX, quad.minY, 1 + offset)
-                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
-                builder.vertex(matrix, quad.maxX, quad.maxY, 1 + offset)
-                    .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
-                builder.vertex(matrix, quad.minX, quad.maxY, 1 + offset)
-                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 0, 0, 1).endVertex();
+                builder.addVertex(matrix, quad.minX, quad.minY, 1 + offset)
+                    .setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(pose, 0, 0, 1);
+                builder.addVertex(matrix, quad.maxX, quad.minY, 1 + offset)
+                    .setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(pose, 0, 0, 1);
+                builder.addVertex(matrix, quad.maxX, quad.maxY, 1 + offset)
+                    .setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(pose, 0, 0, 1);
+                builder.addVertex(matrix, quad.minX, quad.maxY, 1 + offset)
+                    .setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(pose, 0, 0, 1);
             }
             case WEST -> {
-                builder.vertex(matrix, -offset, quad.minY, quad.minX)
-                    .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
-                builder.vertex(matrix, -offset, quad.minY, quad.maxX)
-                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
-                builder.vertex(matrix, -offset, quad.maxY, quad.maxX)
-                    .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
-                builder.vertex(matrix, -offset, quad.maxY, quad.minX)
-                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, -1, 0, 0).endVertex();
+                builder.addVertex(matrix, -offset, quad.minY, quad.minX)
+                    .setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(pose, -1, 0, 0);
+                builder.addVertex(matrix, -offset, quad.minY, quad.maxX)
+                    .setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(pose, -1, 0, 0);
+                builder.addVertex(matrix, -offset, quad.maxY, quad.maxX)
+                    .setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(pose, -1, 0, 0);
+                builder.addVertex(matrix, -offset, quad.maxY, quad.minX)
+                    .setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(pose, -1, 0, 0);
             }
             case EAST -> {
-                builder.vertex(matrix, 1 + offset, quad.minY, 1 - quad.minX)
-                    .color(255, 255, 255, 255).uv(u0, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                builder.vertex(matrix, 1 + offset, quad.minY, 1 - quad.maxX)
-                    .color(255, 255, 255, 255).uv(u1, v1).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                builder.vertex(matrix, 1 + offset, quad.maxY, 1 - quad.maxX)
-                    .color(255, 255, 255, 255).uv(u1, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
-                builder.vertex(matrix, 1 + offset, quad.maxY, 1 - quad.minX)
-                    .color(255, 255, 255, 255).uv(u0, v0).overlayCoords(overlay).uv2(light).normal(normal, 1, 0, 0).endVertex();
+                builder.addVertex(matrix, 1 + offset, quad.minY, 1 - quad.minX)
+                    .setColor(255, 255, 255, 255).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(pose, 1, 0, 0);
+                builder.addVertex(matrix, 1 + offset, quad.minY, 1 - quad.maxX)
+                    .setColor(255, 255, 255, 255).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(pose, 1, 0, 0);
+                builder.addVertex(matrix, 1 + offset, quad.maxY, 1 - quad.maxX)
+                    .setColor(255, 255, 255, 255).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(pose, 1, 0, 0);
+                builder.addVertex(matrix, 1 + offset, quad.maxY, 1 - quad.minX)
+                    .setColor(255, 255, 255, 255).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(pose, 1, 0, 0);
             }
         } //END SWITCH
 

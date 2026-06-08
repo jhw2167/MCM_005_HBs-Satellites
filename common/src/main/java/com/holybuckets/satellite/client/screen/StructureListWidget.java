@@ -14,14 +14,16 @@ public class StructureListWidget extends ObjectSelectionList<StructureListWidget
     private final SatelliteScreen parent;
     private final Set<BlockPos> selectedPositions;
 
-    public StructureListWidget(Minecraft minecraft, int width, int height, int top, int bottom, int itemHeight, int x0, SatelliteScreen parent) {
-        super(minecraft, width, height, top, bottom, itemHeight);
+    private int x0;
+    private int x1;
+
+    public StructureListWidget(Minecraft minecraft, int width, int height, int top, int itemHeight, int x0, SatelliteScreen parent) {
+        super(minecraft, width, height, top, itemHeight);
         this.parent = parent;
         // Set the X position for right-alignment
         this.x0 = x0;
         this.x1 = x0 + width;
-        this.setRenderBackground(false);
-        this.setRenderTopAndBottom(false);
+        this.setRenderHeader(false, 0);
 
         selectedPositions = new HashSet<>();
     }
@@ -42,7 +44,7 @@ public class StructureListWidget extends ObjectSelectionList<StructureListWidget
     }
 
     @Override
-    protected void renderBackground(GuiGraphics graphics) {
+    protected void renderListBackground(GuiGraphics graphics) {
         // Override to remove the default background - we'll render it in the screen
     }
 

@@ -16,17 +16,17 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class HoloBaseBlock extends Block {
 
     public static final BlockBehaviour.Properties HOLO_BASE_PROPERTIES =
-        BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK)
+        BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
             .destroyTime(0.05f)
-        .sound(Blocks.WHITE_WOOL.getSoundType(null));
+        .sound(Blocks.WHITE_WOOL.defaultBlockState().getSoundType());
 
-//        BlockBehaviour.Properties.copy(Blocks.GLASS)
+//        BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS)
 //        .noCollission()
 //        .isViewBlocking((state, level, pos) -> false)
 //        .isSuffocating((state, level, pos) -> false)
 //        .destroyTime(1.0f)
 
-    public static final BlockBehaviour.Properties HOLO_AIR_PROPERTIES = BlockBehaviour.Properties.copy(Blocks.AIR)
+    public static final BlockBehaviour.Properties HOLO_AIR_PROPERTIES = BlockBehaviour.Properties.ofFullCopy(Blocks.AIR)
         .noOcclusion()
         .isViewBlocking((state, level, pos) -> false)
         .isSuffocating((state, level, pos) -> false)

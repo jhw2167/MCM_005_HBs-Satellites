@@ -1,9 +1,7 @@
 package com.holybuckets.satellite.networking;
 
-import com.holybuckets.satellite.Constants;
 import net.blay09.mods.balm.api.Balm;
 import net.blay09.mods.balm.api.network.BalmNetworking;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
 public class ModNetworking {
@@ -13,15 +11,30 @@ public class ModNetworking {
     private static int RECEIVED = 0;
     //private static ThreadPoolExecutor POOL = new ThreadPoolExecutor(2, 2, 60L, java.util.concurrent.TimeUnit.SECONDS, new java.util.concurrent.LinkedBlockingQueue<Runnable>());
 
+    // 1.21.1-style registration: TYPE + STREAM_CODEC live on each message class.
     public static void initialize() {
         BalmNetworking bn = Balm.getNetworking();
-        bn.registerServerboundPacket(id(SatelliteControllerMessage.LOCATION), SatelliteControllerMessage.class, Codecs::encodeControllerInput, Codecs::decodeControllerInput, ModNetworking::handleSatelliteControllerInput);
-        bn.registerClientboundPacket(id(SatelliteControllerMessage.LOCATION), SatelliteControllerMessage.class, Codecs::encodeControllerInput, Codecs::decodeControllerInput, ModNetworking::handleSatelliteControllerInput);
-        bn.registerClientboundPacket(id(SatelliteDisplayMessage.LOCATION), SatelliteDisplayMessage.class, Codecs::encodeControllerDisplay, Codecs::decodeControllerDisplay, ModNetworking::handleSatelliteDisplay);
-    }
 
-    private static ResourceLocation id(String location) {
-        return new ResourceLocation(Constants.MOD_ID, location);
+        bn.registerServerboundPacket(
+            SatelliteControllerMessage.TYPE,
+            SatelliteControllerMessage.class,
+            SatelliteControllerMessage.STREAM_CODEC,
+            ModNetworking::handleSatelliteControllerInput
+        );
+
+        bn.registerClientboundPacket(
+            SatelliteControllerMessage.TYPE,
+            SatelliteControllerMessage.class,
+            SatelliteControllerMessage.STREAM_CODEC,
+            ModNetworking::handleSatelliteControllerInput
+        );
+
+        bn.registerClientboundPacket(
+            SatelliteDisplayMessage.TYPE,
+            SatelliteDisplayMessage.class,
+            SatelliteDisplayMessage.STREAM_CODEC,
+            ModNetworking::handleSatelliteDisplay
+        );
     }
 
     public static void handleSatelliteControllerInput(Player p, SatelliteControllerMessage m) {

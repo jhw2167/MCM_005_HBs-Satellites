@@ -15,6 +15,7 @@ import com.holybuckets.satellite.core.SatelliteWeaponManager;
 import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.InteractionHand;
@@ -524,8 +525,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     //** Serialization
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putInt("colorId", colorId);
         tag.putString("satelliteDisplayError", satelliteDisplayError);
         if(uiTargetBlockPos != null) {  //saved to send to client for rendering
@@ -543,8 +544,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         colorId = tag.getInt("colorId");
         satelliteDisplayError = tag.getString("satelliteDisplayError");
 
@@ -578,9 +579,9 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        this.saveAdditional(tag);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        this.saveAdditional(tag, registries);
         return tag;
     }
 

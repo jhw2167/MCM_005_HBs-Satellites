@@ -78,6 +78,7 @@ repositories {
 
     flatDir {
         dirs './modsWithCompat'
+        dirs './libs'
     }
 
     maven {
@@ -86,6 +87,12 @@ repositories {
     }
 
     maven { url "https://maven.wispforest.io/releases" }
+
+    //scena
+    maven {
+        name = 'LDTTeam'
+        url = 'https://ldtteam.jfrog.io/ldtteam/modding/'
+    }
 }
 
 // Declare capabilities on the outgoing configurations.
@@ -128,6 +135,7 @@ jar {
 processResources {
     var expandProps = [
             'mod_version'                      : mod_version,
+            'version'                      : mod_version,
             'group'                        : project.group, //Else we target the task's group.
             'minecraft_version'            : minecraft_version,
             'minecraft_version_range'      : minecraft_version_range,

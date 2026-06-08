@@ -18,6 +18,7 @@ dependencies {
         transitive = false
         changing = true
     }
+
     modImplementation "curse.maven:chisels-bits-for-fabric-${chiselbits_pid_fabric}:${chiselbits_fid_fabric}"
 
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'

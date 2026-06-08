@@ -6,6 +6,7 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerB
 import com.holybuckets.satellite.core.SatelliteEventManager;
 import com.holybuckets.satellite.core.SatelliteManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -231,9 +232,9 @@ public class TargetReceiverBlockEntity extends BlockEntity
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag)
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
     {
-        super.saveAdditional(tag);
+        super.saveAdditional(tag, registries);
         tag.putInt("colorId", colorId);
         tag.putInt("targetColorId", targetColorId);
         //tag.putInt("signalTicksRemaining", signalTicksRemaining);
@@ -246,8 +247,8 @@ public class TargetReceiverBlockEntity extends BlockEntity
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         colorId = tag.getInt("colorId");
         targetColorId = tag.getInt("targetColorId");
         //signalTicksRemaining = tag.getInt("signalTicksRemaining");
@@ -278,9 +279,9 @@ public class TargetReceiverBlockEntity extends BlockEntity
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        this.saveAdditional(tag);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        this.saveAdditional(tag, registries);
         return tag;
     }
 }

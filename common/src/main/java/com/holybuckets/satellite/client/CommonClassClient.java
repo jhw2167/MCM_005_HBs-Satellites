@@ -119,9 +119,6 @@ public class CommonClassClient implements CommonProxy {
         if (!(camera.getEntity() instanceof Player player)) {
             return;
         }
-        if(bufferBuilder == null ) {
-            bufferBuilder = new BufferBuilder(MAX_UI_SPHERE_VERTICES); // Capacity for beacon vertices
-        }
 
         Level level = camera.getEntity().level();
         //if( !SatelliteManager.isAnyControllerOn()) return; pending implementation
@@ -173,7 +170,7 @@ public class CommonClassClient implements CommonProxy {
                         if( !isViewingHoloBit(level, hitResult, new Vec3(x * bitSize, y * bitSize, z * bitSize) ))continue;
                         if(x==0d && y==0d && z==0d) BUILDER.setColor(LINE_COLOR_RED);
                         else                        BUILDER.setColor(LINE_COLOR);
-                        BUILDER.drawCube(bitX, bitY, bitZ, bitSize);
+                        BUILDER.drawCube(bitX, bitY, bitZ, bitSize, poseStack.last());
 
                     }
                 }
@@ -209,40 +206,38 @@ public class CommonClassClient implements CommonProxy {
             this.color = color;
         }
 
-        public void addLine(double x1, double y1, double z1, double x2, double y2, double z2) {
-            builder.vertex(matrix, (float) x1, (float) y1, (float) z1)
-                .color(color[0], color[1], color[2], color[3])
-                .normal(normal, 1, 0, 0)
-                .endVertex();
+        public void addLine(double x1, double y1, double z1, double x2, double y2, double z2, PoseStack.Pose pose) {
+            builder.addVertex(matrix, (float) x1, (float) y1, (float) z1)
+                .setColor(color[0], color[1], color[2], color[3])
+                .setNormal(pose, 1, 0, 0);
 
-            builder.vertex(matrix, (float) x2, (float) y2, (float) z2)
-                .color(color[0], color[1], color[2], color[3])
-                .normal(normal, 1, 0, 0)
-                .endVertex();
+            builder.addVertex(matrix, (float) x2, (float) y2, (float) z2)
+                .setColor(color[0], color[1], color[2], color[3])
+                .setNormal(pose, 1, 0, 0);
         }
 
-        public void drawCube(double minX, double minY, double minZ, double size)
+        public void drawCube(double minX, double minY, double minZ, double size, PoseStack.Pose pose)
         {
             double maxX, maxY, maxZ;
             maxX = minX + size; maxY = minY + size; maxZ = minZ + size;
 
             // Bottom face (4 edges)
-            addLine(minX, minY, minZ, maxX, minY, minZ);
-            addLine(maxX, minY, minZ, maxX, minY, maxZ);
-            addLine(maxX, minY, maxZ, minX, minY, maxZ);
-            addLine(minX, minY, maxZ, minX, minY, minZ);
+            addLine(minX, minY, minZ, maxX, minY, minZ, pose);
+            addLine(maxX, minY, minZ, maxX, minY, maxZ, pose);
+            addLine(maxX, minY, maxZ, minX, minY, maxZ, pose);
+            addLine(minX, minY, maxZ, minX, minY, minZ, pose);
 
             // Top face (4 edges)
-            addLine(minX, maxY, minZ, maxX, maxY, minZ);
-            addLine(maxX, maxY, minZ, maxX, maxY, maxZ);
-            addLine(maxX, maxY, maxZ, minX, maxY, maxZ);
-            addLine(minX, maxY, maxZ, minX, maxY, minZ);
+            addLine(minX, maxY, minZ, maxX, maxY, minZ, pose);
+            addLine(maxX, maxY, minZ, maxX, maxY, maxZ, pose);
+            addLine(maxX, maxY, maxZ, minX, maxY, maxZ, pose);
+            addLine(minX, maxY, maxZ, minX, maxY, minZ, pose);
 
             // Vertical edges (4 edges)
-            addLine(minX, minY, minZ, minX, maxY, minZ);
-            addLine(maxX, minY, minZ, maxX, maxY, minZ);
-            addLine(maxX, minY, maxZ, maxX, maxY, maxZ);
-            addLine(minX, minY, maxZ, minX, maxY, maxZ);
+            addLine(minX, minY, minZ, minX, maxY, minZ, pose);
+            addLine(maxX, minY, minZ, maxX, maxY, minZ, pose);
+            addLine(maxX, minY, maxZ, maxX, maxY, maxZ, pose);
+            addLine(minX, minY, maxZ, minX, maxY, maxZ, pose);
         }
     }
 

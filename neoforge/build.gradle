@@ -52,11 +52,15 @@ dependencies {
         transitive = false
     }
 
-    implementation ("curse.maven:chisels-bits-${chiselbits_pid}:${chiselbits_fid}") {
+    compileOnly files('libs/chisels-and-bits-api-21.1.33.jar')
+    compileOnly files('libs/chisels-and-bits-core-21.1.33.jar')
+    compileOnly files('libs/chisels-and-bits-create-21.1.33.jar')
+    compileOnly ("curse.maven:chisels-bits-${chiselbits_pid}:${chiselbits_fid}") {
         changing = true
         transitive = false
     }
 
-
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+
+
 }

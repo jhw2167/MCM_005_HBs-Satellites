@@ -6,6 +6,7 @@ import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerB
 import com.holybuckets.satellite.core.SatelliteDisplay;
 import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -141,8 +142,8 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putInt("colorId", colorId);
         
         // Save upgrades array
@@ -152,8 +153,8 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
          colorId = tag.getInt("colorId");
         
         // Load upgrades array
@@ -181,9 +182,9 @@ public class UpgradeControllerBlockEntity extends SatelliteDisplayBlockEntity im
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        this.saveAdditional(tag);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        this.saveAdditional(tag, registries);
         return tag;
     }
 

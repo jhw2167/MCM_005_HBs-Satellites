@@ -9,6 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
+import  com.holybuckets.foundation.HBUtil;
 
 public class ModItems {
     public static DeferredObject<CreativeModeTab> creativeModeTab;
@@ -23,7 +25,8 @@ public class ModItems {
     public static SatelliteItemUpgrade entityDetectorUpgrade;
 
     public static void initialize(BalmItems items) {
-        creativeModeTab = items.registerCreativeModeTab(id(Constants.MOD_ID), () -> new ItemStack(ModBlocks.satelliteBlock));
+        creativeModeTab = items.registerCreativeModeTab(
+         () -> new ItemStack(ModBlocks.satelliteBlock), id(Constants.MOD_ID));
 
         // Register upgrade items with random dye colors
         items.registerItem(() -> multilinkUpgrade = new SatelliteItemUpgrade("multilink_upgrade"), id("multilink_upgrade"));
@@ -36,7 +39,7 @@ public class ModItems {
     }
 
     private static ResourceLocation id(String name) {
-        return new ResourceLocation(Constants.MOD_ID, name);
+        return HBUtil.LOC(Constants.MOD_ID, name);
     }
 
 }
