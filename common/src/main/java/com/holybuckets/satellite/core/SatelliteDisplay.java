@@ -636,7 +636,7 @@ public class SatelliteDisplay {
     public void updateNeighbors() {
         for(ISatelliteDisplayBE disp : displayBlocks.values()) {
         if( disp instanceof BlockEntity be ) {
-            this.level.updateNeighborsAt(disp.getBlockPos(), be.getBlockState().getBlock() );
+            this.level.updateNeighborsAt(disp.getPos(), be.getBlockState().getBlock() );
         }
         }
     }
@@ -847,6 +847,7 @@ public class SatelliteDisplay {
         if(!hasUpgrade(ModItems.entityScannerUpgrade)) return;
         if(this.needsEntityUpdate) collectEntities();
 
+        boolean entityDetectorUpgrade = hasUpgrade(ModItems.entityDetectorUpgrade);
         Set<ISatelliteDisplayBE> entityActiveDisplays = new HashSet<>();
         Iterator<Entity> iterator = displayEntities.iterator();
         while (iterator.hasNext())
@@ -893,7 +894,8 @@ public class SatelliteDisplay {
             // check against Max and min values
             if(x < minX || x > maxX || z < minZ || z > maxZ) continue;
             entityActiveDisplays.add(displayBE);
-            displayBE.setSignalStrength( ModConfig.getSignalStrength(particleType));
+            if( entityDetectorUpgrade )
+                displayBE.setSignalStrength( ModConfig.getSignalStrength(particleType));
 
             ((ServerLevel) level).sendParticles (
                 particleType,                     // Particle type

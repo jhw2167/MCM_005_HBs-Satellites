@@ -17,7 +17,7 @@ public interface ISatelliteBE {
     
     void setTargetPos(BlockPos targetPos);
     
-    BlockPos getBlockPos();
+    BlockPos getPos();
     
     boolean isTraveling();
     

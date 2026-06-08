@@ -65,6 +65,9 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     }
 
     @Override
+    public BlockPos getPos() { return getBlockPos(); }
+
+    @Override
     public void setSignalStrength(int strength) {
         entitySignalStrength = Math.max(entitySignalStrength, strength);
         updateBlockState();

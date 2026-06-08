@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Hologram display blocks understand their chunk display info to display
@@ -22,7 +21,7 @@ public interface ISatelliteDisplayBE {
 
     void setSource(SatelliteDisplay source, boolean forceUpdate);
 
-    BlockPos getBlockPos();
+    BlockPos getPos();
 
     //0-4095
     static int getCachePos(int x, int y, int z) {

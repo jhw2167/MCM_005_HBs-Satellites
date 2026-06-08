@@ -100,6 +100,11 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
     }
 
     @Override
+    public BlockPos getPos() {
+        return getBlockPos();
+    }
+
+    @Override
     public void launch(BlockPos pos)
     {
         if(this.level.isClientSide) return;
@@ -234,16 +239,17 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         public BlockPos getTargetPos() {
             return targetPos;
         }
+
+        @Override
+        public BlockPos getPos() {
+            return blockPos;
+        }
         
         @Override
         public void setTargetPos(BlockPos targetPos) {
             this.targetPos = targetPos;
         }
-        
-        @Override
-        public BlockPos getBlockPos() {
-            return blockPos;
-        }
+
         
         @Override
         public boolean isTraveling() {

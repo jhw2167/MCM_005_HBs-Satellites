@@ -3,35 +3,25 @@ package com.holybuckets.satellite.client.screen;
 import com.google.gson.JsonObject;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.console.IMessager;
-import com.holybuckets.foundation.console.Messager;
 import com.holybuckets.foundation.networking.SimpleStringMessage;
 import com.holybuckets.foundation.structure.StructureInfo;
 import com.holybuckets.foundation.structure.StructureManager;
-import com.holybuckets.satellite.CommonClass;
-import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
-import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.core.SatelliteManager;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.structure.StructureType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SatelliteScreen extends Screen {
 
@@ -202,7 +192,7 @@ public class SatelliteScreen extends Screen {
         );
 
         // Populate with structures
-        List<StructureInfo> structures = getStructureList(satelliteBlock.getBlockPos());
+        List<StructureInfo> structures = getStructureList(satelliteBlock.getPos());
         for (StructureInfo info : structures) {
             this.structureList.addEntry(info);
         }
@@ -256,7 +246,7 @@ public class SatelliteScreen extends Screen {
         graphics.pose().popPose();
 
         // Render current position under title
-        BlockPos currentPos = satelliteBlock.getBlockPos();
+        BlockPos currentPos = satelliteBlock.getPos();
         String currentPosText = String.format("Current Position: %d, %d, %d",
             currentPos.getX(), currentPos.getY(), currentPos.getZ());
         graphics.drawCenteredString(this.font, Component.literal(currentPosText),
@@ -338,7 +328,7 @@ public class SatelliteScreen extends Screen {
         if(target == null) {
             msg("Satellite target position is not set"); return;
         }
-        if(target.equals( satelliteBlock.getBlockPos() )) {
+        if(target.equals( satelliteBlock.getPos() )) {
             msg("Satellite target position is the same as current position"); return;
         }
         if(satelliteBlock.getColorId() == -1) {

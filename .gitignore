@@ -5,6 +5,8 @@ out1.txt
 **/build/*
 **/run/*
 .idea/
+claudeProjFiles/*
+CLAUDE.md
 
 
 # From https://github.com/github/gitignore/blob/master/Gradle.gitignore
@@ -115,6 +117,3 @@ Temporary Items
 .apdisk
 .aider*
 .env
-
-# Additional no want
-*.xcf
