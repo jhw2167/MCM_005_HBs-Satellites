@@ -43,7 +43,7 @@ neoForge {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    implementation("net.blay09.mods:balm-neoforge:${balm_version}") {
+    compileOnly("net.blay09.mods:balm-neoforge:${balm_version}") {
         changing = false
     }
 

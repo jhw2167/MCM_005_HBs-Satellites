@@ -11,8 +11,7 @@ import net.neoforged.fml.common.Mod;
 @Mod(value = Constants.MOD_ID, dist = Dist.CLIENT)
 public class SatellitesMainForgeClient {
 
-
-    public static void clientInitializeForge(IEventBus modEventBus) {
+    public SatellitesMainForgeClient(IEventBus modEventBus) {
         final var context = new NeoForgeLoadContext(modEventBus);
         BalmClient.initialize(Constants.MOD_ID, context, CommonClassClient::initClient);
     }

@@ -99,7 +99,7 @@ public class CommonClassClient implements CommonProxy {
     //Render
     private static void tryRenderUiSphere(BlockHighlightDrawEvent event) {
         try {
-            renderUiSphere(event);
+            //renderUiSphere(event);
         } catch (Exception ex) {
             //If we get an error rendering the beacon, likely due to buffer overflow, reset the buffer
             bufferBuilder = null;

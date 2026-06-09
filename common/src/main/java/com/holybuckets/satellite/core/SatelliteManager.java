@@ -24,6 +24,7 @@ import com.holybuckets.foundation.core.WoolColorHelper;
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.blay09.mods.balm.api.event.EventPriority;
 import net.blay09.mods.balm.api.event.PlayerLoginEvent;
 import net.blay09.mods.balm.api.event.TossItemEvent;
 import net.minecraft.core.BlockPos;
@@ -445,6 +446,22 @@ public class SatelliteManager {
 
     //** Events
     public static void onBeforeServerStart() {
+        woolIds.add(Blocks.RED_WOOL);
+        woolIds.add(Blocks.ORANGE_WOOL);
+        woolIds.add(Blocks.YELLOW_WOOL);
+        woolIds.add(Blocks.LIME_WOOL);
+        woolIds.add(Blocks.GREEN_WOOL);
+        woolIds.add(Blocks.CYAN_WOOL);
+        woolIds.add(Blocks.LIGHT_BLUE_WOOL);
+        woolIds.add(Blocks.BLUE_WOOL);
+        woolIds.add(Blocks.PURPLE_WOOL);
+        woolIds.add(Blocks.MAGENTA_WOOL);
+        woolIds.add(Blocks.PINK_WOOL);
+        woolIds.add(Blocks.WHITE_WOOL);
+        woolIds.add(Blocks.LIGHT_GRAY_WOOL);
+        woolIds.add(Blocks.GRAY_WOOL);
+        woolIds.add(Blocks.BROWN_WOOL);
+        woolIds.add(Blocks.BLACK_WOOL);
         satelliteClientCommandQueue.clear();
         SatelliteWeaponManager.onBeforeServerStart();
     }

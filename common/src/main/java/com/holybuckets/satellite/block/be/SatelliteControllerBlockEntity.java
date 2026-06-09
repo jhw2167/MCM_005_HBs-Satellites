@@ -413,6 +413,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
             setSource(source, true);
         }
 
+        if(this.linkedSatellite==null && this.satelliteTargetPos==null && this.isDisplayOn) {
+            this.toggleOnOff(false);
+        }
+
         processCommands();
         renderDisplay();
         if(source!=null && isDisplayOn) source.resetRateLimiter();
