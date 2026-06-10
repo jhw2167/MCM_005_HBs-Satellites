@@ -6,6 +6,8 @@ import com.holybuckets.foundation.console.IMessager;
 import com.holybuckets.foundation.networking.SimpleStringMessage;
 import com.holybuckets.foundation.structure.StructureInfo;
 import com.holybuckets.foundation.structure.StructureManager;
+import com.holybuckets.satellite.block.ModBlocks;
+import com.holybuckets.satellite.block.be.ModBlockEntities;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.config.ModConfig;
 import com.holybuckets.satellite.core.SatelliteManager;
@@ -196,6 +198,14 @@ public class SatelliteScreen extends Screen {
         for (StructureInfo info : structures) {
             this.structureList.addEntry(info);
         }
+        //add current location:
+        StructureInfo current = new StructureInfo(
+            Minecraft.getInstance().player.blockPosition(),
+            ModBlockEntities.satelliteControllerBlockEntity.getIdentifier(),
+            -1, "Player Position",
+            ModBlockEntities.satelliteControllerBlockEntity.getIdentifier()
+        );
+        this.structureList.addEntry(current);
 
         this.addRenderableWidget(this.structureList);
 
@@ -235,10 +245,22 @@ public class SatelliteScreen extends Screen {
 }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
+    {
         this.renderBackground(graphics);
 
-        // Render title
+        // Decorative fill BEHIND the list widget
+        int listHeight = (int)(guiHeight * RIGHT_LIST_HEIGHT);
+        int listTop = guiTop + 15;
+        graphics.fill(rightColumnX - 2, listTop - 2, rightColumnX + rightColumnWidth - 18,
+            listTop + listHeight + 2, 0x80000000);
+
+        // Render widgets (EditBoxes, Buttons, structureList)
+        super.render(graphics, mouseX, mouseY, partialTick);
+
+        // -------- Everything below renders ON TOP of widgets --------
+
+        // Title
         graphics.pose().pushPose();
         graphics.pose().translate(this.width / 2f, 10f, 0f);
         graphics.pose().scale(1.3f, 1.3f, 1.3f);
@@ -254,8 +276,7 @@ public class SatelliteScreen extends Screen {
 
             //Just under this lets render a bright green "En Route To:"
         BlockPos targetPos = satelliteBlock.getTargetPos();
-        if(satelliteBlock.isTraveling() && targetPos != null && !targetPos.equals( currentPos ))
-        {
+        if (satelliteBlock.isTraveling() && targetPos != null && !targetPos.equals(currentPos)) {
             graphics.pose().pushPose();
             graphics.pose().translate(this.width / 2, 36, 0);
             graphics.pose().scale(.5f, .5f, .5f);
@@ -285,17 +306,18 @@ public class SatelliteScreen extends Screen {
         graphics.drawString(this.font, Z_LABEL, leftColumnX, yStart + spacing + (boxHeight + verticalBuffer) * 2 + 5, 0xA0A0A0);
 
         // Render structure list outline (right-aligned)
-        int listHeight = (int)(guiHeight * RIGHT_LIST_HEIGHT);
-        int listTop = guiTop + 15; // Align with coordinate boxes
+        //int listHeight = (int)(guiHeight * RIGHT_LIST_HEIGHT);
+        //int listTop = guiTop + 15; // Align with coordinate boxes
         graphics.fill(rightColumnX - 2, listTop - 2, rightColumnX + rightColumnWidth - 18, listTop + listHeight + 2, 0x80000000);
         graphics.renderOutline(rightColumnX - 2, listTop - 2, rightColumnWidth - 16, listHeight + 4, 0xFFFFFFFF);
 
+        // Error message
         String errorMsg = satelliteBlock.getSatelliteDisplayError();
-        if(errorMsg != null) {
+        if (errorMsg != null) {
             int listCenterX = rightColumnX + (rightColumnWidth - 18) / 2;
             int errorY = listTop + listHeight + 6;
             graphics.drawCenteredString(this.font, Component.literal(errorMsg),
-                listCenterX, errorY, 0xFFFF5555); // Red text (or use 0xFFAA0000 for darker red)
+                listCenterX, errorY, 0xFFFF5555);
         }
 
 

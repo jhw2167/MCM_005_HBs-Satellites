@@ -26,6 +26,7 @@ public class StructureListWidget extends ObjectSelectionList<StructureListWidget
         selectedPositions = new HashSet<>();
     }
 
+
     @Override
     public int getRowWidth() {
         return this.width - 20;
