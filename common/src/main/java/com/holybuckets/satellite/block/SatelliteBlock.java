@@ -6,7 +6,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
@@ -44,6 +46,18 @@ public class SatelliteBlock extends Block implements EntityBlock {
             satelliteBE.onDestroyed();
         }
         return super.playerWillDestroy(level, pos, state, p);
+    }
+
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        return use(state, level, pos, player, InteractionHand.MAIN_HAND, hitResult);
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        InteractionResult result = use(state, level, pos, player, hand, hitResult);
+        return result == InteractionResult.CONSUME ? ItemInteractionResult.SUCCESS : ItemInteractionResult.CONSUME;
     }
 
     public InteractionResult use(BlockState $$0, Level $$1, BlockPos $$2, Player p, InteractionHand hand, BlockHitResult hitResult) {

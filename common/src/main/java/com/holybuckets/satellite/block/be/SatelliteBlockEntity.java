@@ -147,6 +147,7 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
     private static int TICKS_PER_MINUTE = 20;//.20*60;
     private void travel()
     {
+        //method needs to load chunks itself or satellite does not move
         if(ticks%TICKS_PER_MINUTE!=0) return;
 
         if(getBlockPos().equals(targetPos) || level == null) {
@@ -157,7 +158,8 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         BlockPos currentPos = (travelPos != null) ? travelPos : this.getBlockPos();
         ChunkPos currentChunk = new ChunkPos(currentPos);
         ChunkPos targetChunk = new ChunkPos(targetPos);
-        if(currentChunk.equals(targetChunk)) {
+        if(currentChunk.equals(targetChunk))
+        {
             if( manager.moveSatellite(this, targetPos) ) {
                 traveling = false;
                 travelPos = null;
@@ -165,6 +167,19 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
             return;
         }
 
+        travelPos = targetPos; //destination location for the satellite
+        //forceload the chunks at both source and destination:
+        SatelliteManager.CachedChunkInfo source = SatelliteManager.forceLoadChunk(level, currentChunk);
+        SatelliteManager.CachedChunkInfo target = SatelliteManager.forceLoadChunk(level, targetChunk);
+        if(source == null || target == null) return;
+        if(!source.isLoaded() || !target.isLoaded()) return;
+
+        manager.moveSatellite(this, targetPos);
+        SatelliteManager.flagChunkForUnload(level, currentChunk);
+        SatelliteManager.flagChunkForUnload(level, targetChunk);
+
+
+        /*
         int chunksToMove = SatelliteMain.CONFIG.satelliteConfig.satelliteTravelRateChunksPerSecond*60;
         int dx = targetChunk.x - currentChunk.x;
         int dz = targetChunk.z - currentChunk.z;
@@ -183,15 +198,19 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
             moveZ = -Math.min(chunksToMove, -dz);
         }
 
+
         //Move block entity to new position
-        BlockPos newPos = currentPos.offset(moveX * 16, 0, moveZ * 16);
-        if(moveX < chunksToMove && moveZ < chunksToMove) {
-            int yPos = SatelliteMain.CONFIG.satelliteConfig.minSatelliteWorkingHeight;
+        BlockPos newPos = targetPos;
+        /*if(moveX < chunksToMove && moveZ < chunksToMove)
+        {
+           int yPos = SatelliteMain.CONFIG.satelliteConfig.minSatelliteWorkingHeight;
            newPos = targetChunk.getWorldPosition().atY(yPos);
         }
+
         travelPos = newPos;
-        /*
-        TOO ADVANCED FOR NOW
+
+
+        Move over time logic, for now just use moveSatellite
         BlockState state = level.getBlockState(currentPos);
         level.setBlockAndUpdate(newPos, state);
         level.removeBlock(currentPos, false);
@@ -199,7 +218,7 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         if(be instanceof SatelliteBlockEntity satBE) {
             satBE.targetPos = this.targetPos;
             satBE.traveling = this.traveling;
-            manager.remove(this.colorId);
+            manager.remove(this.colorId, this);
             satBE.setColorId( this.colorId );
             satBE.manager = this.manager;
             satBE.markUpdated();

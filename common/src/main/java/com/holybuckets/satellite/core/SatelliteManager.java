@@ -90,6 +90,15 @@ public class SatelliteManager {
             this.controller = controller;
         }
 
+        //override hashcode, if something is null, use 0
+        @Override
+        public int hashCode() {
+            return Objects.hash(
+                satellite != null ? satellite.getBlockPos() : 0,
+                controller != null ? controller.getBlockPos() : 0
+            );
+        }
+
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
@@ -100,7 +109,7 @@ public class SatelliteManager {
         }
     }
 
-    private static class CachedChunkInfo {
+    public static class CachedChunkInfo {
         LevelChunk chunk;
         int lifetime;
         boolean forceLoaded;
@@ -109,6 +118,10 @@ public class SatelliteManager {
             this.chunk = chunk;
             this.lifetime = 0;
             this.forceLoaded = forceLoaded;
+        }
+
+        public boolean isLoaded() {
+            return chunk != null;
         }
     }
 
@@ -198,6 +211,7 @@ public class SatelliteManager {
         }
 
         satellitePositions.add(be);
+        SatelliteManager.forceLoadChunk(be.getLevel(), be.getBlockPos());
         if(colorId < 0 || satellites.containsKey(colorId)) return;
 
         List<Integer> colors = new ArrayList<>(satellites.keySet());
@@ -214,6 +228,7 @@ public class SatelliteManager {
     public void remove(int colorId, SatelliteBlockEntity be) {
         if(be == null) return;
         satellitePositions.remove(be);
+        SatelliteManager.flagChunkForUnload(be.getLevel(), new ChunkPos(be.getBlockPos()));
         if(colorId < 0) return;
         if(satellites.get(colorId) == be)
             satellites.remove(colorId);
@@ -402,7 +417,7 @@ public class SatelliteManager {
         BlockState state = level.getBlockState(oldPos);
 
         //While there is an existing satellite in the targetPos, move up 16 blocks
-        while(level.getBlockEntity(targetPos) instanceof SatelliteBlockEntity) {
+        while( !(level.getBlockState(targetPos).equals(Blocks.AIR.defaultBlockState()))) {
             targetPos = targetPos.above(1);
         }
         if(targetPos.getY() >= level.getMaxBuildHeight()) {
@@ -446,22 +461,7 @@ public class SatelliteManager {
 
     //** Events
     public static void onBeforeServerStart() {
-        woolIds.add(Blocks.RED_WOOL);
-        woolIds.add(Blocks.ORANGE_WOOL);
-        woolIds.add(Blocks.YELLOW_WOOL);
-        woolIds.add(Blocks.LIME_WOOL);
-        woolIds.add(Blocks.GREEN_WOOL);
-        woolIds.add(Blocks.CYAN_WOOL);
-        woolIds.add(Blocks.LIGHT_BLUE_WOOL);
-        woolIds.add(Blocks.BLUE_WOOL);
-        woolIds.add(Blocks.PURPLE_WOOL);
-        woolIds.add(Blocks.MAGENTA_WOOL);
-        woolIds.add(Blocks.PINK_WOOL);
-        woolIds.add(Blocks.WHITE_WOOL);
-        woolIds.add(Blocks.LIGHT_GRAY_WOOL);
-        woolIds.add(Blocks.GRAY_WOOL);
-        woolIds.add(Blocks.BROWN_WOOL);
-        woolIds.add(Blocks.BLACK_WOOL);
+       woolIds.addAll(WoolColorHelper.getWoolBlocks());
         satelliteClientCommandQueue.clear();
         SatelliteWeaponManager.onBeforeServerStart();
     }

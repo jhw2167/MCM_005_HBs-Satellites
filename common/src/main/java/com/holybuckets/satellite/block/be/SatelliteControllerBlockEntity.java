@@ -2,7 +2,9 @@ package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.console.IMessager;
+import com.holybuckets.foundation.structure.StructureManager;
 import com.holybuckets.satellite.CommonClass;
+import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.LoggerProject;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
@@ -18,6 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -162,11 +165,19 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void setSource(SatelliteDisplay source, boolean forceDisplayUpdates)
     {
         this.source = source;
-        satelliteTargetPos = (linkedSatellite != null) ? linkedSatellite.getBlockPos() : null;
+        satelliteTargetPos = (linkedSatellite != null) ? linkedSatellite.getBlockPos() : satelliteTargetPos;
         if(forceDisplayUpdates) forceUpdate();
         if(source == null || source.noSource()) return;
         toggleOnOff(true);
         this.displayInfo = source.initDisplayInfo(this);
+
+        //Add this id to Foundations structure Manager
+        ResourceLocation loc = HBUtil.LOC(Constants.MOD_ID,
+            "satellite_controller_" + colorId + "_" + this.getBlockPos().asLong() );
+        ///StructureManager.get(level).processStructureLoad();
+
+
+
     }
 
     public void onDestroyed() {
@@ -395,27 +406,24 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         else {}
 
         //1. Recover Satellite if lost between chunk loads
-        if(this.linkedSatellite == null && this.satelliteTargetPos != null) {
+        if (this.satelliteTargetPos != null && level.getChunk(satelliteTargetPos)==null) {
+            SatelliteManager.forceLoadChunk(level, satelliteTargetPos);
+        } else if(this.linkedSatellite == null && this.satelliteTargetPos != null) {
             recoverSatellite();
         }
 
         if(this.linkedSatellite != manager.get(this.colorId))
         {
             linkedSatellite = manager.get(this.colorId);
-            if(linkedSatellite == null) {
-                toggleOnOff(false);
-                setSource(source, true);
-                propagateToNeighbors();
-                return;
-            }
-            this.toggleOnOff(true);
             SatelliteDisplay source = manager.generateSource(this.linkedSatellite, this);
             setSource(source, true);
+            propagateToNeighbors();
         }
 
+        /*
         if(this.linkedSatellite==null && this.satelliteTargetPos==null && this.isDisplayOn) {
             this.toggleOnOff(false);
-        }
+        }*/
 
         processCommands();
         renderDisplay();

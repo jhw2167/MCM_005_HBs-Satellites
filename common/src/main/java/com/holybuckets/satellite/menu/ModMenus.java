@@ -38,24 +38,23 @@ public class ModMenus {
             });
          */
 
+        // Typed factory now consumes TargetControllerMenu.Data and supplies its STREAM_CODEC.
         targetControllerMenu = menus.registerMenu(id("target_controller_menu"),
-            new BalmMenuFactory<TargetControllerMenu, Object>() {
+            new BalmMenuFactory<TargetControllerMenu, TargetControllerMenu.Data>() {
                 @Override
-                public TargetControllerMenu create(int i, Inventory inventory, Object object) {
-                    BlockPos pos = (BlockPos) object;
-                        Level level = inventory.player.level();
+                public TargetControllerMenu create(int i, Inventory inventory, TargetControllerMenu.Data data) {
+                    BlockPos pos = data.pos();
+                    Level level = inventory.player.level();
                     BlockEntity be = level.getBlockEntity(pos);
-                    if (be instanceof TargetControllerBlockEntity) {
-                        TargetControllerBlockEntity entity = (TargetControllerBlockEntity) be;
-                        entity.setLevel(level);
+                    if (be instanceof TargetControllerBlockEntity entity) {
                         return new TargetControllerMenu(i, inventory, entity);
                     }
                     return null;
                 }
 
                 @Override
-                public StreamCodec<RegistryFriendlyByteBuf, Object> getStreamCodec() {
-                    return null;
+                public StreamCodec<RegistryFriendlyByteBuf, TargetControllerMenu.Data> getStreamCodec() {
+                    return TargetControllerMenu.STREAM_CODEC;
                 }
 
             });

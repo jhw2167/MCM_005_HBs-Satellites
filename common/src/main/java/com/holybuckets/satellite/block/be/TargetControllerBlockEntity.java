@@ -15,6 +15,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -355,14 +356,15 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
 
     public BalmMenuProvider getMenuProvider() {
         return new BalmMenuProvider() {
+
             @Override
-            public Object getScreenOpeningData(ServerPlayer serverPlayer) {
-                return worldPosition;
+            public TargetControllerMenu.Data getScreenOpeningData(ServerPlayer serverPlayer) {
+                return new TargetControllerMenu.Data(worldPosition);
             }
 
             @Override
-            public StreamCodec getScreenStreamCodec() {
-                return null;
+            public StreamCodec<RegistryFriendlyByteBuf, TargetControllerMenu.Data> getScreenStreamCodec() {
+                return TargetControllerMenu.STREAM_CODEC;
             }
 
             @Override

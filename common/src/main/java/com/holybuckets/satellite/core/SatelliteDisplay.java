@@ -290,6 +290,10 @@ public class SatelliteDisplay {
         setMinSection( this.surfaceSection - sectionDepth );
 
         this.chunkRange = ModConfig.getSatelliteOperationalDistChunks(hasUpgrade( ModItems.rangeUpgrade ));
+        if(this.level.isClientSide() && satellite == null) {
+            controller.setError( "" );
+            return;
+        }
 
         if( satellite == null ) {
             controller.setError( "No Satellite Connected" );

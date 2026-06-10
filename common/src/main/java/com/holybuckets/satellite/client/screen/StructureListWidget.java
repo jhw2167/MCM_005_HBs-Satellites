@@ -19,13 +19,17 @@ public class StructureListWidget extends ObjectSelectionList<StructureListWidget
 
     public StructureListWidget(Minecraft minecraft, int width, int height, int top, int itemHeight, int x0, SatelliteScreen parent) {
         super(minecraft, width, height, top, itemHeight);
+        this.setX(x0);
         this.parent = parent;
-        // Set the X position for right-alignment
         this.x0 = x0;
         this.x1 = x0 + width;
         this.setRenderHeader(false, 0);
-
         selectedPositions = new HashSet<>();
+    }
+
+    @Override
+    protected void renderListSeparators(GuiGraphics graphics) {
+        // No separators
     }
 
     @Override
@@ -144,6 +148,7 @@ public class StructureListWidget extends ObjectSelectionList<StructureListWidget
         public Component getNarration() {
             return Component.literal(structure.getCommonName() + " at " + structure.getOrigin().toShortString());
         }
+
 
         public StructureInfo getStructure() {
             return this.structure;
