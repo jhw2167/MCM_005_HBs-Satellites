@@ -164,6 +164,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     @Override
     public void setSource(SatelliteDisplay source, boolean forceDisplayUpdates)
     {
+        StructureManager.get(level).removePseudoStructure(getBlockPos());
         this.source = source;
         satelliteTargetPos = (linkedSatellite != null) ? linkedSatellite.getBlockPos() : satelliteTargetPos;
         if(forceDisplayUpdates) forceUpdate();
@@ -174,13 +175,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         //Add this id to Foundations structure Manager
         ResourceLocation loc = HBUtil.LOC(Constants.MOD_ID,
             "satellite_controller_" + colorId + "_" + this.getBlockPos().asLong() );
-        ///StructureManager.get(level).processStructureLoad();
-
-
+        StructureManager.get(level).addPseudoStructure(loc, this.getBlockPos());
 
     }
 
     public void onDestroyed() {
+        //remove from structure manager
+        StructureManager.get(level).removePseudoStructure(getBlockPos());
         this.turnOff();
     }
 
@@ -405,18 +406,33 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         else if(ticks == START_BUFFER) { this.propagateToNeighbors(); this.turnOff(); }
         else {}
 
-        //1. Recover Satellite if lost between chunk loads
-        if (this.satelliteTargetPos != null && level.getChunk(satelliteTargetPos)==null) {
+
+        if (this.satelliteTargetPos != null && level.getChunk(satelliteTargetPos) == null) {
             SatelliteManager.forceLoadChunk(level, satelliteTargetPos);
-        } else if(this.linkedSatellite == null && this.satelliteTargetPos != null) {
+        }
+
+        if (this.linkedSatellite == null && this.satelliteTargetPos != null) {
             recoverSatellite();
         }
 
-        if(this.linkedSatellite != manager.get(this.colorId))
+        if (this.linkedSatellite != manager.get(this.colorId))
         {
-            linkedSatellite = manager.get(this.colorId);
-            SatelliteDisplay source = manager.generateSource(this.linkedSatellite, this);
-            setSource(source, true);
+            var tempSatellite = manager.get(this.colorId);
+            if(tempSatellite == null)   //turn off
+            {
+                if(linkedSatellite != null) {
+                    manager.removeSource(linkedSatellite, this);
+                    linkedSatellite = null;
+                    satelliteTargetPos = null;
+                }
+                setSource(null, true);
+                propagateToNeighbors();
+                return;
+            }
+            linkedSatellite = tempSatellite;
+            this.toggleOnOff(true);
+            SatelliteDisplay newSource = manager.generateSource(this.linkedSatellite, this);
+            setSource(newSource, true);
             propagateToNeighbors();
         }
 
@@ -477,12 +493,13 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     private void recoverSatellite()
     {
         if(this.satelliteTargetPos == null) return;
-        LoggerProject.logInfo("010100", HBUtil.BlockUtil.positionToString(this.getBlockPos()));
+        //LoggerProject.logInfo("010100", HBUtil.BlockUtil.positionToString(this.getBlockPos()));
         LevelChunk distantChunk = manager.getChunk(level, this.satelliteTargetPos);
         if(distantChunk != null) {
             BlockEntity be = distantChunk.getBlockEntity(this.satelliteTargetPos);
-            if(be instanceof SatelliteBlockEntity) {
-                manager.put(this.colorId, (SatelliteBlockEntity) be);
+            if(be instanceof SatelliteBlockEntity satellite) {
+                satellite.setColorId(this.colorId);
+                manager.put(this.colorId, satellite);
             } else {
                 this.satelliteTargetPos = null;
             }

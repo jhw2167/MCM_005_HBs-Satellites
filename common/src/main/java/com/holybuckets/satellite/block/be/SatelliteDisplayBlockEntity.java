@@ -113,14 +113,11 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     @Override
     public void toggleOnOff(boolean toggle)
     {
-        if(toggle != this.isDisplayOn) {
-            this.isDisplayOn = toggle;
-            updateBlockState();
-
-            if(!this.isDisplayOn) {
-                this.clearDisplay();
-            }
-        }
+        if(toggle==isDisplayOn) return;
+        isDisplayOn = toggle;
+        updateBlockState();
+        if(!isDisplayOn)
+            clearDisplay();
     }
 
     protected void updateBlockState()
@@ -186,6 +183,7 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
         displayInfo.forEach( info -> info.isActive = false );
         clearAboveArea(displayInfo.size());
         displayInfo.clear();
+        displayInfo = null;
     }
 
     public void onDestroyed() {
