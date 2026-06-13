@@ -44,6 +44,7 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
         this.targetPos = pos;
         traveling = false;
         dimensionHint = false;
+        manager = SatelliteManager.get(this.level);
     }
 
     public void use(Player p, InteractionHand hand, BlockHitResult res) {
@@ -84,6 +85,7 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
     @Override
     public void setColorId(int colorId) {
         if(colorId < 0 || colorId >= SatelliteManager.totalIds()) return;
+        if(manager==null) manager = manager.get(this.level);
         manager.remove(this.colorId, this);
         this.colorId = colorId;
         this.markUpdated();

@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -240,10 +241,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         } else if( cmd < 5) {   //adjust ordinally
             int dNS=0,dEW=0;
             switch (cmd) {
-                case 1: dNS = 1; break;   //north
-                case 2: dNS = -1; break;  //south
-                case 3: dEW = 1; break;   //east
-                case 4: dEW = -1; break;  //west
+                case 1: dNS = -1; break;   //north
+                case 2: dNS = 1; break;  //south
+                case 3: dEW = -1; break;   //east
+                case 4: dEW = 1; break;  //west
                 default: dNS = 0; dEW = 0; break;
             }
             //this.source.adjOrdinal(dNS, dEW);
@@ -407,6 +408,17 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
         if (this.satelliteTargetPos != null && level.getChunk(satelliteTargetPos) == null) {
             SatelliteManager.forceLoadChunk(level, satelliteTargetPos);
+        }
+
+        //if satellite is linked and more than 30 chunks away. tick manually
+        if(this.linkedSatellite != null)
+        {
+            BlockPos satPos = this.linkedSatellite.getBlockPos();
+            ChunkPos satelliteCp = new ChunkPos(satPos);
+            ChunkPos controllerCp = new ChunkPos(this.getBlockPos());
+            if( HBUtil.ChunkUtil.chunkDistSquared(satelliteCp, controllerCp) > 30*30 ) {
+                this.linkedSatellite.tick(level, satelliteTargetPos, level.getBlockState(satPos), linkedSatellite);
+            }
         }
 
         if (this.linkedSatellite == null && this.satelliteTargetPos != null) {

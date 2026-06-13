@@ -75,6 +75,7 @@ public class SatelliteControllerBlock extends Block implements EntityBlock {
         super.playerWillDestroy(level, pos, state, player);
     }
 
+    @Override
     public InteractionResult use(BlockState $$0, Level $$1, BlockPos $$2, Player p, InteractionHand hand, BlockHitResult hitResult) {
         //If the iteraction was not on the front face, reject
         Direction d = hitResult.getDirection();

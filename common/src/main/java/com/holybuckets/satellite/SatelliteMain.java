@@ -28,6 +28,7 @@ public class SatelliteMain {
     public static ChiselBitsAPI chiselBitsApi;
     public static SatelliteConfig CONFIG;
 
+    //satellites
     private static final Map<Level, SatelliteManager> MANAGERS = new HashMap<>();
 
     public SatelliteMain()
@@ -103,7 +104,7 @@ public class SatelliteMain {
     }
 
     public static SatelliteManager getManager(Level level) {
-        if (level.isClientSide()) return null;
+        if (level==null || level.isClientSide()) return null;
         return MANAGERS.computeIfAbsent(level, SatelliteManager::new);
     }
 
