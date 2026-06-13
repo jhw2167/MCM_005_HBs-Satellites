@@ -85,7 +85,7 @@ public class SatelliteControllerBlock extends Block implements EntityBlock {
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         InteractionResult result = use(state, level, pos, player, hand, hitResult);
-        return result == InteractionResult.CONSUME ? ItemInteractionResult.SUCCESS : ItemInteractionResult.CONSUME;
+        return result == InteractionResult.CONSUME ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     public InteractionResult use(BlockState $$0, Level $$1, BlockPos $$2, Player p, InteractionHand hand, BlockHitResult hitResult) {

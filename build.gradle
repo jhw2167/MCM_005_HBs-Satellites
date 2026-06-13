@@ -4,10 +4,15 @@ plugins {
 }
 
 allprojects {
+    version = mod_version
     apply plugin: "idea"
 
     tasks.withType(Javadoc).configureEach {
         options.addStringOption('Xdoclint:none', '-quiet') // Suppress all warnings
         options.encoding = 'UTF-8' // Set proper encoding
     }
+}
+
+subprojects {
+    version = mod_version
 }

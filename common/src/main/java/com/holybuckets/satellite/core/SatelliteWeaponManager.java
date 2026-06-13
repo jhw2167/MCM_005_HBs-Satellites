@@ -1,70 +1,102 @@
 package com.holybuckets.satellite.core;
 
-import com.google.gson.JsonObject;
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.console.Messager;
-import com.holybuckets.foundation.networking.SimpleStringMessage;
-import com.holybuckets.satellite.SatelliteMain;
-import com.holybuckets.satellite.block.ModBlocks;
+import com.holybuckets.foundation.core.MovingWaypoint;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.RedstoneTorchBlock;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class SatelliteWeaponManager {
+
+    private static class Waypoint {
+        final ServerPlayer player;
+        final BlockPos targetPos;
+        final int colorId;
+        final BlockPos satelliteControllerOrigin;
+
+        Waypoint(ServerPlayer player, BlockPos targetPos, int colorId, BlockPos satelliteControllerOrigin) {
+            this.player = player;
+            this.targetPos = targetPos;
+            this.colorId = colorId;
+            this.satelliteControllerOrigin = satelliteControllerOrigin;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Waypoint w)) return false;
+            return colorId == w.colorId && Objects.equals(player, w.player);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(player, colorId);
+        }
+    }
+
+    // Tracks fired waypoints keyed by satellite controller origin.
+    private static final Map<BlockPos, Set<Waypoint>> waypoints = new HashMap<>();
 
     static void onBeforeServerStart() {
         addDefaultWeapons();
     }
 
     private static void addDefaultWeapons() {
-        TargetControllerBlockEntity.addWeapon(Items.REDSTONE_TORCH, SatelliteWeaponManager::fireWaypointMessage );
+        TargetControllerBlockEntity.addWeapon(Items.REDSTONE_TORCH, SatelliteWeaponManager::fireWaypointMessage);
         //TargetControllerBlockEntity.addWeapon(ModBlocks.satelliteDisplayBlock.asItem(), SatelliteWeaponManager::fireWaypointMessage );
     }
 
-    public static final String MSG_ID_WAYPOINT_FLARE = "satellite_waypoint_flare";
-    public static void clearWaypoints(SatelliteControllerBlockEntity controller) {
-        if(controller == null || controller.getLevel() == null || controller.getLevel().isClientSide) return;
-        JsonObject json = new JsonObject();
-        json.addProperty("satelliteControllerOrigin", HBUtil.BlockUtil.positionToString(controller.getBlockPos()) );
-        json.addProperty("colorId", -1);
-
-        SimpleStringMessage.createAndFire(MSG_ID_WAYPOINT_FLARE, json.toString());
-    }
-
     public static void fireWaypointMessage(TargetControllerBlockEntity controller, ItemStack stack) {
-        fireWaypointMessage(controller, stack, false);
+        if (controller == null || controller.getLevel() == null || controller.getLevel().isClientSide) return;
+        if (!(controller.getPlayerFiredWeapon() instanceof ServerPlayer player)) return;
+
+        BlockPos targetPos = controller.getUiTargetBlockPos();
+        if (targetPos == null) return;
+
+        int colorId = controller.getTargetColorId();
+        BlockPos origin = controller.getSatelliteController().getBlockPos();
+
+        MovingWaypoint.setWaypoint(player, targetPos, colorId);
+        // Remember this waypoint so clear methods can find it later.
+        waypoints.computeIfAbsent(origin, k -> new HashSet<>())
+            .add(new Waypoint(player, targetPos, colorId, origin));
+
+        Messager.getInstance().sendBottomActionHint(player,
+            "Waypoint flare fired at " + HBUtil.BlockUtil.positionToString(targetPos));
     }
 
-    public static void fireWaypointMessage(TargetControllerBlockEntity controller, ItemStack stack, boolean clear)
-     {
-        if(controller == null || controller.getLevel() == null || controller.getLevel().isClientSide) return;
-        BlockPos targetPos = controller.getUiTargetBlockPos();
-        int color = (clear) ? -1 : controller.getTargetColorId();
+    // Clears every tracked waypoint linked to this satellite controller.
+    public static void clearWaypoints(SatelliteControllerBlockEntity controller) {
+        if (controller == null || controller.getLevel() == null || controller.getLevel().isClientSide) return;
 
-        //use GSON to create json with valuies, convert to string and send simpleStringMessage to Client
-        JsonObject json = new JsonObject();
-        //String levelString = HBUtil.LevelUtil.toLevelId(HBUtil.LevelUtil.LevelNameSpace.CLIENT, controller.getLevel());
-        BlockPos targetControllerOrigin = controller.getBlockPos();
-        BlockPos satelliteControllerOrigin = controller.getSatelliteController().getBlockPos();
-        String levelString = HBUtil.LevelUtil.toLevelId(controller.getLevel());
-
-        json.addProperty("levelId", levelString.replace("SERVER", "CLIENT") );
-        json.addProperty("satelliteControllerOrigin", HBUtil.BlockUtil.positionToString(satelliteControllerOrigin) );
-        json.addProperty("targetControllerOrigin", HBUtil.BlockUtil.positionToString(targetControllerOrigin) );
-        if(targetPos != null) {
-            String target = HBUtil.BlockUtil.positionToString(targetPos);
-            json.addProperty("targetPos", target);
-            Messager.getInstance().sendBottomActionHint(controller.getPlayerFiredWeapon(),
-                "Waypoint flare fired at " + target);
+        Set<Waypoint> tracked = waypoints.remove(controller.getBlockPos());
+        if (tracked == null) return;
+        for (Waypoint w : tracked) {
+            MovingWaypoint.removeWaypoint(w.player, w.colorId);
         }
+    }
 
-        json.addProperty("colorId", color);
+    // Clears one waypoint matched by (player, colorId) under the given satellite controller.
+    public static void clearWaypoint(SatelliteControllerBlockEntity controller, ServerPlayer player, int colorId) {
+        if (controller == null || player == null) return;
+        Set<Waypoint> tracked = waypoints.get(controller.getBlockPos());
+        if (tracked == null) return;
 
-        SimpleStringMessage.createAndFireToAll(MSG_ID_WAYPOINT_FLARE, json.toString());
+        Waypoint key = new Waypoint(player, BlockPos.ZERO, colorId, controller.getBlockPos());
+        if (tracked.remove(key)) {
+            MovingWaypoint.removeWaypoint(player, colorId);
+        }
+        if (tracked.isEmpty()) waypoints.remove(controller.getBlockPos());
     }
 
     // Send currently active waypoints in the world to newly joined players

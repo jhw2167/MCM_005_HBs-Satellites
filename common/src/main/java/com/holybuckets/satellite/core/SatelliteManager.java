@@ -149,8 +149,9 @@ public class SatelliteManager {
         SatelliteDisplay.init(reg);
     }
 
-
+    //get( Level, get(level, satellites
     public static SatelliteManager get(Level level) {
+        if(level==null) return null;
         if(level.isClientSide) {
             if(CLIENT_MANAGER == null)
                 CLIENT_MANAGER = new SatelliteManager(level);

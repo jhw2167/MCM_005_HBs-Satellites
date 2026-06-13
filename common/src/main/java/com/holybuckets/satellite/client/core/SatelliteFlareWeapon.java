@@ -65,10 +65,7 @@ public class SatelliteFlareWeapon {
 
     public static String CURRENT_LEVEL_ID = "";
     public static void init(ClientEventRegistrar reg) {
-        reg.registerOnConnectedToServer( SatelliteFlareWeapon::onConnectedToServer);
-        reg.registerOnClientLevelTick(TickType.ON_120_TICKS, SatelliteFlareWeapon::onClient120Ticks);
-        reg.registerOnSimpleMessage(SatelliteWeaponManager.MSG_ID_WAYPOINT_FLARE, SatelliteFlareWeapon::setWayPointFlare);
-        reg.registerOnRenderLevel(RenderLevelEvent.RenderStage.AFTER_PARTICLES, SatelliteFlareWeapon::tryRenderWaypointFlare);
+
     }
 
     private static void onConnectedToServer(ConnectedToServerEvent event) {

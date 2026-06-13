@@ -137,7 +137,17 @@ public class SatelliteDisplayBlockEntity extends BlockEntity implements ISatelli
     @Override
     public void setSource(SatelliteDisplay source, boolean forceUpdate) {
         if(this.level.isClientSide) return;
-        if(this.source == source && !forceUpdate) return; //same source
+        if(forceUpdate) {
+            //update
+        } else if( this.source != source) {
+            //update new source
+        } else if( this.source != null && displayInfo == null) {
+            //update display info with newly loaded info
+        } else if( this.source != null && displayInfo.size() != source.getDispHeight()) {
+            //need to add to display height
+        } else {
+            return;
+        }
 
         this.source = source;
         if(this.source == null || source.noSource() ) {
