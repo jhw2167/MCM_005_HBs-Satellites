@@ -99,7 +99,8 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
 
 
     //setTargetPosition, setSelectedPosition
-    public void setUiTargetBlockPos(BlockPos blockTarget)
+    @Override
+    public void setUiTargetBlockPos(BlockPos blockTarget, Player p)
     {
         this.uiTargetBlockPos = blockTarget;
         markUpdated();
@@ -190,7 +191,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
     public void clearDisplay() {
         super.clearDisplay();
         setCursorPosition(null);
-        setUiTargetBlockPos(null);
+        setUiTargetBlockPos(null, null);
     }
 
     private void turnOff() {
@@ -273,7 +274,7 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
                     source.setTargetController(tc);
                 } else {
                     tc.setCursorPosition(null);
-                    tc.setUiTargetBlockPos(null);
+                    tc.setUiTargetBlockPos(null, null);
                     source.setTargetController(this);
                 }
             } else if (cmd == 11) {

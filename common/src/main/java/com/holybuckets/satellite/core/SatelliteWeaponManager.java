@@ -7,6 +7,7 @@ import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -16,16 +17,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.holybuckets.foundation.HBUtil.PlayerUtil;
+
+
 public class SatelliteWeaponManager {
 
     private static class Waypoint {
-        final ServerPlayer player;
+        final String playerId;
         final BlockPos targetPos;
         final int colorId;
         final BlockPos satelliteControllerOrigin;
 
-        Waypoint(ServerPlayer player, BlockPos targetPos, int colorId, BlockPos satelliteControllerOrigin) {
-            this.player = player;
+        Waypoint(String playerId, BlockPos targetPos, int colorId, BlockPos satelliteControllerOrigin) {
+            this.playerId = playerId;
             this.targetPos = targetPos;
             this.colorId = colorId;
             this.satelliteControllerOrigin = satelliteControllerOrigin;
@@ -35,12 +39,12 @@ public class SatelliteWeaponManager {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof Waypoint w)) return false;
-            return colorId == w.colorId && Objects.equals(player, w.player);
+            return colorId == w.colorId && Objects.equals(playerId, w.playerId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(player, colorId);
+            return Objects.hash(playerId, colorId);
         }
     }
 
@@ -60,6 +64,9 @@ public class SatelliteWeaponManager {
         if (controller == null || controller.getLevel() == null || controller.getLevel().isClientSide) return;
         if (!(controller.getPlayerFiredWeapon() instanceof ServerPlayer player)) return;
 
+        String playerId = PlayerUtil.getId(player);
+        if (playerId == null) return;
+
         BlockPos targetPos = controller.getUiTargetBlockPos();
         if (targetPos == null) return;
 
@@ -69,7 +76,7 @@ public class SatelliteWeaponManager {
         MovingWaypoint.setWaypoint(player, targetPos, colorId);
         // Remember this waypoint so clear methods can find it later.
         waypoints.computeIfAbsent(origin, k -> new HashSet<>())
-            .add(new Waypoint(player, targetPos, colorId, origin));
+            .add(new Waypoint(playerId, targetPos, colorId, origin));
 
         Messager.getInstance().sendBottomActionHint(player,
             "Waypoint flare fired at " + HBUtil.BlockUtil.positionToString(targetPos));
@@ -82,7 +89,7 @@ public class SatelliteWeaponManager {
         Set<Waypoint> tracked = waypoints.remove(controller.getBlockPos());
         if (tracked == null) return;
         for (Waypoint w : tracked) {
-            MovingWaypoint.removeWaypoint(w.player, w.colorId);
+            MovingWaypoint.removeWaypoint(w.playerId, w.colorId);
         }
     }
 
@@ -92,9 +99,12 @@ public class SatelliteWeaponManager {
         Set<Waypoint> tracked = waypoints.get(controller.getBlockPos());
         if (tracked == null) return;
 
-        Waypoint key = new Waypoint(player, BlockPos.ZERO, colorId, controller.getBlockPos());
+        String playerId = PlayerUtil.getId(player);
+        if (playerId == null) return;
+
+        Waypoint key = new Waypoint(playerId, BlockPos.ZERO, colorId, controller.getBlockPos());
         if (tracked.remove(key)) {
-            MovingWaypoint.removeWaypoint(player, colorId);
+            MovingWaypoint.removeWaypoint(playerId, colorId);
         }
         if (tracked.isEmpty()) waypoints.remove(controller.getBlockPos());
     }

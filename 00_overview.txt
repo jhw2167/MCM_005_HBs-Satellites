@@ -67,7 +67,29 @@ Reveal a live terrain view at the satellite viewing area
 Ordinal Direction and Depth can be adjusted
 
 
+Edits
+---
+
+- Updated setUiTargetBlockPos() api in ITargetControler to include player to set playerFiredWeapon on targetSet
+- Attempted patching bug where holo display above satellite controller block was not usable, would just force block reload and not location would be selected
+- Reworked Satellite ordinal buttons
+- Attempted fix of MovingWaypoints not firing
+
+
 1.21 issues to fix:
 ---
 
 	- check that memory is not leaking with the force loads and unloads
+	- On attempt to change Target Controller subchannel on Client running on dedicated server get Exception because woolIds are not loaded on client. Should be fixed with foundations change.
+	- SatelliteController force updates any time it is right clicked
+	- Add a clear() hook to addSatelliteWeapon
+	- Backport 1.21.1 changes to 1.20.1
+
+
+	- Aeronautics Updates
+	- Structure Time updates
+	- Structure time 1.21.1
+	- Structure Time optimal structure placement
+
+	- Economy mod
+	- 
