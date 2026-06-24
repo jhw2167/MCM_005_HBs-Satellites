@@ -2,6 +2,7 @@ package com.holybuckets.satellite.block.be;
 
 import com.holybuckets.foundation.HBUtil;
 import com.holybuckets.foundation.console.IMessager;
+import com.holybuckets.foundation.structure.StructureManager;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.Constants;
 import com.holybuckets.satellite.LoggerProject;
