@@ -100,7 +100,7 @@ public class SatelliteManager {
         }
     }
 
-    private static class CachedChunkInfo {
+    public static class CachedChunkInfo {
         LevelChunk chunk;
         int lifetime;
         boolean forceLoaded;
@@ -109,6 +109,10 @@ public class SatelliteManager {
             this.chunk = chunk;
             this.lifetime = 0;
             this.forceLoaded = forceLoaded;
+        }
+
+        public boolean isLoaded() {
+            return chunk != null;
         }
     }
 
