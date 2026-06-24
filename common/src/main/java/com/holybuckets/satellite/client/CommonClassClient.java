@@ -48,7 +48,7 @@ public class CommonClassClient implements CommonProxy {
 
     public static void initClient() {
         ClientEventRegistrar registrar = ClientEventRegistrar.getInstance();
-        registrar.registerOnConnectedToServer(CommonClassClient::onConnectedToServer, EventPriority.Highest);
+        registrar.registerOnConnectedToServer(CommonClassClient::onConnectedToServer);
         registrar.registerOnDisconnectedFromServer(CommonClassClient::onDisconnectedFromServer, EventPriority.Lowest);
         registrar.registerOnBlockHighlightDraw(CommonClassClient::renderUiSphere, EventPriority.Normal);
         SatelliteDisplayClient.init(registrar);

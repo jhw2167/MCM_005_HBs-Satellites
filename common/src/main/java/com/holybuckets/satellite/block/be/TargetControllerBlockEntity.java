@@ -85,8 +85,9 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     }
 
     @Override
-    public void setUiTargetBlockPos(BlockPos blockPos) {
+    public void setUiTargetBlockPos(BlockPos blockPos, Player p) {
         this.uiTargetBlockPos = blockPos;
+        this.playerFiredWeapon = p;
         this.linkedReceivers.clear();
         List<ServerPlayer> players = HBUtil.PlayerUtil
             .getAllPlayersInBlockRange(getBlockPos(), PLAYER_RANGE/4 );

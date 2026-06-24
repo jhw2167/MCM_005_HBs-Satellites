@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 public interface ITargetController {
     
-    void setUiTargetBlockPos(BlockPos blockPos);
+    void setUiTargetBlockPos(@Nullable BlockPos blockPos, @Nullable Player playingUsing);
     
     BlockPos getUiTargetBlockPos();
     

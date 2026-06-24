@@ -447,7 +447,7 @@ public class SatelliteManager {
 
     //** Events
     public static void onBeforeServerStart() {
-       woolIds.addAll(WoolColorHelper.getWoolBlocks());
+        woolIds.addAll(WoolColorHelper.getWoolBlocks());
         satelliteClientCommandQueue.clear();
         SatelliteWeaponManager.onBeforeServerStart();
     }

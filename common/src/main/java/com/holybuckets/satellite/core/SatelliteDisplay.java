@@ -371,7 +371,7 @@ public class SatelliteDisplay {
     private void refreshUiPositions() {
         for(ISatelliteControllerBE cb : controllerBlocks) {
             if(cb instanceof ITargetController tc) {
-                tc.setUiTargetBlockPos(null);
+                tc.setUiTargetBlockPos(null, null);
                 tc.setCursorPosition(null);
             }
         }
@@ -432,7 +432,7 @@ public class SatelliteDisplay {
                 (int) blockOffset.z
             );
 
-        this.targetController.setUiTargetBlockPos(blockTarget);
+        this.targetController.setUiTargetBlockPos(blockTarget, p);
         this.targetController.setCursorPosition(hitLoc);
     }
 
@@ -488,8 +488,8 @@ public class SatelliteDisplay {
             if(info.isActive) info.resetUpdates();
         });
         needsUpdate = true;
-        if(targetController != null) targetController.setUiTargetBlockPos(null);
-        this.cursorSelection = null;
+        //if(targetController != null) targetController.setUiTargetBlockPos(null);
+        //this.cursorSelection = null;
     }
 
 
@@ -1056,7 +1056,7 @@ public class SatelliteDisplay {
         if( level.getBlockEntity(displayBlockPos) instanceof SatelliteDisplayBlockEntity displayBlockEntity ) {
             SatelliteDisplay source = displayBlockEntity.getSource();
             if(source != null) { source.setPosition( useBlockEvent.getPlayer(), res ); }
-            displayBlockEntity.forceUpdate();
+            source.setNeedsUpdate(true);
         }
 
     }

@@ -92,6 +92,4 @@ Edits
 	- Structure Time optimal structure placement
 
 	- Economy mod
-	- 
-=======
-	- check that memory is not leaking with the force loads and unloads
+	-
