@@ -5,8 +5,8 @@ import com.holybuckets.foundation.console.IMessager;
 import com.holybuckets.satellite.CommonClass;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ITargetController;
+import com.holybuckets.satellite.client.core.SatelliteFlareWeapon;
 import com.holybuckets.satellite.core.SatelliteManager;
-import com.holybuckets.satellite.core.SatelliteWeaponManager;
 import com.holybuckets.satellite.menu.TargetControllerMenu;
 import net.blay09.mods.balm.api.menu.BalmMenuProvider;
 import net.minecraft.core.BlockPos;
@@ -54,6 +54,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     private Player playerFiredWeapon;
     private int weaponCooldownTicks;
     private static final Map<Item, BiConsumer<TargetControllerBlockEntity, ItemStack>> weapons = new HashMap<>();
+    private static final Map<Item, BiConsumer<TargetControllerBlockEntity, ItemStack>> weaponClearHooks = new HashMap<>();
 
     private final Set<TargetReceiverBlockEntity> linkedReceivers = new HashSet<>();
 
@@ -62,6 +63,12 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
     }
     public static boolean validWeapon(Item item) { return weapons.containsKey(item); }
     public static void removeWeapon(Item item) { weapons.remove(item); }
+
+    public static void addWeaponClearHook(Item item, BiConsumer<TargetControllerBlockEntity, ItemStack> consumer) {
+        weaponClearHooks.put(item, consumer);
+    }
+    public static boolean validWeaponClearHook(Item item) { return weaponClearHooks.containsKey(item); }
+    public static void removeWeaponClearHook(Item item) { weaponClearHooks.remove(item); }
 
 
     public TargetControllerBlockEntity(BlockPos pos, BlockState state)
@@ -184,10 +191,17 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
         if(!this.isDisplayOn) return;
 
         if(cmd==10) {
-            if(this.uiCursorPos == null)
+            if(this.uiCursorPos == null) {
                 IMessager.getInstance().sendBottomActionHint(p, "Right click holo display to set target...");
-            else
+            }
+            else {
+                //doClear, clearWeapon
                 IMessager.getInstance().sendBottomActionHint(p, "Clearing... " );
+                ItemStack weaponStack = this.getItem(0);
+                BiConsumer<TargetControllerBlockEntity, ItemStack> clearHook = weaponClearHooks.get(weaponStack.getItem());
+                if (clearHook != null) clearHook.accept(this, weaponStack);
+            }
+
         } else if (cmd==11) {
             if(this.uiTargetBlockPos == null)
                 IMessager.getInstance().sendBottomActionHint(p, "No Target Set ");
@@ -284,7 +298,7 @@ public class TargetControllerBlockEntity extends SatelliteDisplayBlockEntity imp
             waypointPos = (str.equals("")) ? null :
                 new BlockPos( HBUtil.BlockUtil.stringToBlockPos(str) );
             if( wpIsNull && (this.level!=null) && !this.level.isClientSide)
-                SatelliteWeaponManager.fireWaypointMessage(this, ItemStack.EMPTY);
+                SatelliteFlareWeapon.fireWaypointMessage(this, ItemStack.EMPTY);
         }
     }
 

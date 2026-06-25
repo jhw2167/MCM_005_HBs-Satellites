@@ -2,6 +2,7 @@ package com.holybuckets.satellite.core;
 
 import com.google.gson.JsonObject;
 import com.holybuckets.foundation.HBUtil;
+import com.holybuckets.foundation.core.WoolColorHelper;
 import com.holybuckets.foundation.event.EventRegistrar;
 import com.holybuckets.foundation.event.custom.ServerTickEvent;
 import com.holybuckets.foundation.event.custom.TickType;
@@ -15,7 +16,6 @@ import com.holybuckets.satellite.config.SatelliteConfig;
 import com.holybuckets.satellite.item.ModItems;
 import com.holybuckets.satellite.item.SatelliteItemUpgrade;
 import com.holybuckets.satellite.particle.ModParticles;
-import com.holybuckets.satellite.particle.WoolDustHelper;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.blay09.mods.balm.api.event.EventPriority;
 import net.blay09.mods.balm.api.event.UseBlockEvent;
@@ -940,7 +940,7 @@ public class SatelliteDisplay {
             {
                 Vec3 hitLoc = tc.getCursorPosition();
                 ((ServerLevel) level).sendParticles(
-                    WoolDustHelper.getDust(tc.getTargetColorId()),                     // Particle type
+                    WoolColorHelper.getDust(tc.getTargetColorId()),                     // Particle type
                     hitLoc.x, hitLoc.y, hitLoc.z,
                     2,                                // Particle count
                     0.0, 0.0, 0.0,                   // X/Y/Z velocity/spread
@@ -1056,7 +1056,7 @@ public class SatelliteDisplay {
         if( level.getBlockEntity(displayBlockPos) instanceof SatelliteDisplayBlockEntity displayBlockEntity ) {
             SatelliteDisplay source = displayBlockEntity.getSource();
             if(source != null) { source.setPosition( useBlockEvent.getPlayer(), res ); }
-            source.setNeedsUpdate(true);
+            //displayBlockEntity.forceUpdate();
         }
 
     }

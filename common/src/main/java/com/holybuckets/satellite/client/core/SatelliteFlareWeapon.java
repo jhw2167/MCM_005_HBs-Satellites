@@ -1,219 +1,132 @@
 package com.holybuckets.satellite.client.core;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.holybuckets.foundation.HBUtil;
-import com.holybuckets.foundation.client.ClientEventRegistrar;
-import com.holybuckets.foundation.console.IMessager;
-import com.holybuckets.foundation.event.custom.*;
-import com.holybuckets.satellite.CommonClass;
-import com.holybuckets.satellite.LoggerProject;
-import com.holybuckets.satellite.core.SatelliteWeaponManager;
-import com.holybuckets.satellite.particle.WoolDustHelper;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.blay09.mods.balm.api.event.client.ConnectedToServerEvent;
-import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
+import com.holybuckets.foundation.console.Messager;
+import com.holybuckets.foundation.core.MovingWaypoint;
+import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
+import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.client.renderer.blockentity.BeaconRenderer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
+import static com.holybuckets.foundation.HBUtil.PlayerUtil;
+
+/**
+ * Server-side waypoint weapon. Fires a {@link MovingWaypoint} flare for the firing player
+ * and tracks fired waypoints keyed by satellite controller origin so they can be cleared
+ * when the controller's state changes (color change, destruction, UI target cleared, etc).
+ *
+ * NOTE: File location ({@code client/core/}) is legacy. The logic here is purely server-side;
+ * the package may be moved to {@code com.holybuckets.satellite.core} in a future refactor.
+ */
 public class SatelliteFlareWeapon {
-
-    private static Map<BlockPos, HashMap<BlockPos, Waypoint>> activeWaypoints = new HashMap<>();
-    public static int WAYPOINT_FLARE_MAX_DISTANCE = 512;
-    public static int WAYPOINT_FLARE_MIN_DISTANCE = 4;      //delete waypoint when player gets close
+    public static Item SATELLITE_FLARE_DESIGNATOR_ITEM = null;
 
     private static class Waypoint {
-        String levelId;
-        BlockPos targetPos;
-        int colorId;
-        boolean isActive;
+        final String playerId;
+        final BlockPos targetPos;
+        final int colorId;
+        final BlockPos satelliteControllerOrigin;
 
-        public static int activeCount = 0;
-
-        public Waypoint(String levelId, BlockPos targetPos, int colorId) {
-            this.levelId = levelId;
+        Waypoint(String playerId, BlockPos targetPos, int colorId, BlockPos satelliteControllerOrigin) {
+            this.playerId = playerId;
             this.targetPos = targetPos;
             this.colorId = colorId;
-            setActive(CURRENT_LEVEL_ID, Minecraft.getInstance().player);
+            this.satelliteControllerOrigin = satelliteControllerOrigin;
         }
 
-        public void setActive(String currentLevelId, Player p)
-        {
-            this.isActive = false;
-            if(!currentLevelId.equals(this.levelId) ) return;
-            if(!HBUtil.BlockUtil.inRange(p.blockPosition(), this.targetPos, WAYPOINT_FLARE_MAX_DISTANCE)) return;
-            this.isActive = true; activeCount++;
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Waypoint w)) return false;
+            return colorId == w.colorId && Objects.equals(playerId, w.playerId);
         }
 
-        public static void remove(BlockPos pos) {
-            String msg = "Waypoint at " + HBUtil.BlockUtil.positionToString(pos) + " removed";
-            IMessager.getInstance().sendBottomActionHint(msg);
-        }
-
-    }
-
-    public static String CURRENT_LEVEL_ID = "";
-    public static void init(ClientEventRegistrar reg) {
-
-    }
-
-    private static void onConnectedToServer(ConnectedToServerEvent event) {
-        activeWaypoints.clear();
-        bufferBuilder = null;
-    }
-
-    private static void onClient120Ticks(ClientLevelTickEvent event)
-    {
-        CURRENT_LEVEL_ID = HBUtil.LevelUtil.toLevelId(Minecraft.getInstance().level);
-        Waypoint.activeCount = 0;
-        for (var map : activeWaypoints.values()) {
-            Iterator<Map.Entry<BlockPos, Waypoint>> iterator = map.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<?, Waypoint> entry = iterator.next();
-                Waypoint w = entry.getValue();
-
-                w.setActive(CURRENT_LEVEL_ID, Minecraft.getInstance().player);
-
-                if (w.isActive) {
-                    BlockPos playerPos = Minecraft.getInstance().player.blockPosition();
-                    BlockPos wpPos = w.targetPos.atY(playerPos.getY());
-
-                    if (HBUtil.BlockUtil.inRange(playerPos, wpPos, WAYPOINT_FLARE_MIN_DISTANCE)) {
-                        iterator.remove(); // Safe removal during iteration
-                        Waypoint.remove(w.targetPos);
-                    }
-                }
-            }
+        @Override
+        public int hashCode() {
+            return Objects.hash(playerId, colorId);
         }
     }
 
-    private static void setWayPointFlare(SimpleMessageEvent event)
-    {
-        JsonElement json = JsonParser.parseString( event.getContent() );
-        if(json.isJsonNull() || !json.isJsonObject()) return;
-        JsonObject obj = json.getAsJsonObject();
+    // Tracks fired waypoints keyed by satellite controller origin.
+    private static final Map<BlockPos, Set<Waypoint>> waypoints = new HashMap<>();
 
-        if( !obj.has("satelliteControllerOrigin")
-        || !obj.has("colorId")) return;
+    public static void fireWaypointMessage(TargetControllerBlockEntity controller, ItemStack stack) {
+        if (controller == null || controller.getLevel() == null || controller.getLevel().isClientSide) return;
+        if (!(controller.getPlayerFiredWeapon() instanceof ServerPlayer player)) return;
 
-        BlockPos satControllerOrigin = HBUtil.BlockUtil.stringToBlockPos( obj.get("satelliteControllerOrigin").getAsString() );
-        int colorId = obj.get("colorId").getAsInt();
+        String playerId = PlayerUtil.getId(player);
+        if (playerId == null) return;
 
-        if(!obj.has("levelId")
-        || !obj.has("targetControllerOrigin")
-        || !obj.has("targetPos"))
-        {   //Clear waypoint
-            if(activeWaypoints.containsKey( satControllerOrigin )) {
-                activeWaypoints.get( satControllerOrigin ).forEach( (pos,w) -> Waypoint.remove(pos));
-                activeWaypoints.get( satControllerOrigin ).clear();
-            }
-            return;
-        }
+        BlockPos targetPos = controller.getUiTargetBlockPos();
+        if (targetPos == null) return;
 
-        Waypoint w = new Waypoint(
-            obj.get("levelId").getAsString(),
-            HBUtil.BlockUtil.stringToBlockPos( obj.get("targetPos").getAsString() ),
-            colorId
-        );
+        int colorId = controller.getTargetColorId();
+        BlockPos origin = controller.getSatelliteController().getBlockPos();
 
-        BlockPos targetControllerOrigin = HBUtil.BlockUtil.stringToBlockPos( obj.get("targetControllerOrigin").getAsString() );
-        activeWaypoints.putIfAbsent( satControllerOrigin, new HashMap<>() );
-        Map<BlockPos, Waypoint> waypoints = activeWaypoints.get( satControllerOrigin );
-        if( colorId == -1 ) {
-            Waypoint wp = waypoints.remove( targetControllerOrigin );
-            if(wp != null && wp.isActive) Waypoint.remove( wp.targetPos );
-            return;
-        }
-        waypoints.put( targetControllerOrigin,  w );
+        targetPos = targetPos.atY(controller.getLevel().getMinBuildHeight());
+        MovingWaypoint.setWaypoint(player, targetPos, colorId);
+        // Remember this waypoint so clear methods can find it later.
+        waypoints.computeIfAbsent(origin, k -> new HashSet<>())
+            .add(new Waypoint(playerId, targetPos, colorId, origin));
+
+        Messager.getInstance().sendBottomActionHint(player,
+            "Waypoint flare fired at " + HBUtil.BlockUtil.positionToString(targetPos));
     }
 
-    private static BufferBuilder bufferBuilder = null;
-    private static int MAX_BEACON_VERTICES = 256*1024; //256KB
-    private static int MAX_CONCURRENT_BEACONS = 8; //Above 8 we render randomly by frame
+    // Clears every tracked waypoint linked to this satellite controller.
+    public static void clearWaypoints(SatelliteControllerBlockEntity controller) {
+        if (controller == null || controller.getLevel() == null || controller.getLevel().isClientSide) return;
 
-    private static void tryRenderWaypointFlare(RenderLevelEvent event) {
-        try {
-            renderWaypointFlare(event);
-        } catch (Exception ex) {
-            //If we get an error rendering the beacon, likely due to buffer overflow, reset the buffer
-            bufferBuilder = null;
-            String msg = "SatelliteFlareWeapon: Error rendering waypoint flare visuals, resetting buffer. "+
-                "This is not a critical error but let the author know if it happens repeatedly error:\n" + ex.getMessage();
-            LoggerProject.logWarning("007000",  msg);
+        Set<Waypoint> tracked = waypoints.remove(controller.getBlockPos());
+        if (tracked == null) return;
+        for (Waypoint w : tracked) {
+            MovingWaypoint.removeWaypoint(w.playerId, w.colorId);
         }
     }
 
-    private static void renderWaypointFlare(RenderLevelEvent event)
-    {
-        if(activeWaypoints.isEmpty()) return;
+    /**
+     * Clear-hook entry point. Matches the {@code BiConsumer<TargetControllerBlockEntity, ItemStack>}
+     * shape used by {@link TargetControllerBlockEntity#addWeaponClearHook}; called when the player
+     * requests the target controller to clear its current target.
+     */
+    public static void clearWaypoint(TargetControllerBlockEntity controller, ItemStack stack) {
+        if (controller == null || controller.getLevel() == null || controller.getLevel().isClientSide) return;
+        if (!(controller.getPlayerFiredWeapon() instanceof ServerPlayer player)) return;
 
-        if(bufferBuilder == null ) {
-            bufferBuilder = new BufferBuilder(MAX_BEACON_VERTICES);
-        }
+        SatelliteControllerBlockEntity sat = controller.getSatelliteController();
+        if (sat == null) return;
 
-        PoseStack poseStack = event.getPoseStack();
-        Camera camera = event.getCamera();
-        Vec3 cameraPos = camera.getPosition();
-        long gameTime = Minecraft.getInstance().level.getGameTime();
-
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance()
-            .renderBuffers().bufferSource();
-
-        for (var waypoints : activeWaypoints.values()) {
-            for (var wp : waypoints.values()) {
-
-                if (!wp.isActive) continue;
-                if(Waypoint.activeCount > MAX_CONCURRENT_BEACONS) {
-                    //Randomly skip some waypoints to reduce overload
-                    if( Math.random() > ((double)MAX_CONCURRENT_BEACONS / (double)Waypoint.activeCount) ) {
-                        continue;
-                    }
-                }
-                BlockPos targetPos = wp.targetPos;
-
-                poseStack.pushPose();
-
-                // CRITICAL: Translate relative to camera, not absolute world position
-                poseStack.translate(
-                    targetPos.getX() - cameraPos.x + 0.5,  // Center of block
-                    targetPos.getY() - cameraPos.y,
-                    targetPos.getZ() - cameraPos.z + 0.5   // Center of block
-                );
-
-                float[] colors = WoolDustHelper.getWoolColorRGB(wp.colorId);
-
-                BeaconRenderer.renderBeaconBeam(
-                    poseStack,
-                    bufferSource,
-                    BeaconRenderer.BEAM_LOCATION,
-                    event.getPartialTick(),
-                    1.0f,
-                    gameTime,                              // FIXED: Use gameTime, not finishNanoTime
-                    0,                                      // FIXED: Start at 0 (already translated)
-                    Minecraft.getInstance().level.getMaxBuildHeight() - targetPos.getY(), // FIXED: Height to sky
-                    colors,
-                    0.2f,
-                    0.25f
-                );
-
-                poseStack.popPose();
-            }
-        }
-
-        //Must flush the buffer after rendering
-        //bufferSource.endBatch();
+        clearWaypoint(sat, player, controller.getTargetColorId());
     }
 
+    // Clears one waypoint matched by (player, colorId) under the given satellite controller.
+    public static void clearWaypoint(SatelliteControllerBlockEntity controller, ServerPlayer player, int colorId) {
+        if (controller == null || player == null) return;
+        Set<Waypoint> tracked = waypoints.get(controller.getBlockPos());
+        if (tracked == null) return;
+
+        String playerId = PlayerUtil.getId(player);
+        if (playerId == null) return;
+
+        Waypoint key = new Waypoint(playerId, BlockPos.ZERO, colorId, controller.getBlockPos());
+        if (tracked.remove(key)) {
+            MovingWaypoint.removeWaypoint(playerId, colorId);
+        }
+        if (tracked.isEmpty()) waypoints.remove(controller.getBlockPos());
+    }
+
+    // Send currently active waypoints in the world to newly joined players.
+    public static void sendAllActiveWaypoints(ServerPlayer player) {
+
+    }
 
 }
 //END CLASS

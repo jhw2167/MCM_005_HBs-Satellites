@@ -52,7 +52,7 @@ public class CommonClassClient implements CommonProxy {
         registrar.registerOnDisconnectedFromServer(CommonClassClient::onDisconnectedFromServer, EventPriority.Lowest);
         registrar.registerOnBlockHighlightDraw(CommonClassClient::renderUiSphere, EventPriority.Normal);
         SatelliteDisplayClient.init(registrar);
-        SatelliteFlareWeapon.init(registrar);
+        //SatelliteFlareWeapon.init(registrar);
 
         ClientBalmEventRegister.registerEvents();
 

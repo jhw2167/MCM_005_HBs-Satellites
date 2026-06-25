@@ -20,6 +20,7 @@ import com.holybuckets.satellite.block.be.SatelliteBlockEntity;
 import com.holybuckets.satellite.block.be.SatelliteControllerBlockEntity;
 import com.holybuckets.satellite.block.be.TargetControllerBlockEntity;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteControllerBE;
+import com.holybuckets.satellite.client.core.SatelliteFlareWeapon;
 import com.holybuckets.foundation.core.WoolColorHelper;
 import io.netty.util.collection.IntObjectHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -521,7 +522,7 @@ public class SatelliteManager {
 
 
     private static void onPlayerJoined(PlayerLoginEvent playerLoginEvent) {
-        SatelliteWeaponManager.sendAllActiveWaypoints(playerLoginEvent.getPlayer());
+        SatelliteFlareWeapon.sendAllActiveWaypoints(playerLoginEvent.getPlayer());
     }
 
     public void shutdown() {
