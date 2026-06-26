@@ -49,10 +49,10 @@ public class TargetReceiverRenderer implements BlockEntityRenderer<TargetReceive
         renderWoolChannelTexture(targetChannel, poseStack, bufferSource, facing,light, overlay);
 
         // Same size and Y position as SatelliteControllerRenderer, but offset to the right
-        minX = 0.62f;  // 0.34f + 0.33f offset
-        maxX = 0.95f;  // 0.66f + 0.33f offset
-        minY = 0.05f;  // Same as SatelliteControllerRenderer
-        maxY = 0.20f;  // Same as SatelliteControllerRenderer
+        minX = 0.60f;  // 0.34f + 0.33f offset
+        maxX = 0.91f;  // 0.66f + 0.33f offset
+        minY = 0.1f;  // Same as SatelliteControllerRenderer
+        maxY = 0.25f;  // Same as SatelliteControllerRenderer
         WoolQuad mainChannel = new WoolQuad( blockEntity.getColorId(), minX, maxX, minY, maxY );
         renderWoolChannelTexture(mainChannel, poseStack, bufferSource, facing,light, overlay);
 

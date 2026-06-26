@@ -6,7 +6,6 @@ import com.holybuckets.foundation.console.IMessager;
 import com.holybuckets.foundation.networking.SimpleStringMessage;
 import com.holybuckets.foundation.structure.StructureInfo;
 import com.holybuckets.foundation.structure.StructureManager;
-import com.holybuckets.satellite.block.ModBlocks;
 import com.holybuckets.satellite.block.be.ModBlockEntities;
 import com.holybuckets.satellite.block.be.isatelliteblocks.ISatelliteBE;
 import com.holybuckets.satellite.config.ModConfig;
@@ -373,7 +372,7 @@ public class SatelliteScreen extends Screen {
 
     // Temporary structure data - replace with actual data source
     private List<StructureInfo> getStructureList(BlockPos center) {
-        Level level = this.satelliteBlock.getLevel();  //HBUtil.LevelUtil.toLevel(HBUtil.LevelUtil.LevelNameSpace.SERVER, satelliteBlock.getLevel().dimension());
+        Level level = this.satelliteBlock.getWorldLevel();  //HBUtil.LevelUtil.toLevel(HBUtil.LevelUtil.LevelNameSpace.SERVER, satelliteBlock.getLevel().dimension());
         StructureManager manager = StructureManager.get(level);
         if(manager == null) return new ArrayList<>();
         Set<ResourceLocation> targetStructures = ModConfig.getTrackedStructures();

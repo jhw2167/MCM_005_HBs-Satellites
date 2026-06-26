@@ -243,10 +243,10 @@ public class SatelliteControllerBlockEntity extends SatelliteDisplayBlockEntity 
         } else if( cmd < 5) {   //adjust ordinally
             int dNS=0,dEW=0;
             switch (cmd) {
-                case 1: dNS = -1; break;   //north
-                case 2: dNS = 1; break;  //south
-                case 3: dEW = -1; break;   //east
-                case 4: dEW = 1; break;  //west
+                case 1: dNS = -1; break;   //north minus z
+                case 2: dNS = 1; break;  //south pos z
+                case 3: dEW = 1; break;   //east poz x
+                case 4: dEW = -1; break;  //west minus x
                 default: dNS = 0; dEW = 0; break;
             }
             //this.source.adjOrdinal(dNS, dEW);

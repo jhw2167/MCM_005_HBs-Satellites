@@ -127,30 +127,32 @@ public interface ISatelliteControllerBE extends ISatelliteDisplayBE {
     /*
      * Up arrow should move OPPOSITE direction the block is facing,
      *  down arrow should move towards, side arrows fill respectively
+     * N,S,E,W
+     * Up,Dn,L,R
      */
         static int getDirectionFromArrow(Direction blockFacing, int input)
         {
             int cmd = -1;
-            if (blockFacing == Direction.NORTH) {
+            if (blockFacing == Direction.NORTH) { //player faces south to view block
                 if (input == 1) cmd = 2; //Up arrow moves South
                 else if (input == 2) cmd = 1; //Down arrow moves North
-                else if (input == 3) cmd = 4; //left moves East
-                else if (input == 4) cmd = 3; //East moves East
+                else if (input == 3) cmd = 3; //left moves East
+                else if (input == 4) cmd = 4; //right moves West
             } else if (blockFacing == Direction.SOUTH) {
                 if (input == 1) cmd = 1; //Up arrow moves North
                 else if (input == 2) cmd = 2; //Down arrow moves South
-                else if (input == 3) cmd = 3; //West moves East
-                else if (input == 4) cmd = 4; //East moves West
+                else if (input == 3) cmd = 4; //left moves west
+                else if (input == 4) cmd = 3; //right moves east
             } else if (blockFacing == Direction.EAST) {
-                if (input == 1) cmd = 3; //Up arrow moves West
-                else if (input == 2) cmd = 4; //Down arrow moves East
-                else if (input == 3) cmd = 1; //West moves North
-                else if (input == 4) cmd = 2; //East moves South
+                if (input == 1) cmd = 4; //Up arrow moves West
+                else if (input == 2) cmd = 3; //Down arrow moves East
+                else if (input == 3) cmd = 2; //left moves South
+                else if (input == 4) cmd = 1; //right moves North
             } else if (blockFacing == Direction.WEST) {
-                if (input == 1) cmd = 4; //Up arrow moves East
-                else if (input == 2) cmd = 3; //Down arrow moves West
-                else if (input == 3) cmd = 2; //West moves South
-                else if (input == 4) cmd = 1; //East moves North
+                if (input == 1) cmd = 3; //Up arrow moves East
+                else if (input == 2) cmd = 4; //Down arrow moves West
+                else if (input == 3) cmd = 1; //left moves North
+                else if (input == 4) cmd = 2; //right moves South
             }
             return cmd;
         }

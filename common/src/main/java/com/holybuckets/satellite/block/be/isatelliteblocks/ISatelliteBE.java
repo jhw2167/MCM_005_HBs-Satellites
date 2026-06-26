@@ -23,7 +23,7 @@ public interface ISatelliteBE {
     
     void launch(BlockPos targetPos);
     
-    Level getLevel();
+    Level getWorldLevel();
 
     default String getSatelliteDisplayError() {
         return null;

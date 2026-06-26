@@ -80,10 +80,8 @@ Edits
 ---
 
 	- check that memory is not leaking with the force loads and unloads
-	- On attempt to change Target Controller subchannel on Client running on dedicated server get Exception because woolIds are not loaded on client. Should be fixed with foundations change.
-	- SatelliteController force updates any time it is right clicked
-	- Add a clear() hook to addSatelliteWeapon
-	- Backport 1.21.1 changes to 1.20.1
+	- satellite block too big in hand
+	- 
 
 
 	- Aeronautics Updates

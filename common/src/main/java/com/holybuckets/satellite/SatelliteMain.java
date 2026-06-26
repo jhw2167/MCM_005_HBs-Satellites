@@ -61,7 +61,7 @@ public class SatelliteMain {
 
 
         //register local events
-        reg.registerOnBeforeServerStarted(INSTANCE::onBeforeServerStart, EventPriority.Highest);
+        reg.registerOnBeforeServerStarted(INSTANCE::onBeforeServerStart, EventPriority.High);
         reg.registerOnLevelLoad(INSTANCE::onLoadLevel, EventPriority.Normal);
         reg.registerOnServerStopped(INSTANCE::onServerStopped, EventPriority.Lowest);
 

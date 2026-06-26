@@ -107,6 +107,11 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
     }
 
     @Override
+    public Level getWorldLevel() {
+        return getLevel();
+    }
+
+    @Override
     public void launch(BlockPos pos)
     {
         if(this.level.isClientSide) return;
@@ -284,9 +289,10 @@ public class SatelliteBlockEntity extends BlockEntity implements ISatelliteBE, B
             }
             this.traveling = true;
         }
-        
+
+        //Must be renamed so its not caught in obfuscation renaming
         @Override
-        public Level getLevel() {
+        public Level getWorldLevel() {
             return level;
         }
 

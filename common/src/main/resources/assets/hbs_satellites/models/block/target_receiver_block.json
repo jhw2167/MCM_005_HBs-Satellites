@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/orientable",
   "textures": {
-    "top": "hbs_satellites:block/controller_side",
+    "top": "hbs_satellites:block/display_bottom",
     "front": "hbs_satellites:block/target_receiver_off",
     "side": "hbs_satellites:block/controller_side"
   }
